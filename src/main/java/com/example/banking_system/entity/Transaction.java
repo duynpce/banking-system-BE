@@ -1,11 +1,15 @@
 package com.example.banking_system.entity;
 
 
+import com.example.banking_system.constant.TransactionStatus;
+import com.example.banking_system.constant.TransactionType;
+import com.example.banking_system.entity.account.Account;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Data
@@ -15,31 +19,33 @@ import java.time.Instant;
 @Table(name = "transactions")
 public class Transaction {
 
-    @Column(name = "id", nullable = false)
+    @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
     @Column(name = "transferred_amount", nullable = false)
-    private long transferredAmount;
-
-    @Column(name = "from_account_id", nullable = false)
-    private long fromAccountId;
-
-    @Column(name = "to_account_id", nullable = false)
-    private long toAccountId;
+    private BigDecimal transferredAmount;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
 
+    @Column(name = "due_date", nullable = false)
+    private Instant dueDate;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private String status;
+    private TransactionStatus status;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private String type;
+    private TransactionType type;
 
-    @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false, updatable = false)
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)// optional = false similar to nullable = false but for backend not database
-    private Account account;
+    @JoinColumn(name = "from_account_id", referencedColumnName = "id", nullable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private Account fromAccount;
+
+    @JoinColumn(name = "to_account_id", referencedColumnName = "id", nullable = false, updatable = false)
+    @ManyToOne
+    private Account toAccount;
 }
