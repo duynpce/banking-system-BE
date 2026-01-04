@@ -34,7 +34,7 @@ public class PersonalAccount extends  Account {
     public PersonalAccount(String username, String password, BigDecimal balance , String email
             , String phoneNumber, String address, String fullName, LocalDate dateOfBirth
             , String idCardNumber) {
-        super(username, password, balance, email, phoneNumber, address);
+        super(username, password, email, phoneNumber, address);
         this.fullName = fullName;
         this.dateOfBirth = dateOfBirth;
         this.idCardNumber = idCardNumber;

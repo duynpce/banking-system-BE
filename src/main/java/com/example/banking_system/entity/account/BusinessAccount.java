@@ -27,10 +27,10 @@ public class BusinessAccount extends Account{
         super();
     }
 
-    public BusinessAccount(String username, String password, BigDecimal balance, String email
+    public BusinessAccount(String username, String password, String email
             , String phoneNumber, String address, String organizationName, String taxIdNumber
     ) {
-        super(username, password, balance, email, phoneNumber, address);
+        super(username, password, email, phoneNumber, address);
         this.organizationName = organizationName;
         this.taxIdNumber = taxIdNumber;
     }

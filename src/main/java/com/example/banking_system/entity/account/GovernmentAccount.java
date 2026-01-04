@@ -27,7 +27,7 @@ public class GovernmentAccount extends Account {
     public GovernmentAccount(String username, String password, BigDecimal balance , String email
             , String phoneNumber, String address, String governmentDepartment
             ) {
-        super(username, password, balance, email, phoneNumber, address);
+        super(username, password, email, phoneNumber, address);
         this.governmentDepartment = governmentDepartment;
     }
 

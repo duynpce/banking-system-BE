@@ -48,10 +48,6 @@ public abstract class Account {
     private Instant createdAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "type", nullable = false, updatable = false)
-    private AccountType type;
-
-    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private AccountStatus status;
 
@@ -68,10 +64,9 @@ public abstract class Account {
     private Instant verifiedIdCardAt;
 
     // constructor for creating new account, all the non-specified fields will be set to default values in db
-    public Account(String username, String password, BigDecimal balance ,String email, String phoneNumber, String address) {
+    public Account(String username, String password,String email, String phoneNumber, String address) {
         this.username = username;
         this.password = password;
-        this.balance = balance;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.address = address;
