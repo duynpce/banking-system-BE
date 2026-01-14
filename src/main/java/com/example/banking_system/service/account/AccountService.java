@@ -4,6 +4,7 @@ import com.example.banking_system.entity.account.Account;
 import com.example.banking_system.exception.NotFoundException;
 import com.example.banking_system.repository.account.AccountRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service

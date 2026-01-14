@@ -29,7 +29,7 @@ public abstract class Account {
     private String password;
 
     @Column(name = "balance", nullable = false)
-    private BigDecimal balance;
+    private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
@@ -42,26 +42,26 @@ public abstract class Account {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, updatable = false)
-    private Role role;
+    private Role role = Role.USER;
 
     @Column(name ="created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    private Instant createdAt = Instant.now();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private AccountStatus status;
+    private AccountStatus status = AccountStatus.ACTIVE;
 
     @Column(name = "credit_rating", nullable = false)
-    private int creditRating;
+    private int creditRating = 600; // default credit rating
 
     @Column(name = "verified_email_at")
-    private Instant verifiedEmailAt;
+    private Instant verifiedEmailAt = null;
 
     @Column(name = "verified_phone_number_at")
-    private Instant verifiedPhoneNumberAt;
+    private Instant verifiedPhoneNumberAt = null;
 
     @Column(name = "verified_id_card_at")
-    private Instant verifiedIdCardAt;
+    private Instant verifiedIdCardAt = null;
 
     // constructor for creating new account, all the non-specified fields will be set to default values in db
     public Account(String username, String password,String email, String phoneNumber, String address) {

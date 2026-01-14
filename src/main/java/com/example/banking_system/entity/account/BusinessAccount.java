@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @PrimaryKeyJoinColumn(name = "account_id", referencedColumnName = "id")
 public class BusinessAccount extends Account{
 
-    @Column(name = "organization_name", columnDefinition = "text")
+    @Column(name = "organization_name", columnDefinition = "text", nullable = false, unique = true)
     private String organizationName;
 
     @Column(name = "tax_id_number", nullable = false, unique = true)

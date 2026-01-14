@@ -4,7 +4,7 @@ import com.example.banking_system.config.security.CustomUserDetailsService;
 import com.example.banking_system.dto.auth.LoginRequest;
 import com.example.banking_system.dto.auth.TokenResponse;
 import com.example.banking_system.entity.account.Account;
-import com.example.banking_system.exception.UnauthenticatedException;
+import com.example.banking_system.exception.UnauthorizedException;
 import com.example.banking_system.service.account.AccountService;
 import com.example.banking_system.utility.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -24,11 +24,11 @@ public class AuthService {
         Account account = accountService.findByUsername(loginRequest.getUsername());
 
         if(!passwordEncoder.matches(loginRequest.getPassword(), account.getPassword())){
-            throw new UnauthenticatedException("Invalid username or password");
+            throw new UnauthorizedException("Invalid password");
         }
 
         UserDetails userDetails = customUserDetailsService.loadUserByUsername(loginRequest.getUsername());
 
-        return jwtUtil.generateTokens(userDetails);
+        return jwtUtil.generateTokens(userDetails); //bug here
     }
 }

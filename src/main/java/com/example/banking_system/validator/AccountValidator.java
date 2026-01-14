@@ -14,7 +14,6 @@ public class AccountValidator {
 
     public void validateCreate(Account account) {
         validateUniqueAccountDetails(account);
-
     }
 
     private void validateUniqueAccountDetails(Account account) {

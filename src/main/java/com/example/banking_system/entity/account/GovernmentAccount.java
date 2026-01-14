@@ -17,7 +17,7 @@ import java.math.BigDecimal;
 @PrimaryKeyJoinColumn(name = "account_id", referencedColumnName = "id")
 public class GovernmentAccount extends Account {
 
-    @Column(name = "government_department", columnDefinition = "text")
+    @Column(name = "government_department", columnDefinition = "text", nullable = false, unique = true)
     private String governmentDepartment;
 
     public  GovernmentAccount() {

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 public class Util {
 
     public void assertNotConflictData(boolean condition, String message) {
-        if (!condition) {
+        if (condition) {
             throw new ConflictDataException(message);
         }
     }
