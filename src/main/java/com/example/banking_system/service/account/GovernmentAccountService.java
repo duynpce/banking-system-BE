@@ -23,7 +23,7 @@ public class GovernmentAccountService {
     private final JwtUtil jwtUtil;
 
     public GovernmentAccount create(CreateGovernmentAccountRequest createGovernmentAccountRequest) {
-        GovernmentAccount governmentAccount = accountMapper.toGovernmentAccount(createGovernmentAccountRequest);
+        GovernmentAccount governmentAccount = accountMapper.toEntity(createGovernmentAccountRequest);
         governmentAccountValidator.validateCreate(governmentAccount);
 
         final String hashedPassword = passwordEncoder.encode(createGovernmentAccountRequest.getPassword());

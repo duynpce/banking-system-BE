@@ -26,7 +26,7 @@ public class BusinessAccountService {
 
 
     public BusinessAccount create(CreateBusinessAccountRequest createBusinessAccountRequest) {
-        BusinessAccount businessAccount = accountMapper.toBusinessAccount(createBusinessAccountRequest);
+        BusinessAccount businessAccount = accountMapper.toEntity(createBusinessAccountRequest);
         businessAccountValidator.validateCreate(businessAccount);
 
         final String hashedPassword = passwordEncoder.encode(createBusinessAccountRequest.getPassword());

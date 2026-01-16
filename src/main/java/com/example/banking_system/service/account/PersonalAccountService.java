@@ -23,7 +23,7 @@ public class PersonalAccountService {
     private final JwtUtil jwtUtil;
 
     public PersonalAccount create(CreatePersonalAccountRequest createPersonalAccountRequest) {
-        PersonalAccount personalAccount = accountMapper.toPersonalAccount(createPersonalAccountRequest);
+        PersonalAccount personalAccount = accountMapper.toEntity(createPersonalAccountRequest);
         personalAccountValidator.validateCreate(personalAccount);
 
         final String hashedPassword = passwordEncoder.encode(createPersonalAccountRequest.getPassword());

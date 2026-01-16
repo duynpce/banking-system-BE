@@ -1,5 +1,6 @@
 package com.example.banking_system.controller;
 
+import com.example.banking_system.dto.account.GetAccountRequest;
 import com.example.banking_system.entity.account.Account;
 import com.example.banking_system.service.account.AccountService;
 import com.example.banking_system.utility.JwtUtil;
@@ -15,10 +16,10 @@ public class AccountController {
     private final JwtUtil jwtUtil;
 
     @GetMapping
-    public ResponseEntity<Account> get() {
+    public ResponseEntity<GetAccountRequest> get() {
         String username = jwtUtil.getUsername();
-        Account account = accountService.findByUsername(username);
-        return ResponseEntity.ok(account);
+        GetAccountRequest Response = accountService.getByUsername(username);
+        return ResponseEntity.ok(Response);
     }
 
     @DeleteMapping

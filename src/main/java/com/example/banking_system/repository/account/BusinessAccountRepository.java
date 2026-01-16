@@ -8,8 +8,8 @@ import java.util.Optional;
 public interface BusinessAccountRepository extends JpaRepository<BusinessAccount,Long> {
 
     Optional<BusinessAccount> findByOrganizationName(String organizationName);
-    boolean existsByOrganizationName(String organizationName);
-
     Optional<BusinessAccount> findByTaxIdNumber(String taxIdNumber);
+
+    boolean existsByOrganizationName(String organizationName);
     boolean existsByTaxIdNumber(String taxIdNumber);
 }
