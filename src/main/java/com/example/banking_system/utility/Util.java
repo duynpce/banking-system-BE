@@ -6,8 +6,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class Util {
 
-    public void assertNotConflictData(boolean condition, String message) {
-        if (condition) {
+    public void assertUnique(boolean isConflict, String message) {
+        if (isConflict) {
             throw new ConflictDataException(message);
         }
     }

@@ -36,6 +36,7 @@ import org.springframework.security.oauth2.server.authorization.token.Delegating
 import org.springframework.security.oauth2.server.authorization.token.JwtGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2RefreshTokenGenerator;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenGenerator;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
@@ -51,6 +52,7 @@ import java.util.UUID;
 public class OAuth2AuthorizationServerConfig {
 
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationEntryPoint authenticationEntryPoint;
 
     @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
     private String jwkUri;
@@ -64,30 +66,30 @@ public class OAuth2AuthorizationServerConfig {
 
         http
                 .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
+                .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .anyRequest().authenticated()
+                )
                 .with(authorizationServerConfigurer, (authorizationServer) ->
                         authorizationServer
                                 .registeredClientRepository(registeredClientRepository())
                 )
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint((request, response, authException) -> {
-                             response.sendError(HttpServletResponse.SC_BAD_REQUEST,
-                             authException.getMessage());
-                }));
+                        .authenticationEntryPoint(authenticationEntryPoint)
+                );
 
         return http.build();
     }
 
-
-    // Default Security Filter Chain for handling user authentication(e.g., login page)
+    // Default Security Filter Chain for handling user authentication
     @Bean
-//    @Order(2)
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(a -> a
                         .requestMatchers("/error", "/login").permitAll()
                         .anyRequest().authenticated()
                 )
-                .formLogin(Customizer.withDefaults()); // for local user login on the AS consent/auth pages
+                .formLogin(Customizer.withDefaults()) // for local user login on the AS consent/auth pages
+        ;
         return http.build();
     }
 
@@ -152,7 +154,6 @@ public class OAuth2AuthorizationServerConfig {
         return new NimbusJwtEncoder(jwkSource);
     }
 
-    /// note
     @Bean
     public JwtDecoder jwtDecoder() {
             return  NimbusJwtDecoder.withJwkSetUri(jwkUri).build();

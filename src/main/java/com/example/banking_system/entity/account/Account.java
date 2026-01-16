@@ -52,7 +52,7 @@ public abstract class Account {
     private AccountStatus status = AccountStatus.ACTIVE;
 
     @Column(name = "credit_rating", nullable = false)
-    private int creditRating = 600; // default credit rating
+    private int creditRating = 600;
 
     @Column(name = "verified_email_at")
     private Instant verifiedEmailAt = null;

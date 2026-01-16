@@ -1,5 +1,6 @@
 package com.example.banking_system.service.account;
 
+import com.example.banking_system.constant.AccountType;
 import com.example.banking_system.entity.account.Account;
 import com.example.banking_system.exception.NotFoundException;
 import com.example.banking_system.repository.account.AccountRepository;
@@ -12,10 +13,24 @@ import org.springframework.stereotype.Service;
 public class AccountService {
     private final AccountRepository accountRepository;
 
+    public Account save(Account account) {
+        return accountRepository.save(account);
+    }
+
     public Account findByUsername(String username) {
         return accountRepository.findByUsername(username).orElseThrow(
                 () -> new NotFoundException("User not found with username: " + username)
         );
+    }
+
+    public Account findByUsernameAndType(String username, AccountType type) {
+      Account account = findByUsername(username);
+
+      if(account.getType() != type) {
+          throw new NotFoundException("User not found with username: " + username + " and type: " + type);
+      }
+
+        return account;
     }
 
     public boolean existsByUsername(String username) {
@@ -30,4 +45,8 @@ public class AccountService {
         return accountRepository.existsByEmail(email);
     }
 
+    public void delete(String username) {
+        Account account = findByUsername(username);
+        accountRepository.delete(account);
+    }
 }

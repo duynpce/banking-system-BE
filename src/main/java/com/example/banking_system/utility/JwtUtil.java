@@ -22,94 +22,6 @@ import java.util.function.Function;
 @Slf4j
 @Component
 public class JwtUtil {
-    @Value("${jwt.access.secret}")
-    private String accessSecret;
-
-    @Value("${jwt.refresh.secret}")
-    private String refreshSecret;
-
-    @Value("${jwt.access.expiration}")
-    private long accessExpiration;
-
-    @Value("${jwt.refresh.expiration}")
-    private long refreshExpiration;
-
-    public SecretKey getKey(String key){
-        byte [] keyBytes = Decoders.BASE64.decode(key);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    public TokenResponse generateTokens(UserDetails user) {
-        final String accessToken = generateAccessToken(user);
-        final String refreshToken = generateRefreshToken(user);
-        return new TokenResponse(accessToken, refreshToken);
-    }
-
-    public String generateAccessToken(UserDetails user) {
-        return Jwts.builder()
-                .claim(user.getUsername(),user.getAuthorities())
-                .subject(user.getUsername())
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + accessExpiration))
-                .signWith(getKey(accessSecret))
-                .compact();
-    }
-
-    public String generateRefreshToken(UserDetails user) {
-        return Jwts.builder()
-                .claim(user.getUsername(),user.getAuthorities())
-                .subject(user.getUsername())
-                .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + refreshExpiration))
-                .signWith(getKey(refreshSecret))
-                .compact();
-    }
-
-    // Extract username from token
-    public String extractUsername(String token, String key) {
-        return extractClaim(token, Claims::getSubject, key);
-    }
-
-    // Extract expiration date from token
-    public Date extractExpiration(String token, String key) {
-        return extractClaim(token, Claims::getExpiration, key);
-    }
-
-    // Extract a specific claim from token
-    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver, String key) {
-        final Claims claims = extractAllClaims(token, key);
-        return claimsResolver.apply(claims);
-    }
-
-    //Validate token
-    public boolean validateToken(String token, UserDetails userDetails, String key) {
-        final String extractedUsername = extractUsername(token, key);
-        return (extractedUsername.equals(userDetails.getUsername()) && !isTokenExpired(token, key));
-    }
-
-
-    // Check if the token is expired
-    private boolean isTokenExpired(String token, String key) {
-        return extractExpiration(token, key).before(new Date());
-    }
-
-    // Extract all claims from token
-    private Claims extractAllClaims(String token,String key) {
-
-        return Jwts
-                .parser()
-                .verifyWith(getKey(key))
-                .build()
-                .parseSignedClaims(token)
-                .getPayload();
-        /*this is similar to
-        return Jwts.parserBuilder()
-                .setSigningKey(SECRET_KEY)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-         */
-    }
 
     // get username from ContextHolder
     public String getUsername(){
@@ -121,4 +33,6 @@ public class JwtUtil {
 
         return authentication.getName();
     }
+
+
 }

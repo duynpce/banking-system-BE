@@ -25,6 +25,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(401).body(ex.getMessage());
     }
 
+    @ExceptionHandler(ForbiddenException.class)
+    public ResponseEntity<?> handleForbidden(ForbiddenException ex) {
+        return ResponseEntity.status(403).body(ex.getMessage());
+    }
+
     // exception of validation dependency like @Valid, @NotNull, @Size, etc.
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<?> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex) {

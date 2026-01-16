@@ -15,12 +15,4 @@ public class HomeController {
         return "Welcome to the Banking System API!";
     }
 
-    @GetMapping("/author-endpoints")
-    public RequestMatcher authorEndpoints() {
-        OAuth2AuthorizationServerConfigurer authorizationServerConfigurer =
-                OAuth2AuthorizationServerConfigurer.authorizationServer();
-
-        return authorizationServerConfigurer.getEndpointsMatcher();
-    }
-
 }

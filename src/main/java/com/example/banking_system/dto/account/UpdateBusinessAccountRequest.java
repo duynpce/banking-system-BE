@@ -1,15 +1,13 @@
 package com.example.banking_system.dto.account;
 
 import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CreateBusinessAccountRequest extends CreateAccountRequest{
-    @NotBlank(message = "Organization name cannot be blank")
+public class UpdateBusinessAccountRequest extends UpdateAccountRequest{
     private String organizationName;
-    @NotBlank(message = "Tax ID number cannot be blank")
     private String taxIdNumber;
 }
+

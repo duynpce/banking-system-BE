@@ -20,15 +20,12 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final CustomUserDetailsService customUserDetailsService;
 
-    public TokenResponse login(LoginRequest loginRequest) {
+    public void login(LoginRequest loginRequest) {
         Account account = accountService.findByUsername(loginRequest.getUsername());
 
         if(!passwordEncoder.matches(loginRequest.getPassword(), account.getPassword())){
             throw new UnauthorizedException("Invalid password");
         }
 
-        UserDetails userDetails = customUserDetailsService.loadUserByUsername(loginRequest.getUsername());
-
-        return jwtUtil.generateTokens(userDetails); //bug here
     }
 }

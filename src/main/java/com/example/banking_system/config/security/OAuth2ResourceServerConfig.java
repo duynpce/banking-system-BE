@@ -1,5 +1,6 @@
 package com.example.banking_system.config.security;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,15 +12,17 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@RequiredArgsConstructor
 public class OAuth2ResourceServerConfig {
+        private final AuthenticationEntryPoint authenticationEntryPoint;
 
 
         // Resource Server Security Filter Chain
         @Bean
-//        @Order(3)
         @Order(2)
         SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
                 httpSecurity.csrf(AbstractHttpConfigurer::disable)
@@ -34,7 +37,9 @@ public class OAuth2ResourceServerConfig {
                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                         )
                         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
-                ;
+                        .exceptionHandling(ex -> ex
+                                .authenticationEntryPoint(authenticationEntryPoint)
+                        );
                 return httpSecurity.build();
 
         }
