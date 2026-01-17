@@ -6,6 +6,7 @@ import com.example.banking_system.entity.account.Account;
 import com.example.banking_system.entity.account.BusinessAccount;
 import com.example.banking_system.entity.account.GovernmentAccount;
 import com.example.banking_system.entity.account.PersonalAccount;
+import com.example.banking_system.exception.ForbiddenException;
 import com.example.banking_system.exception.NotFoundException;
 import com.example.banking_system.mapper.AccountMapper;
 import com.example.banking_system.repository.account.AccountRepository;
@@ -44,11 +45,12 @@ public class AccountService {
             throw new NotFoundException("Unknown account type");
     }
 
+    // find by username and forcing the AccountType
     public Account findByUsernameAndType(String username, AccountType type) {
         Account account = findByUsername(username);
 
         if(account.getType() != type) {
-            throw new NotFoundException("account type mismatch");
+            throw new ForbiddenException("account type mismatch");
         }
 
         return account;

@@ -1,0 +1,131 @@
+package com.example.banking_system.account;
+
+import com.example.banking_system.constant.AccountType;
+import com.example.banking_system.dto.account.CreateBusinessAccountRequest;
+import com.example.banking_system.dto.account.UpdateBusinessAccountRequest;
+import com.example.banking_system.entity.account.BusinessAccount;
+import com.example.banking_system.exception.ValidationException;
+import com.example.banking_system.mapper.AccountMapper;
+import com.example.banking_system.repository.account.AccountRepository;
+import com.example.banking_system.repository.account.BusinessAccountRepository;
+import com.example.banking_system.service.account.AccountService;
+import com.example.banking_system.service.account.BusinessAccountService;
+import com.example.banking_system.utility.JwtUtil;
+import com.example.banking_system.validator.AccountValidator;
+import com.example.banking_system.validator.BusinessAccountValidator;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import static org.mockito.Mockito.*;
+
+@ExtendWith(MockitoExtension.class)
+public class BusinessAccountUnitTest {
+
+    private final BusinessAccount TestCase = new BusinessAccount("username", "password", "email", "phoneNumber", "address", "OrganizationName", "TaxIdNumber");
+
+
+    @Mock
+    AccountMapper accountMapper;
+
+
+    @Mock
+    BusinessAccountRepository businessAccountRepository;
+
+    @Mock
+    BusinessAccountValidator businessAccountValidator;
+
+    @Mock
+    PasswordEncoder passwordEncoder;
+
+    @Mock
+    AccountService accountService;
+
+    @Mock
+    JwtUtil jwtUtil;
+
+    @InjectMocks
+    BusinessAccountService businessAccountService;
+
+    @Test
+    public void createAccountSuccess() {
+        BusinessAccount businessAccount = TestCase;
+        final String hashedPassword = "hashedPassword";
+
+        CreateBusinessAccountRequest request = new CreateBusinessAccountRequest();
+
+        when(accountMapper.toEntity(request)).thenReturn(businessAccount);
+        doNothing().when(businessAccountValidator).validateCreate(businessAccount);
+        when(passwordEncoder.encode(request.getPassword())).thenReturn(hashedPassword);
+        when(businessAccountRepository.save(businessAccount)).thenReturn(businessAccount);
+
+        BusinessAccount createdAccount = businessAccountService.create(request);
+
+        Assertions.assertEquals(businessAccount, createdAccount);
+        verify(businessAccountRepository, times(1)).save(businessAccount);
+
+    }
+
+    @Test
+    public void createAccountFailure_InvalidAccount() {
+        BusinessAccount invalidAccount = new BusinessAccount();
+
+        CreateBusinessAccountRequest request = new CreateBusinessAccountRequest();
+
+        when(accountMapper.toEntity(request)).thenReturn(invalidAccount);
+        doThrow(new ValidationException("invalid account")).when(businessAccountValidator).validateCreate(invalidAccount);
+
+        RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> {
+            businessAccountService.create(request);
+        });
+
+        Assertions.assertEquals("invalid account", exception.getMessage());
+        verify(businessAccountRepository, never()).save(any());
+    }
+
+    @Test
+    public void updateAccountSuccess() {
+        BusinessAccount existingAccount = TestCase;
+        String username = "username";
+
+        UpdateBusinessAccountRequest request = new UpdateBusinessAccountRequest();
+        request.setOrganizationName("NewOrganizationName");
+        request.setEmail("newemail@example.com");
+
+        when(jwtUtil.getUsername()).thenReturn(username);
+        when(accountService.findByUsernameAndType(username, AccountType.BUSINESS)).thenReturn(existingAccount);
+        doNothing().when(businessAccountValidator).validateUpdate(request, existingAccount);
+        when(businessAccountRepository.save(existingAccount)).thenReturn(existingAccount);
+
+        BusinessAccount updatedAccount = businessAccountService.update(request);
+
+        Assertions.assertEquals(existingAccount, updatedAccount);
+        verify(businessAccountValidator).validateUpdate(request, existingAccount);
+        verify(businessAccountRepository).save(existingAccount);
+    }
+
+    @Test
+    public void updateAccountFailure_InvalidInput() {
+        BusinessAccount existingAccount = TestCase;
+        String username = "username";
+
+        UpdateBusinessAccountRequest request = new UpdateBusinessAccountRequest();
+
+        when(jwtUtil.getUsername()).thenReturn(username);
+        when(accountService.findByUsernameAndType(username, AccountType.BUSINESS)).thenReturn(existingAccount);
+        doThrow(new ValidationException("At least one field must be provided for update"))
+                .when(businessAccountValidator).validateUpdate(request, existingAccount);
+
+        RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> {
+            businessAccountService.update(request);
+        });
+
+        Assertions.assertEquals("At least one field must be provided for update", exception.getMessage());
+        verify(businessAccountRepository, never()).save(any());
+    }
+
+}
