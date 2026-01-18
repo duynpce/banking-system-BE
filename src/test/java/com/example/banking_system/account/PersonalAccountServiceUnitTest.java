@@ -1,5 +1,6 @@
 package com.example.banking_system.account;
 
+import com.example.banking_system.UnitTest;
 import com.example.banking_system.constant.AccountType;
 import com.example.banking_system.dto.account.CreatePersonalAccountRequest;
 import com.example.banking_system.dto.account.UpdatePersonalAccountRequest;
@@ -13,20 +14,15 @@ import com.example.banking_system.utility.JwtUtil;
 import com.example.banking_system.validator.PersonalAccountValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
-import java.time.LocalDate;
 
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-public class PersonalAccountUnitTest {
+public class PersonalAccountServiceUnitTest extends UnitTest {
 
-    private final PersonalAccount TestCase = new PersonalAccount("username", "password", "email", "phoneNumber", "address", "fullName", LocalDate.now(), "idCardNumber");
+    private final TestCases testCases = TestCases.getInstance();
 
     @Mock
     AccountMapper accountMapper;
@@ -51,7 +47,7 @@ public class PersonalAccountUnitTest {
 
     @Test
     public void createAccountSuccess() {
-        PersonalAccount personalAccount = TestCase;
+        PersonalAccount personalAccount = testCases.getPersonalAccountTestCase();
         final String hashedPassword = "hashedPassword";
 
         CreatePersonalAccountRequest request = new CreatePersonalAccountRequest();
@@ -86,7 +82,7 @@ public class PersonalAccountUnitTest {
 
     @Test
     public void updateAccountSuccess() {
-        PersonalAccount existingAccount = TestCase;
+        PersonalAccount existingAccount = testCases.getPersonalAccountTestCase();
         String username = "username";
 
         UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();
@@ -107,7 +103,7 @@ public class PersonalAccountUnitTest {
 
     @Test
     public void updateAccountFailure_InvalidInput() {
-        PersonalAccount existingAccount = TestCase;
+        PersonalAccount existingAccount = testCases.getPersonalAccountTestCase();
         String username = "username";
 
         UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();

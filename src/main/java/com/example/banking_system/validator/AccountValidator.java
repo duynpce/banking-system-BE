@@ -14,7 +14,7 @@ public class AccountValidator {
     private final Util util;
 
     public void validateUniqueAccountDetails(Account account) {
-        util.assertUnique(accountService.existsByUsername(account.getUsername()),"Username already exists");;;
+        util.assertUnique(accountService.existsByUsername(account.getUsername()),"Username already exists");
         util.assertUnique(accountService.existsByPhoneNumber(account.getPhoneNumber()),"Phone number already exists");
         util.assertUnique(accountService.existsByEmail(account.getEmail()),"Email already exists");
     }

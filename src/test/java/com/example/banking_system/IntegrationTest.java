@@ -2,17 +2,17 @@ package com.example.banking_system;
 
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 
+//@Import({TestcontainersConfiguration.class, Cleaner.class})
 @Import(TestcontainersConfiguration.class)
-@SpringBootTest
+@SpringBootTest(classes = BankingSystemApplication.class)
 @Transactional
-public abstract class BankingSystemApplicationTests {
-	@Autowired
-	Cleaner cleaner;
+public abstract class IntegrationTest {
+//	@Autowired
+//	Cleaner cleaner;
 
 	@AfterEach
 	void contextLoads() {

@@ -1,8 +1,7 @@
-package com.example.banking_system.controller;
+package com.example.banking_system.controller.account;
 
 import com.example.banking_system.dto.account.CreatePersonalAccountRequest;
 import com.example.banking_system.dto.account.UpdatePersonalAccountRequest;
-import com.example.banking_system.entity.account.PersonalAccount;
 import com.example.banking_system.service.account.PersonalAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +21,9 @@ public class PersonalAccountController {
     }
 
     @PutMapping
-    public ResponseEntity<PersonalAccount> update(@Valid @RequestBody UpdatePersonalAccountRequest request) {
-        PersonalAccount updatedAccount = personalAccountService.update(request);
-        return ResponseEntity.ok(updatedAccount);
+    public ResponseEntity<String> update(@Valid @RequestBody UpdatePersonalAccountRequest request) {
+        personalAccountService.update(request);
+        return ResponseEntity.ok("Personal account updated successfully");
     }
 }
 

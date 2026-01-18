@@ -1,5 +1,6 @@
 package com.example.banking_system.account;
 
+import com.example.banking_system.UnitTest;
 import com.example.banking_system.constant.AccountType;
 import com.example.banking_system.dto.account.GetAccountRequest;
 import com.example.banking_system.dto.account.GetBusinessAccountRequest;
@@ -16,22 +17,18 @@ import com.example.banking_system.repository.account.AccountRepository;
 import com.example.banking_system.service.account.AccountService;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+
 
 import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-public class AccountServiceUnitTest {
+public class AccountServiceUnitTest extends UnitTest {
 
-    private final BusinessAccount businessTestCase = new BusinessAccount("username", "password", "email", "phoneNumber", "address", "OrganizationName", "TaxIdNumber");
-    private final PersonalAccount personalTestCase = new PersonalAccount("username", "password", "email", "phoneNumber", "address", "fullName", LocalDate.now(), "idCardNumber");
-    private final GovernmentAccount governmentTestCase = new GovernmentAccount("username", "password", "email", "phoneNumber", "address", "governmentDepartment");
+    private final TestCases testCases = TestCases.getInstance();
 
     @Mock
     private AccountRepository accountRepository;
@@ -45,7 +42,7 @@ public class AccountServiceUnitTest {
     @Test
     public void getByUsernameSuccess() {
         final String username = "username";
-        BusinessAccount account = businessTestCase;
+        BusinessAccount account = testCases.getBusinessAccountTestCase();
         GetBusinessAccountRequest dto = new GetBusinessAccountRequest();
 
         when(accountRepository.findByUsername(username)).thenReturn(Optional.of(account));
@@ -75,7 +72,7 @@ public class AccountServiceUnitTest {
 
     @Test
     public void mapToGetDtoSuccess_BusinessAccount() {
-        BusinessAccount account = businessTestCase;
+        BusinessAccount account = testCases.getBusinessAccountTestCase();
         GetBusinessAccountRequest dto = new GetBusinessAccountRequest();
 
         when(accountMapper.toDto((BusinessAccount) account)).thenReturn(dto);
@@ -88,7 +85,7 @@ public class AccountServiceUnitTest {
 
     @Test
     public void mapToGetDtoSuccess_PersonalAccount() {
-        PersonalAccount account = personalTestCase;
+        PersonalAccount account = testCases.getPersonalAccountTestCase();
         GetPersonalAccountRequest dto = new GetPersonalAccountRequest();
 
         when(accountMapper.toDto((PersonalAccount) account)).thenReturn(dto);
@@ -101,7 +98,7 @@ public class AccountServiceUnitTest {
 
     @Test
     public void mapToGetDtoSuccess_GovernmentAccount() {
-        GovernmentAccount account = governmentTestCase;
+        GovernmentAccount account = testCases.getGovernmentAccountTestCase();
         GetGovernmentAccountRequest dto = new GetGovernmentAccountRequest();
 
         when(accountMapper.toDto((GovernmentAccount) account)).thenReturn(dto);
@@ -127,7 +124,7 @@ public class AccountServiceUnitTest {
     @Test
     public void findByUsernameAndTypeSuccess() {
         final String username = "username";
-        BusinessAccount account = businessTestCase;
+        BusinessAccount account = testCases.getBusinessAccountTestCase();
 
         when(accountRepository.findByUsername(username)).thenReturn(Optional.of(account));
 
@@ -140,7 +137,7 @@ public class AccountServiceUnitTest {
     @Test
     public void findByUsernameAndTypeFailure_TypeMismatch() {
         final String username = "username";
-        BusinessAccount account = businessTestCase;
+        BusinessAccount account = testCases.getBusinessAccountTestCase();
 
         when(accountRepository.findByUsername(username)).thenReturn(Optional.of(account));
 
@@ -155,7 +152,7 @@ public class AccountServiceUnitTest {
     @Test
     public void deleteSuccess() {
         final String username = "username";
-        BusinessAccount account = businessTestCase;
+        BusinessAccount account = testCases.getBusinessAccountTestCase();
 
         when(accountRepository.findByUsername(username)).thenReturn(Optional.of(account));
         doNothing().when(accountRepository).delete(account);
@@ -181,4 +178,3 @@ public class AccountServiceUnitTest {
         verify(accountRepository, never()).delete(any());
     }
 }
-

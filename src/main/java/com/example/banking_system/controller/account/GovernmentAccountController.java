@@ -1,8 +1,7 @@
-package com.example.banking_system.controller;
+package com.example.banking_system.controller.account;
 
 import com.example.banking_system.dto.account.CreateGovernmentAccountRequest;
 import com.example.banking_system.dto.account.UpdateGovernmentAccountRequest;
-import com.example.banking_system.entity.account.GovernmentAccount;
 import com.example.banking_system.service.account.GovernmentAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -22,9 +21,9 @@ public class GovernmentAccountController {
     }
 
     @PutMapping
-    public ResponseEntity<GovernmentAccount> update(@Valid @RequestBody UpdateGovernmentAccountRequest request) {
-        GovernmentAccount updatedAccount = governmentAccountService.update(request);
-        return ResponseEntity.ok(updatedAccount);
+    public ResponseEntity<String> update(@Valid @RequestBody UpdateGovernmentAccountRequest request) {
+        governmentAccountService.update(request);
+        return ResponseEntity.ok("Government account updated successfully");
     }
 }
 

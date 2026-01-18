@@ -1,5 +1,6 @@
 package com.example.banking_system.account;
 
+import com.example.banking_system.UnitTest;
 import com.example.banking_system.constant.AccountType;
 import com.example.banking_system.dto.account.CreateGovernmentAccountRequest;
 import com.example.banking_system.dto.account.UpdateGovernmentAccountRequest;
@@ -13,18 +14,15 @@ import com.example.banking_system.utility.JwtUtil;
 import com.example.banking_system.validator.GovernmentAccountValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-public class GovernmentAccountUnitTest {
+public class GovernmentAccountServiceUnitTest extends UnitTest {
 
-    private final GovernmentAccount TestCase = new GovernmentAccount("username", "password", "email", "phoneNumber", "address", "governmentDepartment");
+    private final TestCases testCases = TestCases.getInstance();
 
     @Mock
     AccountMapper accountMapper;
@@ -49,7 +47,7 @@ public class GovernmentAccountUnitTest {
 
     @Test
     public void createAccountSuccess() {
-        GovernmentAccount governmentAccount = TestCase;
+        GovernmentAccount governmentAccount = testCases.getGovernmentAccountTestCase();
         final String hashedPassword = "hashedPassword";
 
         CreateGovernmentAccountRequest request = new CreateGovernmentAccountRequest();
@@ -84,7 +82,7 @@ public class GovernmentAccountUnitTest {
 
     @Test
     public void updateAccountSuccess() {
-        GovernmentAccount existingAccount = TestCase;
+        GovernmentAccount existingAccount = testCases.getGovernmentAccountTestCase();
         String username = "username";
 
         UpdateGovernmentAccountRequest request = new UpdateGovernmentAccountRequest();
@@ -105,7 +103,7 @@ public class GovernmentAccountUnitTest {
 
     @Test
     public void updateAccountFailure_InvalidInput() {
-        GovernmentAccount existingAccount = TestCase;
+        GovernmentAccount existingAccount = testCases.getGovernmentAccountTestCase();
         String username = "username";
 
         UpdateGovernmentAccountRequest request = new UpdateGovernmentAccountRequest();
@@ -123,4 +121,3 @@ public class GovernmentAccountUnitTest {
         verify(governmentAccountRepository, never()).save(any());
     }
 }
-

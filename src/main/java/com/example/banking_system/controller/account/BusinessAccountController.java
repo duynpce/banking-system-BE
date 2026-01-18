@@ -1,13 +1,11 @@
-package com.example.banking_system.controller;
+package com.example.banking_system.controller.account;
 
 import com.example.banking_system.dto.account.CreateBusinessAccountRequest;
 import com.example.banking_system.dto.account.UpdateBusinessAccountRequest;
-import com.example.banking_system.entity.account.BusinessAccount;
 import com.example.banking_system.service.account.BusinessAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,9 +21,9 @@ public class BusinessAccountController {
     }
 
     @PutMapping
-    public ResponseEntity<BusinessAccount> update(@Valid @RequestBody UpdateBusinessAccountRequest request) {
-        BusinessAccount updatedAccount = businessAccountService.update(request);
-        return ResponseEntity.ok(updatedAccount);
+    public ResponseEntity<String> update(@Valid @RequestBody UpdateBusinessAccountRequest request) {
+         businessAccountService.update(request);
+        return ResponseEntity.ok("Business account updated successfully");
     }
 
 

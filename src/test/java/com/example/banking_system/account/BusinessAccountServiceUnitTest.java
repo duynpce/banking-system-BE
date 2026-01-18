@@ -1,37 +1,31 @@
 package com.example.banking_system.account;
 
+import com.example.banking_system.UnitTest;
 import com.example.banking_system.constant.AccountType;
 import com.example.banking_system.dto.account.CreateBusinessAccountRequest;
 import com.example.banking_system.dto.account.UpdateBusinessAccountRequest;
 import com.example.banking_system.entity.account.BusinessAccount;
 import com.example.banking_system.exception.ValidationException;
 import com.example.banking_system.mapper.AccountMapper;
-import com.example.banking_system.repository.account.AccountRepository;
 import com.example.banking_system.repository.account.BusinessAccountRepository;
 import com.example.banking_system.service.account.AccountService;
 import com.example.banking_system.service.account.BusinessAccountService;
 import com.example.banking_system.utility.JwtUtil;
-import com.example.banking_system.validator.AccountValidator;
 import com.example.banking_system.validator.BusinessAccountValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.mockito.Mockito.*;
 
-@ExtendWith(MockitoExtension.class)
-public class BusinessAccountUnitTest {
+public class BusinessAccountServiceUnitTest extends UnitTest {
 
-    private final BusinessAccount TestCase = new BusinessAccount("username", "password", "email", "phoneNumber", "address", "OrganizationName", "TaxIdNumber");
-
+    private final TestCases testCases = TestCases.getInstance();
 
     @Mock
     AccountMapper accountMapper;
-
 
     @Mock
     BusinessAccountRepository businessAccountRepository;
@@ -53,7 +47,7 @@ public class BusinessAccountUnitTest {
 
     @Test
     public void createAccountSuccess() {
-        BusinessAccount businessAccount = TestCase;
+        BusinessAccount businessAccount = testCases.getBusinessAccountTestCase();
         final String hashedPassword = "hashedPassword";
 
         CreateBusinessAccountRequest request = new CreateBusinessAccountRequest();
@@ -89,7 +83,7 @@ public class BusinessAccountUnitTest {
 
     @Test
     public void updateAccountSuccess() {
-        BusinessAccount existingAccount = TestCase;
+        BusinessAccount existingAccount = testCases.getBusinessAccountTestCase();
         String username = "username";
 
         UpdateBusinessAccountRequest request = new UpdateBusinessAccountRequest();
@@ -110,7 +104,7 @@ public class BusinessAccountUnitTest {
 
     @Test
     public void updateAccountFailure_InvalidInput() {
-        BusinessAccount existingAccount = TestCase;
+        BusinessAccount existingAccount = testCases.getBusinessAccountTestCase();
         String username = "username";
 
         UpdateBusinessAccountRequest request = new UpdateBusinessAccountRequest();

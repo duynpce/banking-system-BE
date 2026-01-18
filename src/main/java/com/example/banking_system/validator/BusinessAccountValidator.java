@@ -23,7 +23,6 @@ public class BusinessAccountValidator {
     }
 
     public void validateUniqueAccountBusinessDetails(BusinessAccount businessAccount) {
-       util.assertUnique(businessAccountRepository.existsByOrganizationName(businessAccount.getOrganizationName()),"Organization name already exists");
        util.assertUnique(businessAccountRepository.existsByTaxIdNumber(businessAccount.getTaxIdNumber()),"Tax id number already exists");
     }
 
@@ -46,7 +45,6 @@ public class BusinessAccountValidator {
     private void setNonNullFieldsToUpdateBusinessAccount(UpdateBusinessAccountRequest request, BusinessAccount existingAccount) {
 
         if (request.getOrganizationName() != null) {
-            util.assertUnique(businessAccountRepository.existsByOrganizationName(request.getOrganizationName()), "Organization name already exists");
             existingAccount.setOrganizationName(request.getOrganizationName());
         }
 

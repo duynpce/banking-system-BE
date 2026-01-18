@@ -25,7 +25,7 @@ public abstract class Account {
     @Column(name = "username", nullable = false, unique = true)
     private String username;
 
-    @Column(name = "hashed_password", nullable = false, columnDefinition = "TEXT")
+    @Column(name = "hashed_password", nullable = false, columnDefinition = "text")
     private String password;
 
     @Column(name = "balance", nullable = false)

@@ -56,6 +56,7 @@ public class AccountService {
         return account;
     }
 
+
     public boolean existsByUsername(String username) {
         return accountRepository.existsByUsername(username);
     }

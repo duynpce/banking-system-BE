@@ -1,7 +1,6 @@
-package com.example.banking_system.controller;
+package com.example.banking_system.controller.account;
 
 import com.example.banking_system.dto.account.GetAccountRequest;
-import com.example.banking_system.entity.account.Account;
 import com.example.banking_system.service.account.AccountService;
 import com.example.banking_system.utility.JwtUtil;
 import lombok.RequiredArgsConstructor;
