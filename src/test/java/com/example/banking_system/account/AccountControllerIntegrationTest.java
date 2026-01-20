@@ -44,6 +44,11 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
     private JwtUtil jwtUtil;
 
     @Test
+    public void should_fail(){
+        Assertions.fail();
+    }
+
+    @Test
     public void testGet_BusinessAccount_Success() {
         CreateBusinessAccountRequest createRequest = testCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(createRequest);
