@@ -1,7 +1,6 @@
 package com.example.banking_system.config.security;
 
 import com.example.banking_system.entity.account.Account;
-import com.example.banking_system.repository.account.AccountRepository;
 import com.example.banking_system.service.account.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;

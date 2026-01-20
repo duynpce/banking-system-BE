@@ -18,6 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class PersonalAccountServiceUnitTest extends UnitTest {
@@ -45,6 +47,11 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
     @InjectMocks
     PersonalAccountService personalAccountService;
 
+//    @Test
+//    public void testCi_shouldFail(){
+//        assertTrue(false);
+//    }
+
     @Test
     public void createAccountSuccess() {
         PersonalAccount personalAccount = testCases.getPersonalAccountTestCase();
@@ -59,7 +66,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
 
         PersonalAccount createdAccount = personalAccountService.create(request);
 
-        Assertions.assertEquals(personalAccount, createdAccount);
+        assertEquals(personalAccount, createdAccount);
         verify(personalAccountRepository, times(1)).save(personalAccount);
     }
 
@@ -76,7 +83,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
             personalAccountService.create(request);
         });
 
-        Assertions.assertEquals("invalid account", exception.getMessage());
+        assertEquals("invalid account", exception.getMessage());
         verify(personalAccountRepository, never()).save(any());
     }
 
@@ -96,7 +103,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
 
         PersonalAccount updatedAccount = personalAccountService.update(request);
 
-        Assertions.assertEquals(existingAccount, updatedAccount);
+        assertEquals(existingAccount, updatedAccount);
         verify(personalAccountValidator).validateUpdate(request, existingAccount);
         verify(personalAccountRepository).save(existingAccount);
     }
@@ -117,7 +124,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
             personalAccountService.update(request);
         });
 
-        Assertions.assertEquals("At least one field must be provided for update", exception.getMessage());
+        assertEquals("At least one field must be provided for update", exception.getMessage());
         verify(personalAccountRepository, never()).save(any());
     }
 }

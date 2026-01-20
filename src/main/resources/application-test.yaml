@@ -1,0 +1,34 @@
+spring:
+    application:
+      name: banking-system
+
+    datasource:
+      url: jdbc:postgresql://localhost:5432/banking_system_db
+      username: postgres
+      password: password
+
+    jpa:
+      database-platform: org.hibernate.dialect.PostgreSQLDialect
+      show-sql: true
+      hibernate:
+        ddl-auto: update
+      properties:
+        hibernate:
+          globally_quoted_identifiers: true
+          jdbc:
+            time_zone: UTC
+
+    cache:
+      type: redis
+
+    data:
+      redis:
+        host: localhost
+        port: 6379
+
+    security:
+      oauth2:
+        resourceserver:
+          jwt:
+            jwk-set-uri: http://localhost:8080/oauth2/jwks
+

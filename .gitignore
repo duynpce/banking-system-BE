@@ -33,5 +33,5 @@ build/
 .vscode/
 
 ### environment file ###
-*.yaml
+application.yaml
 *.env
