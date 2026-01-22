@@ -1,6 +1,6 @@
 package com.example.banking_system.entity.card;
 
-import com.example.banking_system.constant.CardHolderType;
+import com.example.banking_system.constant.AccountType;
 import com.example.banking_system.constant.CardType;
 import com.example.banking_system.constant.Privilege;
 import com.example.banking_system.entity.account.PersonalAccount;
@@ -18,19 +18,17 @@ import java.time.Instant;
 @PrimaryKeyJoinColumn(name = "card_id", referencedColumnName = "id")
 public class PersonalCard extends Card{
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "personal_account_id", referencedColumnName = "id", nullable = false, updatable = false)
-    private PersonalAccount account;
+    private String ownerName;
 
     public  PersonalCard() {super();}
 
-    public PersonalCard(String cardNumber, Instant expirationDate, BigDecimal annualFee
+    public PersonalCard(String cardNumber, BigDecimal annualFee
             , CardType type, Privilege privilege, long personalAccountId) {
-        super(cardNumber, expirationDate, annualFee, type, privilege);
+        super(cardNumber, annualFee, type, privilege);
     }
 
     @Override
-    public CardHolderType getHolderType() {
-        return CardHolderType.PERSONAL;
+    public AccountType getHolderType() {
+        return AccountType.PERSONAL;
     }
 }

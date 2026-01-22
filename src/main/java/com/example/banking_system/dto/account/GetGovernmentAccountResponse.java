@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class GetGovernmentAccountRequest extends GetAccountRequest {
+public class GetGovernmentAccountResponse extends GetAccountResponse {
     private String governmentDepartment;
 }
 

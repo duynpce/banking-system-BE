@@ -15,4 +15,5 @@ public class CreateBusinessAccountRequest extends CreateAccountRequest{
     private String organizationName;
     @NotBlank(message = "Tax ID number cannot be blank")
     private String taxIdNumber;
+
 }

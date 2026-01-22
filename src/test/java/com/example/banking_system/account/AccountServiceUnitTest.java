@@ -2,10 +2,10 @@ package com.example.banking_system.account;
 
 import com.example.banking_system.UnitTest;
 import com.example.banking_system.constant.AccountType;
-import com.example.banking_system.dto.account.GetAccountRequest;
-import com.example.banking_system.dto.account.GetBusinessAccountRequest;
-import com.example.banking_system.dto.account.GetGovernmentAccountRequest;
-import com.example.banking_system.dto.account.GetPersonalAccountRequest;
+import com.example.banking_system.dto.account.GetAccountResponse;
+import com.example.banking_system.dto.account.GetBusinessAccountResponse;
+import com.example.banking_system.dto.account.GetGovernmentAccountResponse;
+import com.example.banking_system.dto.account.GetPersonalAccountResponse;
 import com.example.banking_system.entity.account.Account;
 import com.example.banking_system.entity.account.BusinessAccount;
 import com.example.banking_system.entity.account.GovernmentAccount;
@@ -21,7 +21,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 
-import java.time.LocalDate;
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
@@ -43,12 +42,12 @@ public class AccountServiceUnitTest extends UnitTest {
     public void getByUsernameSuccess() {
         final String username = "username";
         BusinessAccount account = testCases.getBusinessAccountTestCase();
-        GetBusinessAccountRequest dto = new GetBusinessAccountRequest();
+        GetBusinessAccountResponse dto = new GetBusinessAccountResponse();
 
         when(accountRepository.findByUsername(username)).thenReturn(Optional.of(account));
         when(accountMapper.toDto((BusinessAccount) account)).thenReturn(dto);
 
-        GetAccountRequest result = accountService.getByUsername(username);
+        GetAccountResponse result = accountService.getByUsername(username);
 
         Assertions.assertEquals(dto, result);
         verify(accountRepository).findByUsername(username);
@@ -73,11 +72,11 @@ public class AccountServiceUnitTest extends UnitTest {
     @Test
     public void mapToGetDtoSuccess_BusinessAccount() {
         BusinessAccount account = testCases.getBusinessAccountTestCase();
-        GetBusinessAccountRequest dto = new GetBusinessAccountRequest();
+        GetBusinessAccountResponse dto = new GetBusinessAccountResponse();
 
         when(accountMapper.toDto((BusinessAccount) account)).thenReturn(dto);
 
-        GetAccountRequest result = accountService.mapToGetDto(account);
+        GetAccountResponse result = accountService.mapToGetDto(account);
 
         Assertions.assertEquals(dto, result);
         verify(accountMapper).toDto((BusinessAccount) account);
@@ -86,11 +85,11 @@ public class AccountServiceUnitTest extends UnitTest {
     @Test
     public void mapToGetDtoSuccess_PersonalAccount() {
         PersonalAccount account = testCases.getPersonalAccountTestCase();
-        GetPersonalAccountRequest dto = new GetPersonalAccountRequest();
+        GetPersonalAccountResponse dto = new GetPersonalAccountResponse();
 
         when(accountMapper.toDto((PersonalAccount) account)).thenReturn(dto);
 
-        GetAccountRequest result = accountService.mapToGetDto(account);
+        GetAccountResponse result = accountService.mapToGetDto(account);
 
         Assertions.assertEquals(dto, result);
         verify(accountMapper).toDto((PersonalAccount) account);
@@ -99,11 +98,11 @@ public class AccountServiceUnitTest extends UnitTest {
     @Test
     public void mapToGetDtoSuccess_GovernmentAccount() {
         GovernmentAccount account = testCases.getGovernmentAccountTestCase();
-        GetGovernmentAccountRequest dto = new GetGovernmentAccountRequest();
+        GetGovernmentAccountResponse dto = new GetGovernmentAccountResponse();
 
         when(accountMapper.toDto((GovernmentAccount) account)).thenReturn(dto);
 
-        GetAccountRequest result = accountService.mapToGetDto(account);
+        GetAccountResponse result = accountService.mapToGetDto(account);
 
         Assertions.assertEquals(dto, result);
         verify(accountMapper).toDto((GovernmentAccount) account);
@@ -157,7 +156,7 @@ public class AccountServiceUnitTest extends UnitTest {
         when(accountRepository.findByUsername(username)).thenReturn(Optional.of(account));
         doNothing().when(accountRepository).delete(account);
 
-        accountService.delete(username);
+        accountService.deleteByUsername(username);
 
         verify(accountRepository).findByUsername(username);
         verify(accountRepository).delete(account);
@@ -170,7 +169,7 @@ public class AccountServiceUnitTest extends UnitTest {
         when(accountRepository.findByUsername(username)).thenReturn(Optional.empty());
 
         NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> {
-            accountService.delete(username);
+            accountService.deleteByUsername(username);
         });
 
         Assertions.assertEquals("User not found with username: " + username, exception.getMessage());

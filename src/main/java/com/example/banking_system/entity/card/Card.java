@@ -1,17 +1,14 @@
 package com.example.banking_system.entity.card;
 
-import com.example.banking_system.constant.CardHolderType;
-import com.example.banking_system.constant.CardStatus;
-import com.example.banking_system.constant.CardType;
-import com.example.banking_system.constant.Privilege;
+import com.example.banking_system.constant.*;
 import com.example.banking_system.entity.account.Account;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -28,7 +25,7 @@ public abstract class Card {
     private String cardNumber;
 
     @Column(name = "expiration_date", nullable = false)
-    private Instant expirationDate;
+    private LocalDate expirationDate = LocalDate.now().plusYears(3);
 
     @Column(name = "annual_fee", nullable = false)
     private BigDecimal annualFee;
@@ -41,16 +38,19 @@ public abstract class Card {
     private Privilege privilege;
 
     @Column(name = "status", nullable = false)
-    private CardStatus status;
+    private CardStatus status = CardStatus.ACTIVE; // Default status is ACTIVE
 
-    public Card(String cardNumber, Instant expirationDate, BigDecimal annualFee
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false, updatable = false)
+    private Account account;
+
+    public Card(String cardNumber, BigDecimal annualFee
             , CardType type, Privilege privilege) {
         this.cardNumber = cardNumber;
-        this.expirationDate = expirationDate;
         this.annualFee = annualFee;
         this.type = type;
         this.privilege = privilege;
     }
 
-    public abstract CardHolderType getHolderType();
+    public abstract  AccountType getHolderType();
 }

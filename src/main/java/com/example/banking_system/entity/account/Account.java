@@ -4,12 +4,15 @@ import com.example.banking_system.constant.AccountStatus;
 import com.example.banking_system.constant.AccountType;
 import com.example.banking_system.constant.CreditRank;
 import com.example.banking_system.constant.Role;
+import com.example.banking_system.entity.Loan;
+import com.example.banking_system.entity.card.Card;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -62,6 +65,12 @@ public abstract class Account {
 
     @Column(name = "verified_id_card_at")
     private Instant verifiedIdCardAt = null;
+
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Loan> loans;
+
+    @OneToMany(fetch = FetchType.LAZY,mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Card> cards;
 
     // constructor for creating new account, all the non-specified fields will be set to default values in db
     public Account(String username, String password,String email, String phoneNumber, String address) {

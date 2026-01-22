@@ -72,6 +72,7 @@ public class OAuth2AuthorizationServerConfig {
                 .with(authorizationServerConfigurer, (authorizationServer) ->
                         authorizationServer
                                 .registeredClientRepository(registeredClientRepository())
+                                .oidc(Customizer.withDefaults())
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
@@ -105,6 +106,7 @@ public class OAuth2AuthorizationServerConfig {
                 .redirectUri("http://localhost:8081/callback")
                 .scope("api:read")
                 .scope("api:write")
+                .scope("openid")
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenTimeToLive(Duration.ofMinutes(15))
                         .refreshTokenTimeToLive(Duration.ofDays(1))
@@ -126,6 +128,7 @@ public class OAuth2AuthorizationServerConfig {
                 .jwkSetEndpoint(jwkUri)
                 //authorization endpoint , user logged in --> authorization code --> used the code to get tokens here
                 .authorizationEndpoint("/oauth2/authorize")
+
                 // refresh token endpoint
                 .tokenEndpoint("/oauth2/token")
                 //check if the token is valid endpoint

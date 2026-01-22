@@ -11,7 +11,7 @@ public interface AccountMapper {
     BusinessAccount toEntity(CreateBusinessAccountRequest createBusinessAccountRequest);
     PersonalAccount toEntity(CreatePersonalAccountRequest createPersonalAccountRequest);
     GovernmentAccount toEntity(CreateGovernmentAccountRequest createGovernmentAccountRequest);
-    GetBusinessAccountRequest toDto(BusinessAccount businessAccount);
-    GetPersonalAccountRequest toDto(PersonalAccount personalAccount);
-    GetGovernmentAccountRequest toDto(GovernmentAccount governmentAccount);
+    GetBusinessAccountResponse toDto(BusinessAccount businessAccount);
+    GetPersonalAccountResponse toDto(PersonalAccount personalAccount);
+    GetGovernmentAccountResponse toDto(GovernmentAccount governmentAccount);
 }

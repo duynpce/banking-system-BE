@@ -44,23 +44,18 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
     private JwtUtil jwtUtil;
 
     @Test
-    public void should_fail(){
-        Assertions.fail();
-    }
-
-    @Test
     public void testGet_BusinessAccount_Success() {
         CreateBusinessAccountRequest createRequest = testCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(createRequest);
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
 
-        ResponseEntity<GetAccountRequest> response = accountController.get();
+        ResponseEntity<GetAccountResponse> response = accountController.get();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertInstanceOf(GetBusinessAccountRequest.class, response.getBody(), "Response body should be GetBusinessAccountRequest");
+        assertInstanceOf(GetBusinessAccountResponse.class, response.getBody(), "Response body should be GetBusinessAccountRequest");
 
-        GetBusinessAccountRequest businessAccount = (GetBusinessAccountRequest) response.getBody();
+        GetBusinessAccountResponse businessAccount = (GetBusinessAccountResponse) response.getBody();
         assertEquals(createRequest.getUsername(), businessAccount.getUsername(), "Username should match");
         assertEquals(createRequest.getOrganizationName(), businessAccount.getOrganizationName(), "Organization name should match");
     }
@@ -72,12 +67,12 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
 
-        ResponseEntity<GetAccountRequest> response = accountController.get();
+        ResponseEntity<GetAccountResponse> response = accountController.get();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertInstanceOf(GetPersonalAccountRequest.class, response.getBody(), "Response body should be GetPersonalAccountRequest");
+        assertInstanceOf(GetPersonalAccountResponse.class, response.getBody(), "Response body should be GetPersonalAccountRequest");
 
-        GetPersonalAccountRequest personalAccount = (GetPersonalAccountRequest) response.getBody();
+        GetPersonalAccountResponse personalAccount = (GetPersonalAccountResponse) response.getBody();
         assertEquals(createRequest.getUsername(), personalAccount.getUsername(), "Username should match");
         assertEquals(createRequest.getFullName(), personalAccount.getFullName(), "Full name should match");
     }
@@ -89,12 +84,12 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
 
-        ResponseEntity<GetAccountRequest> response = accountController.get();
+        ResponseEntity<GetAccountResponse> response = accountController.get();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertInstanceOf(GetGovernmentAccountRequest.class, response.getBody(), "Response body should be GetGovernmentAccountRequest");
+        assertInstanceOf(GetGovernmentAccountResponse.class, response.getBody(), "Response body should be GetGovernmentAccountRequest");
 
-        GetGovernmentAccountRequest governmentAccount = (GetGovernmentAccountRequest) response.getBody();
+        GetGovernmentAccountResponse governmentAccount = (GetGovernmentAccountResponse) response.getBody();
         assertEquals(createRequest.getUsername(), governmentAccount.getUsername(), "Username should match");
         assertEquals(createRequest.getGovernmentDepartment(), governmentAccount.getGovernmentDepartment(), "Government department should match");
     }

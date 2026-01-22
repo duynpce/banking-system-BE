@@ -1,6 +1,6 @@
 package com.example.banking_system.controller.account;
 
-import com.example.banking_system.dto.account.GetAccountRequest;
+import com.example.banking_system.dto.account.GetAccountResponse;
 import com.example.banking_system.service.account.AccountService;
 import com.example.banking_system.utility.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -15,16 +15,16 @@ public class AccountController {
     private final JwtUtil jwtUtil;
 
     @GetMapping
-    public ResponseEntity<GetAccountRequest> get() {
+    public ResponseEntity<GetAccountResponse> get() {
         String username = jwtUtil.getUsername();
-        GetAccountRequest Response = accountService.getByUsername(username);
+        GetAccountResponse Response = accountService.getByUsername(username);
         return ResponseEntity.ok(Response);
     }
 
     @DeleteMapping
     public ResponseEntity<String> delete() {
         String username = jwtUtil.getUsername();
-        accountService.delete(username);
+        accountService.deleteByUsername(username);
         return ResponseEntity.ok("Account deleted successfully");
     }
 }

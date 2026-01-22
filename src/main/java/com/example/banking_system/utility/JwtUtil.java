@@ -2,6 +2,8 @@ package com.example.banking_system.utility;
 
 import com.example.banking_system.dto.auth.TokenResponse;
 import com.example.banking_system.exception.BusinessException;
+import com.example.banking_system.exception.ForbiddenException;
+import com.example.banking_system.exception.UnauthorizedException;
 import com.example.banking_system.exception.ValidationException;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.io.Decoders;
@@ -28,7 +30,7 @@ public class JwtUtil {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if(authentication == null || !authentication.isAuthenticated()){
-            throw new ValidationException("haven't logged in");
+            throw new UnauthorizedException("haven't logged in");
         }
 
         return authentication.getName();

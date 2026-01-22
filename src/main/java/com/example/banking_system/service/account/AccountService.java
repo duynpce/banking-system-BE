@@ -1,7 +1,7 @@
 package com.example.banking_system.service.account;
 
 import com.example.banking_system.constant.AccountType;
-import com.example.banking_system.dto.account.GetAccountRequest;
+import com.example.banking_system.dto.account.GetAccountResponse;
 import com.example.banking_system.entity.account.Account;
 import com.example.banking_system.entity.account.BusinessAccount;
 import com.example.banking_system.entity.account.GovernmentAccount;
@@ -11,7 +11,6 @@ import com.example.banking_system.exception.NotFoundException;
 import com.example.banking_system.mapper.AccountMapper;
 import com.example.banking_system.repository.account.AccountRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -20,8 +19,12 @@ public class AccountService {
     private final AccountRepository accountRepository;
     private final AccountMapper accountMapper;
 
-    // get --> used for GET method , find --> used for internal finding without mapping
-    public GetAccountRequest getByUsername(String username) {
+    /*
+        2 steps:
+            1 find account by username
+            2 map to corresponding GetAccountResponse dto
+     */
+    public GetAccountResponse getByUsername(String username) {
         Account account = findByUsername(username);
         return mapToGetDto(account);
     }
@@ -32,7 +35,7 @@ public class AccountService {
         );
     }
 
-    public GetAccountRequest mapToGetDto(Account account) {
+    public GetAccountResponse mapToGetDto(Account account) {
 
         if(account.getType() == AccountType.PERSONAL) {
             return accountMapper.toDto((PersonalAccount) account);
@@ -45,7 +48,11 @@ public class AccountService {
             throw new NotFoundException("Unknown account type");
     }
 
-    // find by username and forcing the AccountType
+    /*
+        2 steps:
+            1 find account by username
+            2 check if account type matches the provided type
+     */
     public Account findByUsernameAndType(String username, AccountType type) {
         Account account = findByUsername(username);
 
@@ -69,7 +76,7 @@ public class AccountService {
         return accountRepository.existsByEmail(email);
     }
 
-    public void delete(String username) {
+    public void deleteByUsername(String username) {
         Account account = findByUsername(username);
         accountRepository.delete(account);
     }

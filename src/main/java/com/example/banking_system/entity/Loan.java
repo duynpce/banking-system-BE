@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -29,15 +30,15 @@ public class Loan {
     private BigDecimal interestRate;
 
     @Column(name = "due_date", nullable = false)
-    private Instant dueDate;
+    private LocalDate dueDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private LoanStatus status;
+    private LoanStatus status = LoanStatus.CURRENT_PAYMENT;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private LoanType type; // personal, mortgage, student , business , credit ...
+    private LoanType type;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false, updatable = false)

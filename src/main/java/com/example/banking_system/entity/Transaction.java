@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -28,14 +29,14 @@ public class Transaction {
     private BigDecimal transferredAmount;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    private Instant createdAt = Instant.now();
 
     @Column(name = "due_date", nullable = false)
-    private Instant dueDate;
+    private LocalDate dueDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private TransactionStatus status;
+    private TransactionStatus status = TransactionStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
