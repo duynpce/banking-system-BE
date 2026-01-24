@@ -1,5 +1,7 @@
 package com.example.banking_system.mapper;
 
+import com.example.banking_system.dto.account.CreateBusinessAccountRequest;
+import com.example.banking_system.dto.card.CreatePersonalCardRequest;
 import com.example.banking_system.dto.card.GetBusinessCardResponse;
 import com.example.banking_system.dto.card.GetPersonalCardResponse;
 import com.example.banking_system.entity.card.BusinessCard;
@@ -15,4 +17,6 @@ public interface CardMapper {
     List<GetBusinessCardResponse> toBusinessCardsDto(List<Card> cards);
     GetPersonalCardResponse toPersonalCardDto(PersonalCard personalCard);
     GetBusinessCardResponse toBusinessCardDto(BusinessCard businessCard);
+    PersonalCard toEntity(CreatePersonalCardRequest createPersonalCardRequest);
+    BusinessCard toEntity(CreateBusinessAccountRequest createBusinessAccountRequest);
 }

@@ -1,4 +1,4 @@
-package com.example.banking_system.validator;
+package com.example.banking_system.validator.account;
 
 import com.example.banking_system.dto.account.UpdateGovernmentAccountRequest;
 import com.example.banking_system.entity.account.GovernmentAccount;

@@ -11,7 +11,7 @@ import com.example.banking_system.repository.account.BusinessAccountRepository;
 import com.example.banking_system.service.account.AccountService;
 import com.example.banking_system.service.account.BusinessAccountService;
 import com.example.banking_system.utility.JwtUtil;
-import com.example.banking_system.validator.BusinessAccountValidator;
+import com.example.banking_system.validator.account.BusinessAccountValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.InjectMocks;

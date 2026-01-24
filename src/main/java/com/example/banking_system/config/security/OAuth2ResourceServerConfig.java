@@ -28,7 +28,7 @@ public class OAuth2ResourceServerConfig {
                 httpSecurity.csrf(AbstractHttpConfigurer::disable)
                         .securityMatcher("/v1/**")
                         .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/v1/auth/**", "/v1/home" ,"/v1/author-endpoints").permitAll()
+                                .requestMatchers("/v1/auth/**","/v1/test/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/v1/business-accounts","/v1/personal-accounts").permitAll()
                                 .anyRequest().authenticated()
 

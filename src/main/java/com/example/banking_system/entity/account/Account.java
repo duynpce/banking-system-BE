@@ -31,7 +31,7 @@ public abstract class Account {
     @Column(name = "hashed_password", nullable = false, columnDefinition = "text")
     private String password;
 
-    @Column(name = "balance", nullable = false)
+    @Column(name = "balance", nullable = false, columnDefinition = "numeric(19,2)")
     private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(name = "email", nullable = false, unique = true)
@@ -39,6 +39,9 @@ public abstract class Account {
 
     @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
+
+    @Column(name = "id_card_number", nullable = false, unique = true)
+    private String idCardNumber;
 
     @Column(name = "address", nullable = false, columnDefinition = "text")
     private String address;
@@ -63,8 +66,8 @@ public abstract class Account {
     @Column(name = "verified_phone_number_at")
     private Instant verifiedPhoneNumberAt = null;
 
-    @Column(name = "verified_id_card_at")
-    private Instant verifiedIdCardAt = null;
+    @Column(name = "verified_id_card_number_at")
+    private Instant verifiedIdCardNumberAt = null;
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Loan> loans;
@@ -90,8 +93,8 @@ public abstract class Account {
         return verifiedPhoneNumberAt != null;
     }
 
-    public boolean isIdCardVerified() {
-        return verifiedIdCardAt != null;
+    public boolean isIdCardNumberVerified() {
+        return verifiedIdCardNumberAt != null;
     }
 
     public CreditRank getCreditRank(){

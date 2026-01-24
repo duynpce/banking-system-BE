@@ -11,7 +11,7 @@ import com.example.banking_system.repository.account.GovernmentAccountRepository
 import com.example.banking_system.service.account.AccountService;
 import com.example.banking_system.service.account.GovernmentAccountService;
 import com.example.banking_system.utility.JwtUtil;
-import com.example.banking_system.validator.GovernmentAccountValidator;
+import com.example.banking_system.validator.account.GovernmentAccountValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

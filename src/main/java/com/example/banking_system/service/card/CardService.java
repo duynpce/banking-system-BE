@@ -15,7 +15,9 @@ import com.example.banking_system.exception.NotFoundException;
 import com.example.banking_system.mapper.CardMapper;
 import com.example.banking_system.repository.card.CardRepository;
 import com.example.banking_system.service.account.AccountService;
+import com.example.banking_system.service.account.BusinessAccountService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,6 +28,10 @@ public class CardService {
     private final CardRepository cardRepository;
     private final CardMapper cardMapper;
     private final AccountService accountService;
+
+    @Value("${value.bin}")
+    private String BIN;
+
 
 
     public List<? extends GetCardResponse> GetAllByUsername(String username) {
@@ -102,6 +108,12 @@ public class CardService {
         return cardRepository.findById(cardId).orElseThrow(
                 () -> new NotFoundException("Card not found with id: " + cardId)
         );
+    }
+
+    public String generateCardNumber() {
+        String sequence = String.valueOf(cardRepository.getCardNumberSequence()).formatted("%012d");
+        System.out.println(BIN + " " + sequence);
+        return BIN + sequence;
     }
 
 }

@@ -27,6 +27,7 @@ public class JwtUtil {
 
     // get username from ContextHolder
     public String getUsername(){
+
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if(authentication == null || !authentication.isAuthenticated()){

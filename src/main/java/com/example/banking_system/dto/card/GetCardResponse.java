@@ -1,7 +1,7 @@
 package com.example.banking_system.dto.card;
 
 import com.example.banking_system.constant.CardType;
-import com.example.banking_system.constant.Privilege;
+import com.example.banking_system.constant.CardPrivilege;
 import lombok.Data;
 
 @Data
@@ -10,5 +10,5 @@ public abstract class GetCardResponse {
     private String cardNumber;
     private String expirationDate;
     private CardType type;
-    private Privilege privilege;
+    private CardPrivilege cardPrivilege;
 }

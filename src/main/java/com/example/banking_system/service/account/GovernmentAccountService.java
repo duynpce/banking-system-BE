@@ -7,7 +7,7 @@ import com.example.banking_system.entity.account.GovernmentAccount;
 import com.example.banking_system.mapper.AccountMapper;
 import com.example.banking_system.repository.account.GovernmentAccountRepository;
 import com.example.banking_system.utility.JwtUtil;
-import com.example.banking_system.validator.GovernmentAccountValidator;
+import com.example.banking_system.validator.account.GovernmentAccountValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

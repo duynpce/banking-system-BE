@@ -7,7 +7,7 @@ import com.example.banking_system.entity.account.PersonalAccount;
 import com.example.banking_system.mapper.AccountMapper;
 import com.example.banking_system.repository.account.PersonalAccountRepository;
 import com.example.banking_system.utility.JwtUtil;
-import com.example.banking_system.validator.PersonalAccountValidator;
+import com.example.banking_system.validator.account.PersonalAccountValidator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;

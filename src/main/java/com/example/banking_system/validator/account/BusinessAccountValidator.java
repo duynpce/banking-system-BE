@@ -1,10 +1,9 @@
-package com.example.banking_system.validator;
+package com.example.banking_system.validator.account;
 
 import com.example.banking_system.dto.account.UpdateBusinessAccountRequest;
 import com.example.banking_system.entity.account.BusinessAccount;
 import com.example.banking_system.exception.ValidationException;
 import com.example.banking_system.repository.account.BusinessAccountRepository;
-import com.example.banking_system.service.account.AccountService;
 import com.example.banking_system.utility.Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
