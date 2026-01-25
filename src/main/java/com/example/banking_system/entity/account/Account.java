@@ -31,7 +31,7 @@ public abstract class Account {
     @Column(name = "hashed_password", nullable = false, columnDefinition = "text")
     private String password;
 
-    @Column(name = "balance", nullable = false, columnDefinition = "numeric(19,2)")
+    @Column(name = "balance", nullable = false, precision = 19, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO;
 
     @Column(name = "email", nullable = false, unique = true)
@@ -39,9 +39,6 @@ public abstract class Account {
 
     @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
-
-    @Column(name = "id_card_number", nullable = false, unique = true)
-    private String idCardNumber;
 
     @Column(name = "address", nullable = false, columnDefinition = "text")
     private String address;

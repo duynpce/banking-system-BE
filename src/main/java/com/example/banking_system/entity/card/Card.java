@@ -29,7 +29,7 @@ public abstract class Card {
     @Column(name = "annual_fee", nullable = false)
     private BigDecimal annualFee;
 
-    @Column(name = "cashback_rate", nullable = false, columnDefinition = "numeric(5,2)")
+    @Column(name = "cashback_rate", nullable = false, precision = 10, scale = 2)
     private BigDecimal cashbackRate;
 
     @Column(name ="type", nullable = false)
