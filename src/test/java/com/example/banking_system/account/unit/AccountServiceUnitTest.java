@@ -1,0 +1,180 @@
+package com.example.banking_system.account.unit;
+
+import com.example.banking_system.account.TestCases;
+import com.example.banking_system.common.UnitTest;
+import com.example.banking_system.account.constant.AccountType;
+import com.example.banking_system.account.dto.GetAccountResponse;
+import com.example.banking_system.account.dto.GetBusinessAccountResponse;
+import com.example.banking_system.account.dto.GetGovernmentAccountResponse;
+import com.example.banking_system.account.dto.GetPersonalAccountResponse;
+import com.example.banking_system.account.entity.Account;
+import com.example.banking_system.account.entity.BusinessAccount;
+import com.example.banking_system.account.entity.GovernmentAccount;
+import com.example.banking_system.account.entity.PersonalAccount;
+import com.example.banking_system.common.exception.ForbiddenException;
+import com.example.banking_system.common.exception.NotFoundException;
+import com.example.banking_system.account.mapper.AccountMapper;
+import com.example.banking_system.account.repository.AccountRepository;
+import com.example.banking_system.account.service.AccountService;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+
+
+import java.util.Optional;
+
+import static org.mockito.Mockito.*;
+
+public class AccountServiceUnitTest extends UnitTest {
+
+    private final TestCases testCases = TestCases.getInstance();
+
+    @Mock
+    private AccountRepository accountRepository;
+
+    @Mock
+    private AccountMapper accountMapper;
+
+    @InjectMocks
+    private AccountService accountService;
+
+    @Test
+    public void getByUsernameSuccess() {
+        final String username = "username";
+        BusinessAccount account = testCases.getBusinessAccountTestCase();
+        GetBusinessAccountResponse dto = new GetBusinessAccountResponse();
+
+        when(accountRepository.findByUsername(username)).thenReturn(Optional.of(account));
+        when(accountMapper.toDto((BusinessAccount) account)).thenReturn(dto);
+
+        GetAccountResponse result = accountService.getByUsername(username);
+
+        Assertions.assertEquals(dto, result);
+        verify(accountRepository).findByUsername(username);
+        verify(accountMapper).toDto((BusinessAccount) account);
+    }
+
+    @Test
+    public void getByUsernameFailure_UserNotFound() {
+        final String username = "nonexistent";
+
+        when(accountRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+        NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> {
+            accountService.getByUsername(username);
+        });
+
+        Assertions.assertEquals("User not found with username: " + username, exception.getMessage());
+        verify(accountRepository).findByUsername(username);
+        verify(accountMapper, never()).toDto(any(BusinessAccount.class));
+    }
+
+    @Test
+    public void mapToGetDtoSuccess_BusinessAccount() {
+        BusinessAccount account = testCases.getBusinessAccountTestCase();
+        GetBusinessAccountResponse dto = new GetBusinessAccountResponse();
+
+        when(accountMapper.toDto((BusinessAccount) account)).thenReturn(dto);
+
+        GetAccountResponse result = accountService.mapToGetDto(account);
+
+        Assertions.assertEquals(dto, result);
+        verify(accountMapper).toDto((BusinessAccount) account);
+    }
+
+    @Test
+    public void mapToGetDtoSuccess_PersonalAccount() {
+        PersonalAccount account = testCases.getPersonalAccountTestCase();
+        GetPersonalAccountResponse dto = new GetPersonalAccountResponse();
+
+        when(accountMapper.toDto((PersonalAccount) account)).thenReturn(dto);
+
+        GetAccountResponse result = accountService.mapToGetDto(account);
+
+        Assertions.assertEquals(dto, result);
+        verify(accountMapper).toDto((PersonalAccount) account);
+    }
+
+    @Test
+    public void mapToGetDtoSuccess_GovernmentAccount() {
+        GovernmentAccount account = testCases.getGovernmentAccountTestCase();
+        GetGovernmentAccountResponse dto = new GetGovernmentAccountResponse();
+
+        when(accountMapper.toDto((GovernmentAccount) account)).thenReturn(dto);
+
+        GetAccountResponse result = accountService.mapToGetDto(account);
+
+        Assertions.assertEquals(dto, result);
+        verify(accountMapper).toDto((GovernmentAccount) account);
+    }
+
+    @Test
+    public void mapToGetDtoFailure_UnknownAccountType() {
+        Account account = mock(Account.class);
+        when(account.getType()).thenReturn(null);
+
+        NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> {
+            accountService.mapToGetDto(account);
+        });
+
+        Assertions.assertEquals("Unknown account type", exception.getMessage());
+    }
+
+    @Test
+    public void findByUsernameAndTypeSuccess() {
+        final String username = "username";
+        BusinessAccount account = testCases.getBusinessAccountTestCase();
+
+        when(accountRepository.findByUsername(username)).thenReturn(Optional.of(account));
+
+        Account result = accountService.findByUsernameAndType(username, AccountType.BUSINESS);
+
+        Assertions.assertEquals(account, result);
+        verify(accountRepository).findByUsername(username);
+    }
+
+    @Test
+    public void findByUsernameAndTypeFailure_TypeMismatch() {
+        final String username = "username";
+        BusinessAccount account = testCases.getBusinessAccountTestCase();
+
+        when(accountRepository.findByUsername(username)).thenReturn(Optional.of(account));
+
+        ForbiddenException exception = Assertions.assertThrows(ForbiddenException.class, () -> {
+            accountService.findByUsernameAndType(username, AccountType.PERSONAL);
+        });
+
+        Assertions.assertEquals("account type mismatch", exception.getMessage());
+        verify(accountRepository).findByUsername(username);
+    }
+
+    @Test
+    public void deleteSuccess() {
+        final String username = "username";
+        BusinessAccount account = testCases.getBusinessAccountTestCase();
+
+        when(accountRepository.findByUsername(username)).thenReturn(Optional.of(account));
+        doNothing().when(accountRepository).delete(account);
+
+        accountService.deleteByUsername(username);
+
+        verify(accountRepository).findByUsername(username);
+        verify(accountRepository).delete(account);
+    }
+
+    @Test
+    public void deleteFailure_UserNotFound() {
+        final String username = "nonexistent";
+
+        when(accountRepository.findByUsername(username)).thenReturn(Optional.empty());
+
+        NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> {
+            accountService.deleteByUsername(username);
+        });
+
+        Assertions.assertEquals("User not found with username: " + username, exception.getMessage());
+        verify(accountRepository).findByUsername(username);
+        verify(accountRepository, never()).delete(any());
+    }
+}

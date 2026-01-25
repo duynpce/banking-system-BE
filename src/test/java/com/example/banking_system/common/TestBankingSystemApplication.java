@@ -1,0 +1,12 @@
+package com.example.banking_system.common;
+
+import com.example.banking_system.BankingSystemApplication;
+import org.springframework.boot.SpringApplication;
+
+public class TestBankingSystemApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.from(BankingSystemApplication::main).with(TestcontainersConfiguration.class).run(args);
+	}
+
+}

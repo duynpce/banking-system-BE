@@ -1,11 +1,10 @@
 package com.example.banking_system.account;
 
-import com.example.banking_system.dto.account.*;
-import com.example.banking_system.entity.account.BusinessAccount;
-import com.example.banking_system.entity.account.GovernmentAccount;
-import com.example.banking_system.entity.account.PersonalAccount;
+import com.example.banking_system.account.dto.*;
+import com.example.banking_system.account.entity.BusinessAccount;
+import com.example.banking_system.account.entity.GovernmentAccount;
+import com.example.banking_system.account.entity.PersonalAccount;
 import lombok.Getter;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
