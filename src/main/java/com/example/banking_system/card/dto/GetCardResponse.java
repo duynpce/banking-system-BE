@@ -1,7 +1,7 @@
 package com.example.banking_system.card.dto;
 
 import com.example.banking_system.card.constant.CardType;
-import com.example.banking_system.card.constant.CardPrivilege;
+import com.example.banking_system.card.entity.CardPrivilege;
 import lombok.Data;
 
 @Data

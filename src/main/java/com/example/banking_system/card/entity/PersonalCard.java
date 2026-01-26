@@ -2,7 +2,6 @@ package com.example.banking_system.card.entity;
 
 import com.example.banking_system.account.constant.AccountType;
 import com.example.banking_system.card.constant.CardType;
-import com.example.banking_system.card.constant.CardPrivilege;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

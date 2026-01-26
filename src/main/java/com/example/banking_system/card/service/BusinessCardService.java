@@ -29,6 +29,7 @@ public class BusinessCardService {
 
         BusinessCard businessCard = new BusinessCard(cardNumber, request.getType(), request.getPrivilege());
         businessCard.setAccount(account);
+        cardService.updateAnnualFeeAndExpirationDateOnCreate(businessCard);
 
         return businessCardRepository.save(businessCard);
     }

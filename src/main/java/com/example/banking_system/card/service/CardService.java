@@ -23,10 +23,21 @@ public class CardService {
     private final CardRepository cardRepository;
     private final CardMapper cardMapper;
     private final AccountService accountService;
+    private final CardPrivilegeService cardPrivilegeService;
 
     @Value("${value.bin}")
     private String BIN;
 
+    public void updateAnnualFeeAndExpirationDateOnCreate(Card card) {
+        // Calculate and set annual fee
+        card.setAnnualFee(cardPrivilegeService.getAnnualFee(card));
+        // Calculate and set expiration date
+        card.setExpirationDate(cardPrivilegeService.getExpirationDate(card));
+    }
+
+    public void extendExpirationDate(Card card, int yearsToExtend) {
+        card.setExpirationDate(card.getExpirationDate().plusYears(yearsToExtend));
+    }
 
 
     public List<? extends GetCardResponse> GetAllByUsername(String username) {

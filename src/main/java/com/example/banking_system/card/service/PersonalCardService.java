@@ -29,6 +29,7 @@ public class PersonalCardService {
 
         PersonalCard personalCard = new PersonalCard(cardNumber, request.getType(), request.getPrivilege());
         personalCard.setAccount(account);
+        cardService.updateAnnualFeeAndExpirationDateOnCreate(personalCard);
 
         return personalCardRepository.save(personalCard);
     }
