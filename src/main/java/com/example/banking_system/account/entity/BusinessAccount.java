@@ -1,19 +1,17 @@
 package com.example.banking_system.account.entity;
 
 import com.example.banking_system.account.constant.AccountType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.Table;
+import com.example.banking_system.account.constant.Gender;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @Entity
-@Table(name = "business_account")
-@EqualsAndHashCode(callSuper = true)
-@PrimaryKeyJoinColumn(name = "account_id", referencedColumnName = "id")
-public class BusinessAccount extends Account{
+@Table(name = "business_account_details")
+@PrimaryKeyJoinColumn(name = "account_id")
+@EqualsAndHashCode(callSuper = false)
+public class BusinessAccount extends AccountDetails {
 
     @Column(name = "organization_name", columnDefinition = "text", nullable = false)
     private String organizationName;
@@ -22,19 +20,16 @@ public class BusinessAccount extends Account{
     private String taxIdNumber;
 
     public BusinessAccount() {
-        super();
+        setAccount(new Account());
+        getAccount().setType(AccountType.BUSINESS);
     }
 
     public BusinessAccount(String username, String password, String email
             , String phoneNumber, String address, String organizationName, String taxIdNumber
     ) {
-        super(username, password, email, phoneNumber, address);
+        setAccount(new Account(username, password, email, phoneNumber, address, AccountType.BUSINESS));
         this.organizationName = organizationName;
         this.taxIdNumber = taxIdNumber;
     }
 
-    @Override
-    public AccountType getType() {
-        return AccountType.BUSINESS;
-    }
 }

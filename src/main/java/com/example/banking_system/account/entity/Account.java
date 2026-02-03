@@ -15,11 +15,10 @@ import java.time.Instant;
 import java.util.List;
 
 @Data
-@NoArgsConstructor
 @Entity
 @Table(name = "account")
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Account {
+@NoArgsConstructor
+public class Account {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -47,12 +46,20 @@ public abstract class Account {
     @Column(name = "role", nullable = false, updatable = false)
     private Role role = Role.USER;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", updatable = false, nullable = false)
+    private AccountType type;
+
     @Column(name ="created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private AccountStatus status = AccountStatus.ACTIVE;
+
+    //eager mapping because we always need account details when we have an account
+    @OneToOne(mappedBy = "account" , cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private AccountDetails accountDetails;
 
     @Column(name = "credit_rating", nullable = false)
     private int creditRating = 600;
@@ -72,13 +79,14 @@ public abstract class Account {
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Card> cards;
 
-    // constructor for creating new account, all the non-specified fields will be set to default values in db
-    public Account(String username, String password,String email, String phoneNumber, String address) {
+    public Account(String username, String password,String email, String phoneNumber, String address, AccountType type) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.phoneNumber = phoneNumber;
         this.address = address;
+        this.type = type;
+
     }
 
     // when the field is not null, it means the corresponding info is verified at a specific time
@@ -100,6 +108,4 @@ public abstract class Account {
         else if (creditRating >= 600) {return CreditRank.FAIR;}
         else {return CreditRank.POOR;}
     }
-
-    public abstract AccountType getType();
 }

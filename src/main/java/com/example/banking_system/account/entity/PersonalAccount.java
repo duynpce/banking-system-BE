@@ -1,10 +1,8 @@
 package com.example.banking_system.account.entity;
 
 import com.example.banking_system.account.constant.AccountType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.Table;
+import com.example.banking_system.account.constant.Gender;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
@@ -12,10 +10,11 @@ import java.time.LocalDate;
 
 @Data
 @Entity
-@Table(name = "personal_account")
-@EqualsAndHashCode(callSuper = true)
-@PrimaryKeyJoinColumn(name = "account_id", referencedColumnName = "id")
-public class PersonalAccount extends  Account {
+@Table(name = "personal_account_details")
+@PrimaryKeyJoinColumn(name = "account_id")
+@EqualsAndHashCode(callSuper = false)
+public class PersonalAccount extends  AccountDetails {
+
     @Column(name = "full_name", columnDefinition = "text")
     private String fullName;
 
@@ -25,22 +24,24 @@ public class PersonalAccount extends  Account {
     @Column(name = "id_card_number", nullable = false, unique = true)
     private String idCardNumber;
 
-    public  PersonalAccount() {
-        super();
+    @Enumerated(EnumType.STRING)
+    @Column(name = "gender", nullable = false)
+    private Gender gender;
+
+
+    public PersonalAccount() {
+        setAccount(new Account());
+        getAccount().setType(AccountType.PERSONAL);
     }
 
-
-    public PersonalAccount(String username, String password , String email
-            , String phoneNumber, String address, String fullName, LocalDate dateOfBirth
+    public PersonalAccount(String username, String password, String email
+            , String phoneNumber, String address, Gender gender, String fullName, LocalDate dateOfBirth
             , String idCardNumber) {
-        super(username, password, email, phoneNumber, address);
+        setAccount(new Account(username, password, email, phoneNumber, address, AccountType.PERSONAL));
         this.fullName = fullName;
         this.dateOfBirth = dateOfBirth;
         this.idCardNumber = idCardNumber;
+        this.gender = gender;
     }
 
-    @Override
-    public AccountType getType() {
-        return AccountType.PERSONAL;
-    }
 }

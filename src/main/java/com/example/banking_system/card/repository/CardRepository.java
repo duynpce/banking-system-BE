@@ -13,5 +13,6 @@ public interface CardRepository extends JpaRepository<Card, Long> {
 
     @Query(value = "select nextval('card_number_sequence')", nativeQuery = true)
     long getCardNumberSequence();
+
 }
 

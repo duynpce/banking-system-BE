@@ -3,8 +3,6 @@ package com.example.banking_system.card.validator;
 import com.example.banking_system.card.dto.UpdateCardPrivilegeRequest;
 import com.example.banking_system.card.entity.CardPrivilege;
 import com.example.banking_system.card.repository.CardPrivilegeRepository;
-import com.example.banking_system.card.service.CardPrivilegeService;
-import com.example.banking_system.common.exception.ConflictDataException;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.Util;
 import lombok.RequiredArgsConstructor;

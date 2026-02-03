@@ -1,16 +1,14 @@
 package com.example.banking_system.account.unit;
 
 import com.example.banking_system.account.TestCases;
+import com.example.banking_system.account.service.domain.PersonalAccountService;
+import com.example.banking_system.account.service.query.PersonalAccountQueryService;
 import com.example.banking_system.common.UnitTest;
-import com.example.banking_system.account.constant.AccountType;
 import com.example.banking_system.account.dto.CreatePersonalAccountRequest;
 import com.example.banking_system.account.dto.UpdatePersonalAccountRequest;
 import com.example.banking_system.account.entity.PersonalAccount;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.account.mapper.AccountMapper;
-import com.example.banking_system.account.repository.PersonalAccountRepository;
-import com.example.banking_system.account.service.AccountService;
-import com.example.banking_system.account.service.PersonalAccountService;
 import com.example.banking_system.common.utility.JwtUtil;
 import com.example.banking_system.account.validator.PersonalAccountValidator;
 import org.junit.jupiter.api.Assertions;
@@ -20,7 +18,6 @@ import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
 public class PersonalAccountServiceUnitTest extends UnitTest {
@@ -31,7 +28,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
     AccountMapper accountMapper;
 
     @Mock
-    PersonalAccountRepository personalAccountRepository;
+    PersonalAccountQueryService personalAccountQueryService;
 
     @Mock
     PersonalAccountValidator personalAccountValidator;
@@ -40,18 +37,10 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
     PasswordEncoder passwordEncoder;
 
     @Mock
-    AccountService accountService;
-
-    @Mock
     JwtUtil jwtUtil;
 
     @InjectMocks
     PersonalAccountService personalAccountService;
-
-//    @Test
-//    public void testCi_shouldFail(){
-//        assertTrue(false);
-//    }
 
     @Test
     public void createAccountSuccess() {
@@ -63,12 +52,12 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
         when(accountMapper.toEntity(request)).thenReturn(personalAccount);
         doNothing().when(personalAccountValidator).validateCreate(personalAccount);
         when(passwordEncoder.encode(request.getPassword())).thenReturn(hashedPassword);
-        when(personalAccountRepository.save(personalAccount)).thenReturn(personalAccount);
+        when(personalAccountQueryService.save(personalAccount)).thenReturn(personalAccount);
 
         PersonalAccount createdAccount = personalAccountService.create(request);
 
         assertEquals(personalAccount, createdAccount);
-        verify(personalAccountRepository, times(1)).save(personalAccount);
+        verify(personalAccountQueryService, times(1)).save(personalAccount);
     }
 
     @Test
@@ -80,12 +69,10 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
         when(accountMapper.toEntity(request)).thenReturn(invalidAccount);
         doThrow(new ValidationException("invalid account")).when(personalAccountValidator).validateCreate(invalidAccount);
 
-        RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> {
-            personalAccountService.create(request);
-        });
+        RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> personalAccountService.create(request));
 
         assertEquals("invalid account", exception.getMessage());
-        verify(personalAccountRepository, never()).save(any());
+        verify(personalAccountQueryService, never()).save(any());
     }
 
     @Test
@@ -98,15 +85,15 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
         request.setEmail("newemail@example.com");
 
         when(jwtUtil.getUsername()).thenReturn(username);
-        when(accountService.findByUsernameAndType(username, AccountType.PERSONAL)).thenReturn(existingAccount);
+        when(personalAccountQueryService.findByUsername(username)).thenReturn(existingAccount);
         doNothing().when(personalAccountValidator).validateUpdate(request, existingAccount);
-        when(personalAccountRepository.save(existingAccount)).thenReturn(existingAccount);
+        when(personalAccountQueryService.save(existingAccount)).thenReturn(existingAccount);
 
         PersonalAccount updatedAccount = personalAccountService.update(request);
 
         assertEquals(existingAccount, updatedAccount);
         verify(personalAccountValidator).validateUpdate(request, existingAccount);
-        verify(personalAccountRepository).save(existingAccount);
+        verify(personalAccountQueryService).save(existingAccount);
     }
 
     @Test
@@ -117,16 +104,13 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
         UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();
 
         when(jwtUtil.getUsername()).thenReturn(username);
-        when(accountService.findByUsernameAndType(username, AccountType.PERSONAL)).thenReturn(existingAccount);
+        when(personalAccountQueryService.findByUsername(username)).thenReturn(existingAccount);
         doThrow(new ValidationException("At least one field must be provided for update"))
                 .when(personalAccountValidator).validateUpdate(request, existingAccount);
 
-        RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> {
-            personalAccountService.update(request);
-        });
+        RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> personalAccountService.update(request));
 
         assertEquals("At least one field must be provided for update", exception.getMessage());
-        verify(personalAccountRepository, never()).save(any());
+        verify(personalAccountQueryService, never()).save(any());
     }
 }
-

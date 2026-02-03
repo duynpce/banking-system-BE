@@ -1,5 +1,6 @@
 package com.example.banking_system.account;
 
+import com.example.banking_system.account.constant.Gender;
 import com.example.banking_system.account.dto.*;
 import com.example.banking_system.account.entity.BusinessAccount;
 import com.example.banking_system.account.entity.GovernmentAccount;
@@ -11,7 +12,7 @@ import java.time.LocalDate;
 @Getter
 public class TestCases {
     private final BusinessAccount businessAccountTestCase = new BusinessAccount("username", "password", "email", "phoneNumber", "address", "OrganizationName", "TaxIdNumber");
-    private final PersonalAccount personalAccountTestCase = new PersonalAccount("username", "password", "email", "phoneNumber", "address", "fullName", LocalDate.now(), "idCardNumber");
+    private final PersonalAccount personalAccountTestCase = new PersonalAccount("username", "password", "email", "phoneNumber", "address", Gender.FEMALE,"fullName", LocalDate.now(), "idCardNumber");
     private final GovernmentAccount governmentAccountTestCase = new GovernmentAccount("username", "password", "email", "phoneNumber", "address", "governmentDepartment");
 
 
@@ -29,7 +30,7 @@ public class TestCases {
         CreateBusinessAccountRequest request = new CreateBusinessAccountRequest();
         request.setUsername("username");
         request.setPassword("password");
-        request.setEmail("email");
+        request.setEmail("email@gmail.com");
         request.setPhoneNumber("phoneNumber");
         request.setAddress("address");;
         request.setOrganizationName("OrganizationName");
@@ -41,7 +42,7 @@ public class TestCases {
         CreateGovernmentAccountRequest request = new CreateGovernmentAccountRequest();
         request.setUsername("username");
         request.setPassword("password");
-        request.setEmail("email");
+        request.setEmail("email@gmail.com");
         request.setPhoneNumber("phoneNumber");
         request.setAddress("address");;
         request.setGovernmentDepartment("governmentDepartment");
@@ -52,18 +53,19 @@ public class TestCases {
         CreatePersonalAccountRequest request = new CreatePersonalAccountRequest();
         request.setUsername("username");
         request.setPassword("password");
-        request.setEmail("email");
+        request.setEmail("email@gmail.com");
         request.setPhoneNumber("phoneNumber");
         request.setAddress("address");;
         request.setFullName("fullName");
         request.setDateOfBirth(LocalDate.now());
         request.setIdCardNumber("idCardNumber");
+        request.setGender(Gender.UNKNOWN);
         return request;
     }
 
     public UpdateBusinessAccountRequest getUpdateBusinessAccountRequestTestCase() {
         UpdateBusinessAccountRequest request = new UpdateBusinessAccountRequest();
-        request.setEmail("newEmail");
+        request.setEmail("newEmail@gmail.com");
         request.setPhoneNumber("newPhoneNumber");
         request.setAddress("newAddress");
         request.setOrganizationName("newOrganizationName");
@@ -73,7 +75,7 @@ public class TestCases {
 
     public UpdateGovernmentAccountRequest getUpdateGovernmentAccountRequestTestCase() {
         UpdateGovernmentAccountRequest request = new UpdateGovernmentAccountRequest();
-        request.setEmail("newEmail");
+        request.setEmail("newEmail@gmail.com");
         request.setPhoneNumber("newPhoneNumber");
         request.setAddress("newAddress");
         request.setGovernmentDepartment("newGovernmentDepartment");
@@ -82,7 +84,7 @@ public class TestCases {
 
     public UpdatePersonalAccountRequest getUpdatePersonalAccountRequestTestCase() {
         UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();
-        request.setEmail("newEmail");
+        request.setEmail("newEmail@gmail.com");
         request.setPhoneNumber("newPhoneNumber");
         request.setAddress("newAddress");
         request.setFullName("newFullName");

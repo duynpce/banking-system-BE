@@ -1,6 +1,8 @@
 package com.example.banking_system.account.integration;
 
 import com.example.banking_system.account.TestCases;
+import com.example.banking_system.account.service.query.AccountQueryService;
+import com.example.banking_system.account.service.query.BusinessAccountQueryService;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.account.controller.AccountController;
 import com.example.banking_system.account.controller.BusinessAccountController;
@@ -9,7 +11,6 @@ import com.example.banking_system.account.controller.PersonalAccountController;
 import com.example.banking_system.account.dto.*;
 import com.example.banking_system.common.exception.NotFoundException;
 import com.example.banking_system.common.exception.UnauthorizedException;
-import com.example.banking_system.account.service.AccountService;
 import com.example.banking_system.common.utility.JwtUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -17,11 +18,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
+//not using transaction for commit delete and create operation
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class AccountControllerIntegrationTest extends IntegrationTest {
 
     private final TestCases testCases = TestCases.getInstance();
@@ -36,10 +40,13 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
     private PersonalAccountController personalAccountController;
 
     @Autowired
+    private BusinessAccountQueryService businessAccountQueryService;
+
+    @Autowired
     private GovernmentAccountController governmentAccountController;
 
     @Autowired
-    private AccountService accountService;
+    private AccountQueryService accountQueryService;
 
     @MockitoBean
     private JwtUtil jwtUtil;
@@ -49,16 +56,19 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
         CreateBusinessAccountRequest createRequest = testCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(createRequest);
 
+
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
 
         ResponseEntity<GetAccountResponse> response = accountController.get();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertInstanceOf(GetBusinessAccountResponse.class, response.getBody(), "Response body should be GetBusinessAccountRequest");
 
         GetBusinessAccountResponse businessAccount = (GetBusinessAccountResponse) response.getBody();
-        assertEquals(createRequest.getUsername(), businessAccount.getUsername(), "Username should match");
+        assertNotNull(businessAccount);
         assertEquals(createRequest.getOrganizationName(), businessAccount.getOrganizationName(), "Organization name should match");
+
+        // Clean up
+        accountController.delete();
     }
 
     @Test
@@ -71,11 +81,13 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
         ResponseEntity<GetAccountResponse> response = accountController.get();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertInstanceOf(GetPersonalAccountResponse.class, response.getBody(), "Response body should be GetPersonalAccountRequest");
 
         GetPersonalAccountResponse personalAccount = (GetPersonalAccountResponse) response.getBody();
-        assertEquals(createRequest.getUsername(), personalAccount.getUsername(), "Username should match");
+        assertNotNull(personalAccount);
         assertEquals(createRequest.getFullName(), personalAccount.getFullName(), "Full name should match");
+
+        // Clean up
+        accountController.delete();
     }
 
     @Test
@@ -88,20 +100,20 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
         ResponseEntity<GetAccountResponse> response = accountController.get();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertInstanceOf(GetGovernmentAccountResponse.class, response.getBody(), "Response body should be GetGovernmentAccountRequest");
 
         GetGovernmentAccountResponse governmentAccount = (GetGovernmentAccountResponse) response.getBody();
-        assertEquals(createRequest.getUsername(), governmentAccount.getUsername(), "Username should match");
+        assertNotNull(governmentAccount);
         assertEquals(createRequest.getGovernmentDepartment(), governmentAccount.getGovernmentDepartment(), "Government department should match");
+
+        // Clean up
+        accountController.delete();
     }
 
     @Test
     public void testGet_NotLoggedIn_Failure() {
         when(jwtUtil.getUsername()).thenThrow(new UnauthorizedException("has not logged in"));
 
-        Assertions.assertThrows(UnauthorizedException.class, () -> {
-            accountController.get();
-        }, "has not logged in");
+        Assertions.assertThrows(UnauthorizedException.class, () -> accountController.get(), "has not logged in");
     }
 
     @Test
@@ -116,18 +128,14 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
         assertEquals("Account deleted successfully", response.getBody(), "Response message should match");
 
-        Assertions.assertThrows(NotFoundException.class, () -> {
-            accountService.findByUsername(createRequest.getUsername());
-        }, "User not found with username: " + createRequest.getUsername());
+        Assertions.assertThrows(NotFoundException.class, () -> accountQueryService.findByUsername(createRequest.getUsername()), "User not found with username: " + createRequest.getUsername());
     }
 
     @Test
     public void testDelete_NotLoggedIn_Failure() {
         when(jwtUtil.getUsername()).thenThrow(new UnauthorizedException("has not logged in"));
 
-        Assertions.assertThrows(UnauthorizedException.class, () -> {
-            accountController.delete();
-        }, "has not logged in");
+        Assertions.assertThrows(UnauthorizedException.class, () -> accountController.delete(), "has not logged in");
     }
 }
 

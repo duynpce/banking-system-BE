@@ -2,7 +2,7 @@ package com.example.banking_system.account.controller;
 
 import com.example.banking_system.account.dto.CreateGovernmentAccountRequest;
 import com.example.banking_system.account.dto.UpdateGovernmentAccountRequest;
-import com.example.banking_system.account.service.GovernmentAccountService;
+import com.example.banking_system.account.service.domain.GovernmentAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

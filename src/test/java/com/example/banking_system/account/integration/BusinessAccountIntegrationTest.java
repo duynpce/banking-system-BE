@@ -2,6 +2,7 @@ package com.example.banking_system.account.integration;
 
 
 import com.example.banking_system.account.TestCases;
+import com.example.banking_system.account.service.query.BusinessAccountQueryService;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.account.controller.BusinessAccountController;
 import com.example.banking_system.account.dto.CreateBusinessAccountRequest;
@@ -9,7 +10,6 @@ import com.example.banking_system.account.dto.UpdateBusinessAccountRequest;
 import com.example.banking_system.account.entity.BusinessAccount;
 import com.example.banking_system.common.exception.ConflictDataException;
 import com.example.banking_system.common.exception.ValidationException;
-import com.example.banking_system.account.service.AccountService;
 import com.example.banking_system.common.utility.JwtUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,7 @@ public class BusinessAccountIntegrationTest extends IntegrationTest {
     private BusinessAccountController businessAccountController;
 
     @Autowired
-    AccountService accountService;
+    BusinessAccountQueryService businessAccountQueryService;
 
     @MockitoBean
     private JwtUtil jwtUtil;
@@ -42,7 +42,7 @@ public class BusinessAccountIntegrationTest extends IntegrationTest {
 
         ResponseEntity<String> response = businessAccountController.create(request);
 
-        BusinessAccount createdAccount = (BusinessAccount) accountService.findByUsername(request.getUsername());
+        BusinessAccount createdAccount = businessAccountQueryService.findByUsername(request.getUsername());
 
         assertEquals(createdAccount.getTaxIdNumber(), request.getTaxIdNumber(), "Tax ID number should match");
         assertEquals(createdAccount.getOrganizationName(), request.getOrganizationName(), "Organization name should match" );
@@ -81,15 +81,15 @@ public class BusinessAccountIntegrationTest extends IntegrationTest {
 
         UpdateBusinessAccountRequest updateRequest = testCases.getUpdateBusinessAccountRequestTestCase();
         ResponseEntity<String> response = businessAccountController.update(updateRequest);
-        BusinessAccount updatedAccount = (BusinessAccount) accountService.findByUsername(createRequest.getUsername());
+        BusinessAccount updatedAccount =  businessAccountQueryService.findByUsername(createRequest.getUsername());
 
         // Verify response
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
 
         // Verify updated data
-        assertEquals(updateRequest.getEmail(), updatedAccount.getEmail(), "Email should be updated");
-        assertEquals(updateRequest.getPhoneNumber(), updatedAccount.getPhoneNumber(), "Phone number should be updated");
-        assertEquals(updateRequest.getAddress(), updatedAccount.getAddress(), "Address should be updated");
+        assertEquals(updateRequest.getEmail(), updatedAccount.getAccount().getEmail(), "Email should be updated");
+        assertEquals(updateRequest.getPhoneNumber(), updatedAccount.getAccount().getPhoneNumber(), "Phone number should be updated");
+        assertEquals(updateRequest.getAddress(), updatedAccount.getAccount().getAddress(), "Address should be updated");
         assertEquals(updateRequest.getOrganizationName(), updatedAccount.getOrganizationName(), "Organization name should be updated");
         assertEquals(updateRequest.getTaxIdNumber(), updatedAccount.getTaxIdNumber(), "Tax ID number should be updated");
 

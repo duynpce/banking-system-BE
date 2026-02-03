@@ -1,13 +1,12 @@
 package com.example.banking_system.card.controller;
 
 import com.example.banking_system.card.dto.GetCardResponse;
-import com.example.banking_system.account.service.AccountService;
-import com.example.banking_system.card.service.CardService;
-import com.example.banking_system.common.utility.JwtUtil;
+import com.example.banking_system.card.service.domain.CardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -15,29 +14,29 @@ import java.util.List;
 @RequestMapping("/v1/cards")
 public class CardController {
     private final CardService cardService;
-    private final AccountService accountService;
-    private final JwtUtil jwtUtil;
 
     // Get all cards for the authenticated user by its username from JWT
     @GetMapping
-    public ResponseEntity<List<? extends GetCardResponse>> getAll(){
-        final String username = jwtUtil.getUsername();
-        List<? extends GetCardResponse>response = cardService.GetAllByUsername(username);
+    public ResponseEntity<List<? extends GetCardResponse>> getAllFromByJwt(){
+        List<? extends GetCardResponse>response = cardService.GetAllCardByJwt();
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/{cardId}")
-    public ResponseEntity<GetCardResponse> getById(@PathVariable long cardId){
-        final String username = jwtUtil.getUsername();
-        GetCardResponse response = cardService.getCardByUsernameAndCardId(username, cardId);
+    @GetMapping("/{id}")
+    public ResponseEntity<GetCardResponse> getById(@PathVariable long id){
+        GetCardResponse response = cardService.getCardById(id);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping
-    public ResponseEntity<GetCardResponse> delete(@RequestParam long cardId){
-        final String username = jwtUtil.getUsername();
-        cardService.deleteCardByUsernameAndCardId(username, cardId);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<GetCardResponse> delete(@PathVariable long id){
+        cardService.deleteCardById( id);
         return ResponseEntity.noContent().build();
     }
 
+    @GetMapping("/cashback-rate/{id}")
+    public ResponseEntity<BigDecimal> getCashbackRate(@PathVariable long id) {
+        BigDecimal cashbackRate = cardService.getCashbackRateById(id);
+        return ResponseEntity.ok(cashbackRate);
+    }
 }

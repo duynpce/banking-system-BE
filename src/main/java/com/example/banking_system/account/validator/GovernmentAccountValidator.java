@@ -12,7 +12,7 @@ public class GovernmentAccountValidator {
     private final AccountValidator accountValidator;
 
     public void validateCreate(GovernmentAccount governmentAccount) {
-        accountValidator.validateUniqueAccountDetails(governmentAccount);
+        accountValidator.validateUniqueAccountDetails(governmentAccount.getAccount());
     }
 
     public void validateUpdate(UpdateGovernmentAccountRequest request, GovernmentAccount existingAccount) {
@@ -21,7 +21,7 @@ public class GovernmentAccountValidator {
         }
 
         // check if the fields to be updated are unique, if they are unique, set them to existingAccount
-        accountValidator.setNonNullFieldsToUpdateAccount(request, existingAccount);
+        accountValidator.setNonNullFieldsToUpdateAccount(request, existingAccount.getAccount());
         setNonNullFieldsToUpdateGovernmentAccount(request, existingAccount);
     }
 

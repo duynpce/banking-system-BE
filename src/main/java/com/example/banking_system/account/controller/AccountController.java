@@ -1,8 +1,7 @@
 package com.example.banking_system.account.controller;
 
 import com.example.banking_system.account.dto.GetAccountResponse;
-import com.example.banking_system.account.service.AccountService;
-import com.example.banking_system.common.utility.JwtUtil;
+import com.example.banking_system.account.service.domain.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,19 +11,16 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AccountController {
     private final AccountService accountService;
-    private final JwtUtil jwtUtil;
 
     @GetMapping
     public ResponseEntity<GetAccountResponse> get() {
-        String username = jwtUtil.getUsername();
-        GetAccountResponse Response = accountService.getByUsername(username);
+        GetAccountResponse Response = accountService.get();
         return ResponseEntity.ok(Response);
     }
 
     @DeleteMapping
     public ResponseEntity<String> delete() {
-        String username = jwtUtil.getUsername();
-        accountService.deleteByUsername(username);
+        accountService.delete();
         return ResponseEntity.ok("Account deleted successfully");
     }
 }

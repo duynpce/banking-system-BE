@@ -1,0 +1,27 @@
+package com.example.banking_system.card.service.query;
+
+import com.example.banking_system.card.entity.Card;
+import com.example.banking_system.card.repository.CardRepository;
+import com.example.banking_system.common.exception.NotFoundException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+@Service
+@RequiredArgsConstructor
+public class CardQueryService {
+    private final CardRepository cardRepository;
+
+    public Card findById(Long id) {
+        return cardRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Card not found with id: " + id)
+        );
+    }
+
+    public void delete(Card card) {
+        cardRepository.delete(card);
+    }
+
+    public long getCardNumberSequence() {
+        return cardRepository.getCardNumberSequence();
+    }
+}

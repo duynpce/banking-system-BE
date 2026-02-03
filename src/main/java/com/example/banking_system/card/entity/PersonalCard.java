@@ -4,23 +4,33 @@ import com.example.banking_system.account.constant.AccountType;
 import com.example.banking_system.card.constant.CardType;
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+
+import java.math.BigDecimal;
 
 @Data
-@EqualsAndHashCode(callSuper = true)
 @Entity
-@Table(name = "personal_card")
-@PrimaryKeyJoinColumn(name = "card_id", referencedColumnName = "id")
-public class PersonalCard extends Card{
+@Table(name = "personal_card_details")
+public class PersonalCard {
 
-    public  PersonalCard() {super();}
+    @Id
+    @Column(name = "card_id")
+    private long cardId;
 
-    public PersonalCard(String cardNumber, CardType type, CardPrivilege cardPrivilege) {
-        super(cardNumber, type, cardPrivilege);
+    @MapsId
+    @OneToOne(fetch = FetchType.LAZY, optional = false, cascade = CascadeType.ALL)
+    @JoinColumn(name = "card_id")
+    private Card card;
+
+
+    @Column(name = "reward_points", nullable = false)
+    private int rewardPoint = 0;
+
+
+    public PersonalCard() {
+
     }
 
-    @Override
-    public AccountType getHolderType() {
-        return AccountType.PERSONAL;
+    public PersonalCard(String cardNumber, CardType type, CardPrivilege privilege) {
+        this.card = new Card(cardNumber, type, privilege);
     }
 }

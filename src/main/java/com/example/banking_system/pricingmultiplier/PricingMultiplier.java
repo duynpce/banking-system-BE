@@ -21,6 +21,7 @@ public class PricingMultiplier {
     private Long id;
 
     @Column(name = "account_type", nullable = false)
+    @Enumerated(EnumType.STRING)
     private AccountType accountType;
 
     @Column(name = "multiplier_value", nullable = false, precision = 10, scale = 2)

@@ -2,7 +2,7 @@ package com.example.banking_system.account.controller;
 
 import com.example.banking_system.account.dto.CreateBusinessAccountRequest;
 import com.example.banking_system.account.dto.UpdateBusinessAccountRequest;
-import com.example.banking_system.account.service.BusinessAccountService;
+import com.example.banking_system.account.service.domain.BusinessAccountService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -1,36 +1,31 @@
 package com.example.banking_system.account.entity;
 
 import com.example.banking_system.account.constant.AccountType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.PrimaryKeyJoinColumn;
-import jakarta.persistence.Table;
+import com.example.banking_system.account.constant.Gender;
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 @Data
 @Entity
-@Table(name = "government_account")
-@EqualsAndHashCode(callSuper = true)
-@PrimaryKeyJoinColumn(name = "account_id", referencedColumnName = "id")
-public class GovernmentAccount extends Account {
+@Table(name = "government_account_details")
+@PrimaryKeyJoinColumn(name = "account_id")
+@EqualsAndHashCode(callSuper = false)
+public class GovernmentAccount extends  AccountDetails {
 
     @Column(name = "government_department", columnDefinition = "text", nullable = false)
     private String governmentDepartment;
 
-    public  GovernmentAccount() {
-        super();
+    public GovernmentAccount() {
+        setAccount(new Account());
+        getAccount().setType(AccountType.GOVERNMENT);
     }
 
     public GovernmentAccount(String username, String password, String email
             , String phoneNumber, String address, String governmentDepartment
-            ) {
-        super(username, password, email, phoneNumber, address);
+    ) {
+        setAccount(new Account(username, password, email, phoneNumber, address, AccountType.GOVERNMENT));
         this.governmentDepartment = governmentDepartment;
     }
 
-    @Override
-    public AccountType getType() {
-        return AccountType.GOVERNMENT;
-    }
 }

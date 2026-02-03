@@ -1,6 +1,6 @@
 package com.example.banking_system.common.Controller;
 
-import com.example.banking_system.card.service.CardService;
+import com.example.banking_system.card.service.domain.CardService;
 import com.example.banking_system.common.utility.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;

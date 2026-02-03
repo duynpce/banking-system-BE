@@ -1,6 +1,7 @@
 package com.example.banking_system.account.integration;
 
 import com.example.banking_system.account.TestCases;
+import com.example.banking_system.account.service.query.GovernmentAccountQueryService;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.account.controller.GovernmentAccountController;
 import com.example.banking_system.account.dto.CreateGovernmentAccountRequest;
@@ -8,7 +9,6 @@ import com.example.banking_system.account.dto.UpdateGovernmentAccountRequest;
 import com.example.banking_system.account.entity.GovernmentAccount;
 import com.example.banking_system.common.exception.ConflictDataException;
 import com.example.banking_system.common.exception.ValidationException;
-import com.example.banking_system.account.service.AccountService;
 import com.example.banking_system.common.utility.JwtUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -28,7 +28,7 @@ public class GovernmentAccountIntegrationTest extends IntegrationTest {
     private GovernmentAccountController governmentAccountController;
 
     @Autowired
-    AccountService accountService;
+    GovernmentAccountQueryService governmentAccountQueryService;
 
     @MockitoBean
     private JwtUtil jwtUtil;
@@ -39,7 +39,7 @@ public class GovernmentAccountIntegrationTest extends IntegrationTest {
 
         ResponseEntity<String> response = governmentAccountController.create(request);
 
-        GovernmentAccount createdAccount = (GovernmentAccount) accountService.findByUsername(request.getUsername());
+        GovernmentAccount createdAccount = governmentAccountQueryService.findByUsername(request.getUsername());
 
         assertEquals(createdAccount.getGovernmentDepartment(), request.getGovernmentDepartment(), "Government department should match");
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
@@ -55,9 +55,7 @@ public class GovernmentAccountIntegrationTest extends IntegrationTest {
         request2.setUsername("newUsername");
         request2.setEmail("newEmail@gmail.com");
 
-        Assertions.assertThrows(ConflictDataException.class, () -> {
-            governmentAccountController.create(request2);
-        }, "Phone number already exists");
+        Assertions.assertThrows(ConflictDataException.class, () -> governmentAccountController.create(request2), "Phone number already exists");
     }
 
     @Test
@@ -69,15 +67,15 @@ public class GovernmentAccountIntegrationTest extends IntegrationTest {
 
         UpdateGovernmentAccountRequest updateRequest = testCases.getUpdateGovernmentAccountRequestTestCase();
         ResponseEntity<String> response = governmentAccountController.update(updateRequest);
-        GovernmentAccount updatedAccount = (GovernmentAccount) accountService.findByUsername(createRequest.getUsername());
+        GovernmentAccount updatedAccount = governmentAccountQueryService.findByUsername(createRequest.getUsername());
 
         // Verify response
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
 
         // Verify updated data
-        assertEquals(updateRequest.getEmail(), updatedAccount.getEmail(), "Email should be updated");
-        assertEquals(updateRequest.getPhoneNumber(), updatedAccount.getPhoneNumber(), "Phone number should be updated");
-        assertEquals(updateRequest.getAddress(), updatedAccount.getAddress(), "Address should be updated");
+        assertEquals(updateRequest.getEmail(), updatedAccount.getAccount().getEmail(), "Email should be updated");
+        assertEquals(updateRequest.getPhoneNumber(), updatedAccount.getAccount().getPhoneNumber(), "Phone number should be updated");
+        assertEquals(updateRequest.getAddress(), updatedAccount.getAccount().getAddress(), "Address should be updated");
         assertEquals(updateRequest.getGovernmentDepartment(), updatedAccount.getGovernmentDepartment(), "Government department should be updated");
     }
 

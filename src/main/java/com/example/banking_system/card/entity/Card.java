@@ -9,38 +9,46 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
 @Entity
 @Table(name = "card")
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class Card {
+public class Card {
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "card_number", nullable = false, updatable = false,unique = true)
+    @Column(name = "card_number", nullable = false, updatable = false, unique = true)
     private String cardNumber;
 
-    @Column(name = "expiration_date", nullable = false,updatable = false)
+    @Column(name = "expiration_date", nullable = false, updatable = false)
     private LocalDate expirationDate;
 
-    @Column(name = "annual_fee", nullable = false)
-    private BigDecimal annualFee;
-
-    @Column(name ="type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
     private CardType type;
 
+    @Column(name = "balance", nullable = false, precision = 12, scale = 2)
+    private BigDecimal balance = BigDecimal.ZERO;
+
+    @Column(name = "pin_code", nullable = false, length = 6)
+    private String pinCode;
+
+    @Column(name = "pin_code_attempts", nullable = false)
+    private int pinCodeAttempts = 0;
+
     @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDate createdAt = LocalDate.now();
+    private Instant createdAt = Instant.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "privilege_code", referencedColumnName = "code", nullable = false, updatable = false)
     private CardPrivilege privilege;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private CardStatus status = CardStatus.ACTIVE;
 
@@ -54,5 +62,7 @@ public abstract class Card {
         this.privilege = privilege;
     }
 
-    public abstract AccountType getHolderType();
+    public AccountType getHolderType(){
+        return account.getType();
+    }
 }

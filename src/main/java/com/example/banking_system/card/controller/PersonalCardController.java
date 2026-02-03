@@ -1,7 +1,7 @@
 package com.example.banking_system.card.controller;
 
 import com.example.banking_system.card.dto.CreatePersonalCardRequest;
-import com.example.banking_system.card.service.PersonalCardService;
+import com.example.banking_system.card.service.domain.PersonalCardService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

@@ -2,8 +2,8 @@ package com.example.banking_system.account.validator;
 
 import com.example.banking_system.account.dto.UpdatePersonalAccountRequest;
 import com.example.banking_system.account.entity.PersonalAccount;
+import com.example.banking_system.account.service.query.PersonalAccountQueryService;
 import com.example.banking_system.common.exception.ValidationException;
-import com.example.banking_system.account.repository.PersonalAccountRepository;
 import com.example.banking_system.common.utility.Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -12,16 +12,16 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class PersonalAccountValidator {
     private final AccountValidator accountValidator;
-    private final PersonalAccountRepository personalAccountRepository;
+    private final PersonalAccountQueryService personalAccountQueryService;
     private final Util util;
 
     public void validateCreate(PersonalAccount personalAccount) {
-        accountValidator.validateUniqueAccountDetails(personalAccount);
+        accountValidator.validateUniqueAccountDetails(personalAccount.getAccount());
         validateUniqueAccountPersonalDetails(personalAccount);
     }
 
     public void validateUniqueAccountPersonalDetails(PersonalAccount personalAccount) {
-        util.assertUnique(personalAccountRepository.existsByIdCardNumber(personalAccount.getIdCardNumber()), "ID card number already exists");
+        util.assertUnique(personalAccountQueryService.existsByIdCardNumber(personalAccount.getIdCardNumber()), "ID card number already exists");
     }
 
     public void validateUpdate(UpdatePersonalAccountRequest request, PersonalAccount existingAccount) {
@@ -30,13 +30,13 @@ public class PersonalAccountValidator {
         }
 
         // check if the fields to be updated are unique, if they are unique, set them to existingAccount
-        accountValidator.setNonNullFieldsToUpdateAccount(request, existingAccount);
+        accountValidator.setNonNullFieldsToUpdateAccount(request, existingAccount.getAccount());
         setNonNullFieldsToUpdatePersonalAccount(request, existingAccount);
     }
 
     private boolean isAllFieldsNull(UpdatePersonalAccountRequest request) {
-        return request.getEmail() == null && request.getPhoneNumber() == null && request.getAddress() == null &&
-               request.getFullName() == null && request.getDateOfBirth() == null && request.getIdCardNumber() == null;
+        return request.getEmail() == null && request.getPhoneNumber() == null && request.getAddress() == null && request.getGender() == null
+               && request.getFullName() == null && request.getDateOfBirth() == null && request.getIdCardNumber() == null;
     }
 
     private void setNonNullFieldsToUpdatePersonalAccount(UpdatePersonalAccountRequest request, PersonalAccount existingAccount) {
@@ -49,8 +49,12 @@ public class PersonalAccountValidator {
         }
 
         if (request.getIdCardNumber() != null) {
-            util.assertUnique(personalAccountRepository.existsByIdCardNumber(request.getIdCardNumber()), "ID card number already exists");
+            util.assertUnique(personalAccountQueryService.existsByIdCardNumber(request.getIdCardNumber()), "ID card number already exists");
             existingAccount.setIdCardNumber(request.getIdCardNumber());
+        }
+
+        if (request.getGender() != null) {
+            existingAccount.setGender(request.getGender());
         }
     }
 }
