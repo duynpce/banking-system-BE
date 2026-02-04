@@ -1,6 +1,9 @@
 package com.example.banking_system.account.unit;
 
 import com.example.banking_system.account.TestCases;
+import com.example.banking_system.account.dto.GetAccountResponse;
+import com.example.banking_system.account.entity.Account;
+import com.example.banking_system.account.mapper.AccountMapper;
 import com.example.banking_system.account.service.domain.AccountService;
 import com.example.banking_system.account.service.query.AccountQueryService;
 import com.example.banking_system.common.UnitTest;
@@ -23,10 +26,44 @@ public class AccountServiceUnitTest extends UnitTest {
     JwtUtil jwtUtil;
 
     @Mock
+    AccountMapper accountMapper;
+
+    @Mock
     private AccountQueryService accountQueryService;
 
     @InjectMocks
     private AccountService accountService;
+
+
+    @Test
+    public void getAccountSuccess() {
+        final String username = "username";
+        when(jwtUtil.getUsername()).thenReturn(username);
+        GetAccountResponse response = new GetAccountResponse();
+        Account returnAccount = testCases.getBusinessAccountTestCase().getAccount();
+        response.setEmail(returnAccount.getEmail());
+
+        when(accountQueryService.findByUsername(username)).thenReturn(returnAccount);
+        when(accountMapper.toDto(returnAccount)).thenReturn(response);
+
+        GetAccountResponse result = accountService.get();
+
+        Assertions.assertEquals(returnAccount.getEmail(), result.getEmail());
+        verify(accountQueryService).findByUsername(username);
+    }
+
+    @Test
+    public void getAccountFailure_UserNotFound() {
+        final String username = "nonexistent";
+
+        when(jwtUtil.getUsername()).thenReturn(username);
+        when(accountQueryService.findByUsername(username)).thenThrow(new NotFoundException("User not found with username: " + username));
+
+        NotFoundException exception = Assertions.assertThrows(NotFoundException.class, () -> accountService.get());
+
+        Assertions.assertEquals("User not found with username: " + username, exception.getMessage());
+        verify(accountQueryService).findByUsername(username);
+    }
 
     @Test
     public void deleteSuccess() {

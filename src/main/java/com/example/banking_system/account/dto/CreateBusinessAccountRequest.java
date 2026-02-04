@@ -7,14 +7,16 @@ import lombok.EqualsAndHashCode;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
-public class CreateBusinessAccountRequest extends CreateAccountRequest{
-    {
-        setType(AccountType.BUSINESS);
-    }
+public class CreateBusinessAccountRequest extends CreateAccountRequest {
 
     @NotBlank(message = "Organization name cannot be blank")
     private String organizationName;
     @NotBlank(message = "Tax ID number cannot be blank")
     private String taxIdNumber;
+
+    public CreateBusinessAccountRequest() {
+        super(AccountType.BUSINESS);
+    }
+
 
 }

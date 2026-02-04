@@ -3,8 +3,10 @@ package com.example.banking_system.card.service.domain;
 import com.example.banking_system.account.service.query.AccountQueryService;
 import com.example.banking_system.card.dto.CreatePersonalCardRequest;
 import com.example.banking_system.account.entity.Account;
+import com.example.banking_system.card.entity.CardPrivilege;
 import com.example.banking_system.card.entity.PersonalCard;
 import com.example.banking_system.card.repository.PersonalCardRepository;
+import com.example.banking_system.card.service.query.CardPrivilegeQueryService;
 import com.example.banking_system.common.utility.JwtUtil;
 import com.example.banking_system.card.validator.PersonalCardValidator;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ public class PersonalCardService {
     private final PersonalCardValidator personalCardValidator;
     private final CardService cardService;
     private final AccountQueryService accountQueryService;
+    private final CardPrivilegeQueryService cardPrivilegeQueryService;
     private final JwtUtil jwtUtil;
 
 
@@ -30,7 +33,8 @@ public class PersonalCardService {
 
         String cardNumber = cardService.generateCardNumber();
 
-        PersonalCard personalCard = new PersonalCard(cardNumber, request.getType(), request.getPrivilege());
+        CardPrivilege privilege = cardPrivilegeQueryService.findByCode(request.getPrivilegeCode());
+        PersonalCard personalCard = new PersonalCard(cardNumber, request.getType(),privilege);
         personalCard.getCard().setAccount(account);
         cardService.updateExpirationDateOnCreate(personalCard.getCard());
 

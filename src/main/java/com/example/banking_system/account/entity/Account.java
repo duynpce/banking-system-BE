@@ -106,7 +106,7 @@ public class Account {
     public CreditRank getCreditRank(){
         if (creditRating >= 800) {return CreditRank.EXCELLENT;}
         else if (creditRating >= 700) {return CreditRank.GOOD;}
-        else if (creditRating >= 600) {return CreditRank.FAIR;}
+        else if (creditRating >= 550) {return CreditRank.FAIR;}
         else {return CreditRank.POOR;}
     }
 

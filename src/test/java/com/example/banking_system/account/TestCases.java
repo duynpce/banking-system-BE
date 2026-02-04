@@ -6,6 +6,7 @@ import com.example.banking_system.account.entity.BusinessAccount;
 import com.example.banking_system.account.entity.GovernmentAccount;
 import com.example.banking_system.account.entity.PersonalAccount;
 import lombok.Getter;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
@@ -28,11 +29,7 @@ public class TestCases {
 
     public CreateBusinessAccountRequest getCreateBusinessAccountRequestTestCase() {
         CreateBusinessAccountRequest request = new CreateBusinessAccountRequest();
-        request.setUsername("username");
-        request.setPassword("password");
-        request.setEmail("email@gmail.com");
-        request.setPhoneNumber("phoneNumber");
-        request.setAddress("address");;
+        fillCreateAccountRequest(request);
         request.setOrganizationName("OrganizationName");
         request.setTaxIdNumber("TaxIdNumber");
         return request;
@@ -40,22 +37,14 @@ public class TestCases {
 
     public CreateGovernmentAccountRequest getCreateGovernmentAccountRequestTestCase() {
         CreateGovernmentAccountRequest request = new CreateGovernmentAccountRequest();
-        request.setUsername("username");
-        request.setPassword("password");
-        request.setEmail("email@gmail.com");
-        request.setPhoneNumber("phoneNumber");
-        request.setAddress("address");;
+        fillCreateAccountRequest(request);
         request.setGovernmentDepartment("governmentDepartment");
         return request;
     }
 
     public CreatePersonalAccountRequest getCreatePersonalAccountRequestTestCase() {
         CreatePersonalAccountRequest request = new CreatePersonalAccountRequest();
-        request.setUsername("username");
-        request.setPassword("password");
-        request.setEmail("email@gmail.com");
-        request.setPhoneNumber("phoneNumber");
-        request.setAddress("address");;
+        fillCreateAccountRequest(request);
         request.setFullName("fullName");
         request.setDateOfBirth(LocalDate.now());
         request.setIdCardNumber("idCardNumber");
@@ -63,11 +52,18 @@ public class TestCases {
         return request;
     }
 
+    private void fillCreateAccountRequest(CreateAccountRequest request) {
+        request.setUsername("username");
+        request.setPassword("password");
+        request.setEmail("email@gmail.com");
+        request.setPhoneNumber("phoneNumber");
+        request.setAddress("address");
+    }
+
+
     public UpdateBusinessAccountRequest getUpdateBusinessAccountRequestTestCase() {
         UpdateBusinessAccountRequest request = new UpdateBusinessAccountRequest();
-        request.setEmail("newEmail@gmail.com");
-        request.setPhoneNumber("newPhoneNumber");
-        request.setAddress("newAddress");
+        fillUpdateAccountRequest(request);
         request.setOrganizationName("newOrganizationName");
         request.setTaxIdNumber("newTaxIdNumber");
         return request;
@@ -75,22 +71,24 @@ public class TestCases {
 
     public UpdateGovernmentAccountRequest getUpdateGovernmentAccountRequestTestCase() {
         UpdateGovernmentAccountRequest request = new UpdateGovernmentAccountRequest();
-        request.setEmail("newEmail@gmail.com");
-        request.setPhoneNumber("newPhoneNumber");
-        request.setAddress("newAddress");
+        fillUpdateAccountRequest(request);
         request.setGovernmentDepartment("newGovernmentDepartment");
         return request;
     }
 
     public UpdatePersonalAccountRequest getUpdatePersonalAccountRequestTestCase() {
         UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();
-        request.setEmail("newEmail@gmail.com");
-        request.setPhoneNumber("newPhoneNumber");
-        request.setAddress("newAddress");
+        fillUpdateAccountRequest(request);
         request.setFullName("newFullName");
         request.setIdCardNumber("newIdCardNumber");
         request.setDateOfBirth(LocalDate.now());
         return request;
+    }
+
+    private void fillUpdateAccountRequest(UpdateAccountRequest request) {
+        request.setEmail("newEmail@gmail.com");
+        request.setPhoneNumber("newPhoneNumber");
+        request.setAddress("newAddress");
     }
     
 }

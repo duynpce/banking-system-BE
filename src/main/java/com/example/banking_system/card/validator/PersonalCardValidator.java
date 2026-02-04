@@ -1,6 +1,7 @@
 package com.example.banking_system.card.validator;
 
 import com.example.banking_system.account.entity.Account;
+import com.example.banking_system.common.exception.ForbiddenException;
 import com.example.banking_system.common.exception.ValidationException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,10 @@ public class PersonalCardValidator {
         // Check if account type can open personal card
         if (!account.getType().canOpenPersonalCard()) {
             throw new ValidationException("This account type cannot open a personal card");
+        }
+
+        if(!account.getCreditRank().canOpenCard()) {
+            throw new ForbiddenException("Account's credit rank does not permit opening a personal card");
         }
     }
 }

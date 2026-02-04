@@ -8,9 +8,11 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class CreateGovernmentAccountRequest extends CreateAccountRequest{
-    {
-        setType(AccountType.GOVERNMENT);
-    }
     @NotBlank(message = "Government department cannot be blank")
     private String governmentDepartment;
+
+    public CreateGovernmentAccountRequest() {
+        super(AccountType.GOVERNMENT);
+    }
+
 }

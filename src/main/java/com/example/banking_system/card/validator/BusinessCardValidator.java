@@ -14,6 +14,10 @@ public class BusinessCardValidator {
         if (!account.getType().canOpenBusinessCard()) {
             throw new ValidationException("This account type cannot open a business card");
         }
+
+        if (!account.getCreditRank().canOpenCard()) {
+            throw new ValidationException("Account's credit rank does not permit opening a business card");
+        }
     }
 }
 

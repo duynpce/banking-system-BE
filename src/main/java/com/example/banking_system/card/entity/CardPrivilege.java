@@ -66,5 +66,9 @@ public class CardPrivilege {
         return cardPrivilegeCode != null ? cardPrivilegeCode.getExpirationYears() : 0;
     }
 
+    public BigDecimal getSpendingLimitDaily() {
+        return cardPrivilegeCode != null ? cardPrivilegeCode.getSpendingLimitDaily() : BigDecimal.ZERO;
+    }
+
 }
     

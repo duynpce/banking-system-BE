@@ -4,7 +4,9 @@ import com.example.banking_system.account.service.query.AccountQueryService;
 import com.example.banking_system.card.dto.CreateBusinessCardRequest;
 import com.example.banking_system.account.entity.Account;
 import com.example.banking_system.card.entity.BusinessCard;
+import com.example.banking_system.card.entity.CardPrivilege;
 import com.example.banking_system.card.repository.BusinessCardRepository;
+import com.example.banking_system.card.service.query.CardPrivilegeQueryService;
 import com.example.banking_system.common.utility.JwtUtil;
 import com.example.banking_system.card.validator.BusinessCardValidator;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +20,7 @@ public class BusinessCardService {
     private final BusinessCardValidator businessCardValidator;
     private final CardService cardService;
     private final AccountQueryService accountQueryService;
+    private final CardPrivilegeQueryService cardPrivilegeQueryService;
     private final JwtUtil jwtUtil;
 
     @Transactional
@@ -29,7 +32,8 @@ public class BusinessCardService {
 
         String cardNumber = cardService.generateCardNumber();
 
-        BusinessCard businessCard = new BusinessCard(cardNumber, request.getType(), request.getPrivilege(), request.getDepartmentCode());
+        CardPrivilege privilege = cardPrivilegeQueryService.findByCode(request.getPrivilegeCode());
+        BusinessCard businessCard = new BusinessCard(cardNumber, request.getType(), privilege, request.getAuthorizedPersonName());
         businessCard.getCard().setAccount(account);
         cardService.updateExpirationDateOnCreate(businessCard.getCard());
 

@@ -6,5 +6,5 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class GetBusinessCardResponse extends GetCardResponse {
-    private String businessName;
+    private String departmentCode;
 }

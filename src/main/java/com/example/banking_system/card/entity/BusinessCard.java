@@ -14,18 +14,15 @@ import java.math.BigDecimal;
 @EqualsAndHashCode(callSuper = false)
 public class BusinessCard extends CardDetails {
 
-    @Column(name = "department_code", nullable = false)
-    private String departmentCode;
-
-    @Column(name = "expense_limit", precision = 12, scale = 2)
-    private BigDecimal expenseLimit;
+    @Column(name= "authorized_person_name", nullable = false)
+    private String authorizedPersonName;
 
     public BusinessCard() {
         setCard(new Card());
     }
 
-    public BusinessCard(String cardNumber, CardType type, CardPrivilege privilege, String departmentCode) {
+    public BusinessCard(String cardNumber, CardType type, CardPrivilege privilege, String authorizedPersonName) {
         setCard(new Card(cardNumber, type, privilege));
-        this.departmentCode = departmentCode;
+        this.authorizedPersonName = authorizedPersonName;
     }
 }

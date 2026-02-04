@@ -10,7 +10,10 @@ import java.math.BigDecimal;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class CreateBusinessCardRequest extends  CreateCardRequest{
+    @NotBlank(message = "authorizedPersonName must not be blank")
+    private String authorizedPersonName;
 
-    @NotBlank(message = "departmentCode must not be blank")
-    private String departmentCode;
+    public  CreateBusinessCardRequest() {
+
+    }
 }

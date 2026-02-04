@@ -13,7 +13,6 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 @Data
-@NoArgsConstructor
 @Entity
 @Table(name = "card")
 public class Card {
@@ -44,6 +43,9 @@ public class Card {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
+    @Column(name = "spending_limit_daily", precision = 12, scale = 4)
+    private BigDecimal spendingLimitDaily;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_privilege_id", referencedColumnName = "id", nullable = false, updatable = false)
     private CardPrivilege privilege;
@@ -60,10 +62,14 @@ public class Card {
     @OneToOne(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private CardDetails cardDetails;
 
+    public Card(){
+    }
+
     public Card(String cardNumber, CardType type, CardPrivilege privilege) {
         this.cardNumber = cardNumber;
         this.type = type;
         this.privilege = privilege;
+        this.spendingLimitDaily = privilege.getSpendingLimitDaily();
     }
 
 
