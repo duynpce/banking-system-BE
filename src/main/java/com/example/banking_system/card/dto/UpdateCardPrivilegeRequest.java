@@ -15,6 +15,6 @@ public class UpdateCardPrivilegeRequest {
     @NotBlank(message = "Code must not be blank")
     private String code;
 
-    private BigDecimal baseAnnualFee;
-    private BigDecimal baseCashBackRate;
+    private BigDecimal AnnualFee;
+    private BigDecimal CashBackRate;
 }

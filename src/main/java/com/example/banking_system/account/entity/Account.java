@@ -4,6 +4,7 @@ import com.example.banking_system.account.constant.AccountStatus;
 import com.example.banking_system.account.constant.AccountType;
 import com.example.banking_system.account.constant.CreditRank;
 import com.example.banking_system.auth.constant.Role;
+import com.example.banking_system.card.entity.CardDetails;
 import com.example.banking_system.loan.Loan;
 import com.example.banking_system.card.entity.Card;
 import jakarta.persistence.*;
@@ -108,4 +109,12 @@ public class Account {
         else if (creditRating >= 600) {return CreditRank.FAIR;}
         else {return CreditRank.POOR;}
     }
+
+    // java
+    public List<CardDetails> getCardDetailsList() {
+        return this.cards.stream()
+                .map(Card::getCardDetails)
+                .toList();
+    }
+
 }

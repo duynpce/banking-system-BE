@@ -16,9 +16,9 @@ public class CreateCardPrivilegeRequest {
     private String code;
 
     @NotNull(message = "Base annual fee must not be null")
-    private BigDecimal baseAnnualFee;
+    private BigDecimal AnnualFee;
 
     @NotNull(message = "Cashback percentage must not be null")
-    private BigDecimal baseCashBackRate;
+    private BigDecimal CashBackRate;
 
 }

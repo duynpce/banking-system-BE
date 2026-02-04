@@ -34,9 +34,9 @@ public class CardController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/cashback-rate/{id}")
-    public ResponseEntity<BigDecimal> getCashbackRate(@PathVariable long id) {
-        BigDecimal cashbackRate = cardService.getCashbackRateById(id);
-        return ResponseEntity.ok(cashbackRate);
-    }
+//    @GetMapping("/cashback-rate/{id}")
+//    public ResponseEntity<BigDecimal> getCashbackRate(@PathVariable long id) {
+//        BigDecimal cashbackRate = cardService.getCashbackRateById(id);
+//        return ResponseEntity.ok(cashbackRate);
+//    }
 }

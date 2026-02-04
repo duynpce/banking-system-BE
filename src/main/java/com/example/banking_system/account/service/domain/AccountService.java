@@ -19,7 +19,7 @@ public class AccountService {
     @Transactional(readOnly = true)
     public GetAccountResponse get() {
         String username = jwtUtil.getUsername();
-        Account account = accountQueryService.findByUsernameWithDetails(username);
+        Account account = accountQueryService.findByUsername(username);
 
         return accountMapper.toDto(account);
     }

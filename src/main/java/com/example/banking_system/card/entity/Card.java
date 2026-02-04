@@ -45,7 +45,7 @@ public class Card {
     private Instant createdAt = Instant.now();
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "privilege_code", referencedColumnName = "code", nullable = false, updatable = false)
+    @JoinColumn(name = "card_privilege_id", referencedColumnName = "id", nullable = false, updatable = false)
     private CardPrivilege privilege;
 
     @Enumerated(EnumType.STRING)
@@ -56,13 +56,16 @@ public class Card {
     @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false, updatable = false)
     private Account account;
 
+    //eager mapping because we always need card details when we have a card
+    @OneToOne(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private CardDetails cardDetails;
+
     public Card(String cardNumber, CardType type, CardPrivilege privilege) {
         this.cardNumber = cardNumber;
         this.type = type;
         this.privilege = privilege;
     }
 
-    public AccountType getHolderType(){
-        return account.getType();
-    }
+
+
 }

@@ -5,7 +5,7 @@ import com.example.banking_system.card.entity.CardPrivilege;
 import lombok.Data;
 
 @Data
-public abstract class GetCardResponse {
+public class GetCardResponse {
     private long id;
     private String cardNumber;
     private String expirationDate;

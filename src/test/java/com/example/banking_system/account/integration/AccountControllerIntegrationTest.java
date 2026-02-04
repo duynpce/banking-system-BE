@@ -66,6 +66,7 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
         GetBusinessAccountResponse businessAccount = (GetBusinessAccountResponse) response.getBody();
         assertNotNull(businessAccount);
         assertEquals(createRequest.getOrganizationName(), businessAccount.getOrganizationName(), "Organization name should match");
+        assertEquals(createRequest.getEmail(), businessAccount.getEmail(), "Username should match");
 
         // Clean up
         accountController.delete();

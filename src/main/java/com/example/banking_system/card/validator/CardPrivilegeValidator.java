@@ -3,6 +3,7 @@ package com.example.banking_system.card.validator;
 import com.example.banking_system.card.dto.UpdateCardPrivilegeRequest;
 import com.example.banking_system.card.entity.CardPrivilege;
 import com.example.banking_system.card.repository.CardPrivilegeRepository;
+import com.example.banking_system.card.service.query.CardPrivilegeQueryService;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.Util;
 import lombok.RequiredArgsConstructor;
@@ -11,12 +12,14 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class CardPrivilegeValidator {
-    private final CardPrivilegeRepository cardPrivilegeRepository ;
+    private final CardPrivilegeQueryService cardPrivilegeQueryService;
     private final Util util;
 
     public void validateCreate(CardPrivilege cardPrivilege){
-        util.assertUnique(cardPrivilegeRepository.existsByCode(cardPrivilege.getCode()),
-                "Card privilege with code " + cardPrivilege.getCode() + " already exists");
+        util.assertUnique(
+                cardPrivilegeQueryService.isExistsAndActive(cardPrivilege),
+                "An active card privilege already exists for this account type and card type"
+        );
     }
 
     public void validateUpdate(UpdateCardPrivilegeRequest request, CardPrivilege existingCardPrivilege) {
@@ -29,16 +32,16 @@ public class CardPrivilegeValidator {
     }
 
     private boolean isAllFieldsNull(UpdateCardPrivilegeRequest request) {
-        return request.getBaseAnnualFee() == null && request.getBaseCashBackRate() == null;
+        return request.getAnnualFee() == null && request.getCashBackRate() == null;
     }
 
     private void setNonNullFieldsToUpdateCardPrivilege(UpdateCardPrivilegeRequest request, CardPrivilege existingCardPrivilege) {
-        if (request.getBaseAnnualFee() != null) {
-            existingCardPrivilege.setBaseAnnualFee(request.getBaseAnnualFee());
+        if (request.getAnnualFee() != null) {
+            existingCardPrivilege.setAnnualFee(request.getAnnualFee());
         }
 
-        if (request.getBaseCashBackRate() != null) {
-            existingCardPrivilege.setBaseCashbackRate(request.getBaseCashBackRate());
+        if (request.getCashBackRate() != null) {
+            existingCardPrivilege.setCashbackRate(request.getCashBackRate());
         }
     }
 }

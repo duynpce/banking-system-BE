@@ -27,7 +27,7 @@ public class CardPrivilegeController {
 
     @DeleteMapping("/{code}")
     public ResponseEntity<Void> deleteCardPrivilege(@PathVariable String code) {
-        cardPrivilegeService.deleteCardPrivilegeByCode(code);
+        cardPrivilegeService.deleteByPrivilegeCode(code);
         return ResponseEntity.noContent().build();
     }
 
