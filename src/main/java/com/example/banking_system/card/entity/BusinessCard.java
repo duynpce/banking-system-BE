@@ -21,8 +21,8 @@ public class BusinessCard extends CardDetails {
         setCard(new Card());
     }
 
-    public BusinessCard(String cardNumber, CardType type, CardPrivilege privilege, String authorizedPersonName) {
-        setCard(new Card(cardNumber, type, privilege));
+    public BusinessCard(String pinCode ,String cardNumber, CardType type, CardPrivilege privilege, String authorizedPersonName) {
+        setCard(new Card(pinCode,cardNumber, type, privilege));
         this.authorizedPersonName = authorizedPersonName;
     }
 }

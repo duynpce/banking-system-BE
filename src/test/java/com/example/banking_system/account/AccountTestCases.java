@@ -6,22 +6,21 @@ import com.example.banking_system.account.entity.BusinessAccount;
 import com.example.banking_system.account.entity.GovernmentAccount;
 import com.example.banking_system.account.entity.PersonalAccount;
 import lombok.Getter;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 
 @Getter
-public class TestCases {
+public class AccountTestCases {
     private final BusinessAccount businessAccountTestCase = new BusinessAccount("username", "password", "email", "phoneNumber", "address", "OrganizationName", "TaxIdNumber");
     private final PersonalAccount personalAccountTestCase = new PersonalAccount("username", "password", "email", "phoneNumber", "address", Gender.FEMALE,"fullName", LocalDate.now(), "idCardNumber");
     private final GovernmentAccount governmentAccountTestCase = new GovernmentAccount("username", "password", "email", "phoneNumber", "address", "governmentDepartment");
 
 
-    private static TestCases instance;
+    private static AccountTestCases instance;
 
-    public static TestCases getInstance() {
+    public static AccountTestCases getInstance() {
         if(instance == null) {
-            instance = new TestCases();
+            instance = new AccountTestCases();
         }
 
         return instance;

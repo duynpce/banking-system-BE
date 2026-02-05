@@ -16,14 +16,20 @@ public class CardPrivilegeQueryService {
         return cardPrivilegeRepository.save(cardPrivilege);
     }
 
-    public CardPrivilege findByCode(String privilegeCode) {
-        return cardPrivilegeRepository.findById(privilegeCode).orElseThrow(
+    public CardPrivilege findByPrivilegeCode(String privilegeCode) {
+        return cardPrivilegeRepository.findByCardPrivilegeCode_CodeAndIsActiveTrue(privilegeCode).orElseThrow(
                 () -> new NotFoundException(("Card privilege not found with code: " + privilegeCode))
         );
     }
 
     public void delete(CardPrivilege cardPrivilege) {
         cardPrivilegeRepository.delete(cardPrivilege);
+    }
+
+    //temporary for test
+    public void deleteByPrivilegeCode(String privilegeCode) {
+        CardPrivilege cardPrivilege = findByPrivilegeCode(privilegeCode);
+        delete(cardPrivilege);
     }
 
     public boolean isExistsAndActive(CardPrivilege cardPrivilege) {

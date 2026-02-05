@@ -2,7 +2,7 @@ package com.example.banking_system.card.unit;
 
 import com.example.banking_system.account.entity.Account;
 import com.example.banking_system.account.service.query.AccountQueryService;
-import com.example.banking_system.card.TestCases;
+import com.example.banking_system.card.CardTestCases;
 import com.example.banking_system.card.dto.CreatePersonalCardRequest;
 import com.example.banking_system.card.entity.CardPrivilege;
 import com.example.banking_system.card.entity.CardPrivilegeCode;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 
 public class PersonalCardServiceUnitTest extends UnitTest {
 
-    private final TestCases testCases = TestCases.getInstance();
+    private final CardTestCases cardTestCases = CardTestCases.getInstance();
 
     @Mock
     PersonalCardRepository personalCardRepository;
@@ -61,7 +61,7 @@ public class PersonalCardServiceUnitTest extends UnitTest {
         CardPrivilege privilege = new CardPrivilege();
         privilege.setCardPrivilegeCode(cardPrivilegeCode);
 
-        CreatePersonalCardRequest request = testCases.getCreatePersonalCardRequestTestCase();
+        CreatePersonalCardRequest request = cardTestCases.getCreatePersonalCardRequestTestCase();
 
         PersonalCard personalCard = new PersonalCard();
 
@@ -69,7 +69,7 @@ public class PersonalCardServiceUnitTest extends UnitTest {
         when(accountQueryService.findByUsername(username)).thenReturn(account);
         doNothing().when(personalCardValidator).validateCreate(account);
         when(cardService.generateCardNumber()).thenReturn(cardNumber);
-        when(cardPrivilegeQueryService.findByCode(request.getPrivilegeCode())).thenReturn(privilege);
+        when(cardPrivilegeQueryService.findByPrivilegeCode(request.getPrivilegeCode())).thenReturn(privilege);
         doNothing().when(cardService).updateExpirationDateOnCreate(any());
         when(personalCardRepository.save(any(PersonalCard.class))).thenReturn(personalCard);
 
@@ -78,7 +78,7 @@ public class PersonalCardServiceUnitTest extends UnitTest {
         Assertions.assertEquals(personalCard, createdCard);
         verify(personalCardValidator).validateCreate(account);
         verify(cardService).generateCardNumber();
-        verify(cardPrivilegeQueryService).findByCode(request.getPrivilegeCode());
+        verify(cardPrivilegeQueryService).findByPrivilegeCode(request.getPrivilegeCode());
         verify(personalCardRepository, times(1)).save(any(PersonalCard.class));
     }
 
@@ -90,7 +90,7 @@ public class PersonalCardServiceUnitTest extends UnitTest {
         account.setId(1L);
         account.setUsername(username);
 
-        CreatePersonalCardRequest request = testCases.getCreatePersonalCardRequestTestCase();
+        CreatePersonalCardRequest request = cardTestCases.getCreatePersonalCardRequestTestCase();
 
         when(jwtUtil.getUsername()).thenReturn(username);
         when(accountQueryService.findByUsername(username)).thenReturn(account);

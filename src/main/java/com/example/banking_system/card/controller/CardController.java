@@ -34,6 +34,7 @@ public class CardController {
         return ResponseEntity.noContent().build();
     }
 
+    //later reimplement
 //    @GetMapping("/cashback-rate/{id}")
 //    public ResponseEntity<BigDecimal> getCashbackRate(@PathVariable long id) {
 //        BigDecimal cashbackRate = cardService.getCashbackRateById(id);

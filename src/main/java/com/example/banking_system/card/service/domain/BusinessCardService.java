@@ -31,9 +31,8 @@ public class BusinessCardService {
         businessCardValidator.validateCreate(account);
 
         String cardNumber = cardService.generateCardNumber();
-
-        CardPrivilege privilege = cardPrivilegeQueryService.findByCode(request.getPrivilegeCode());
-        BusinessCard businessCard = new BusinessCard(cardNumber, request.getType(), privilege, request.getAuthorizedPersonName());
+        CardPrivilege privilege = cardPrivilegeQueryService.findByPrivilegeCode(request.getPrivilegeCode());
+        BusinessCard businessCard = new BusinessCard(request.getPinCode(), cardNumber, request.getType(), privilege, request.getAuthorizedPersonName());
         businessCard.getCard().setAccount(account);
         cardService.updateExpirationDateOnCreate(businessCard.getCard());
 

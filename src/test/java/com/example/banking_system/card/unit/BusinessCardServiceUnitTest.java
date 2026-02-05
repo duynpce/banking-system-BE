@@ -2,7 +2,7 @@ package com.example.banking_system.card.unit;
 
 import com.example.banking_system.account.entity.Account;
 import com.example.banking_system.account.service.query.AccountQueryService;
-import com.example.banking_system.card.TestCases;
+import com.example.banking_system.card.CardTestCases;
 import com.example.banking_system.card.dto.CreateBusinessCardRequest;
 import com.example.banking_system.card.entity.BusinessCard;
 import com.example.banking_system.card.entity.CardPrivilege;
@@ -24,7 +24,7 @@ import static org.mockito.Mockito.*;
 
 public class BusinessCardServiceUnitTest extends UnitTest {
 
-    private final TestCases testCases = TestCases.getInstance();
+    private final CardTestCases cardTestCases = CardTestCases.getInstance();
 
     @Mock
     BusinessCardRepository businessCardRepository;
@@ -61,7 +61,7 @@ public class BusinessCardServiceUnitTest extends UnitTest {
         CardPrivilege privilege = new CardPrivilege();
         privilege.setCardPrivilegeCode(cardPrivilegeCode);
 
-        CreateBusinessCardRequest request = testCases.getCreateBusinessCardRequestTestCase();
+        CreateBusinessCardRequest request = cardTestCases.getCreateBusinessCardRequestTestCase();
 
         BusinessCard businessCard = new BusinessCard();
 
@@ -69,7 +69,7 @@ public class BusinessCardServiceUnitTest extends UnitTest {
         when(accountQueryService.findByUsername(username)).thenReturn(account);
         doNothing().when(businessCardValidator).validateCreate(account);
         when(cardService.generateCardNumber()).thenReturn(cardNumber);
-        when(cardPrivilegeQueryService.findByCode(request.getPrivilegeCode())).thenReturn(privilege);
+        when(cardPrivilegeQueryService.findByPrivilegeCode(request.getPrivilegeCode())).thenReturn(privilege);
         doNothing().when(cardService).updateExpirationDateOnCreate(any());
         when(businessCardRepository.save(any(BusinessCard.class))).thenReturn(businessCard);
 
@@ -78,7 +78,7 @@ public class BusinessCardServiceUnitTest extends UnitTest {
         Assertions.assertEquals(businessCard, createdCard);
         verify(businessCardValidator).validateCreate(account);
         verify(cardService).generateCardNumber();
-        verify(cardPrivilegeQueryService).findByCode(request.getPrivilegeCode());
+        verify(cardPrivilegeQueryService).findByPrivilegeCode(request.getPrivilegeCode());
         verify(businessCardRepository, times(1)).save(any(BusinessCard.class));
     }
 
@@ -90,7 +90,7 @@ public class BusinessCardServiceUnitTest extends UnitTest {
         account.setId(1L);
         account.setUsername(username);
 
-        CreateBusinessCardRequest request = testCases.getCreateBusinessCardRequestTestCase();
+        CreateBusinessCardRequest request = cardTestCases.getCreateBusinessCardRequestTestCase();
 
         when(jwtUtil.getUsername()).thenReturn(username);
         when(accountQueryService.findByUsername(username)).thenReturn(account);

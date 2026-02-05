@@ -14,4 +14,7 @@ public abstract class CreateCardRequest {
 
     @NotNull(message = "Card type is required")
     private CardType type;
+
+    @NotBlank(message = "Pin code must not be blank")
+    private String pinCode;
 }

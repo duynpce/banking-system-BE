@@ -1,6 +1,6 @@
 package com.example.banking_system.account.integration;
 
-import com.example.banking_system.account.TestCases;
+import com.example.banking_system.account.AccountTestCases;
 import com.example.banking_system.account.service.query.GovernmentAccountQueryService;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.account.controller.GovernmentAccountController;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 
 public class GovernmentAccountIntegrationTest extends IntegrationTest {
 
-    private final TestCases testCases = TestCases.getInstance();
+    private final AccountTestCases accountTestCases = AccountTestCases.getInstance();
 
     @Autowired
     private GovernmentAccountController governmentAccountController;
@@ -35,7 +35,7 @@ public class GovernmentAccountIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreateGovernmentAccount_Success(){
-        CreateGovernmentAccountRequest request = testCases.getCreateGovernmentAccountRequestTestCase();
+        CreateGovernmentAccountRequest request = accountTestCases.getCreateGovernmentAccountRequestTestCase();
 
         ResponseEntity<String> response = governmentAccountController.create(request);
 
@@ -48,10 +48,10 @@ public class GovernmentAccountIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreateGovernmentAccount_DuplicatePhoneNumber_Failure(){
-        CreateGovernmentAccountRequest request1 = testCases.getCreateGovernmentAccountRequestTestCase();
+        CreateGovernmentAccountRequest request1 = accountTestCases.getCreateGovernmentAccountRequestTestCase();
         governmentAccountController.create(request1);
 
-        CreateGovernmentAccountRequest request2 = testCases.getCreateGovernmentAccountRequestTestCase();
+        CreateGovernmentAccountRequest request2 = accountTestCases.getCreateGovernmentAccountRequestTestCase();
         request2.setUsername("newUsername");
         request2.setEmail("newEmail@gmail.com");
 
@@ -60,12 +60,12 @@ public class GovernmentAccountIntegrationTest extends IntegrationTest {
 
     @Test
     public void testUpdateGovernmentAccount_Success(){
-        CreateGovernmentAccountRequest createRequest = testCases.getCreateGovernmentAccountRequestTestCase();
+        CreateGovernmentAccountRequest createRequest = accountTestCases.getCreateGovernmentAccountRequestTestCase();
         governmentAccountController.create(createRequest);
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
 
-        UpdateGovernmentAccountRequest updateRequest = testCases.getUpdateGovernmentAccountRequestTestCase();
+        UpdateGovernmentAccountRequest updateRequest = accountTestCases.getUpdateGovernmentAccountRequestTestCase();
         ResponseEntity<String> response = governmentAccountController.update(updateRequest);
         GovernmentAccount updatedAccount = governmentAccountQueryService.findByUsername(createRequest.getUsername());
 
@@ -81,7 +81,7 @@ public class GovernmentAccountIntegrationTest extends IntegrationTest {
 
     @Test
     public void testUpdateGovernmentAccount_AllFieldsNull_Failure(){
-        CreateGovernmentAccountRequest createRequest = testCases.getCreateGovernmentAccountRequestTestCase();
+        CreateGovernmentAccountRequest createRequest = accountTestCases.getCreateGovernmentAccountRequestTestCase();
         governmentAccountController.create(createRequest);
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());

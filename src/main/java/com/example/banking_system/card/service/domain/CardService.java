@@ -26,7 +26,7 @@ public class CardService {
 
     private final AccountQueryService accountQueryService;
     private final CardPrivilegeQueryService cardPrivilegeQueryService;
-    private final PricingMultiplierService pricingMultiplierService;
+//    private final PricingMultiplierService pricingMultiplierService;
     private final JwtUtil jwtUtil;
     private final CardQueryService cardQueryService;
     private final CardMapper cardMapper;
@@ -35,17 +35,14 @@ public class CardService {
     private String BIN;
 
     public void updateExpirationDateOnCreate(Card card) {
-        LocalDate expirationDate = getExpirationDate(card);
+
+        int baseExpirationYears = cardPrivilegeQueryService.findByPrivilegeCode(card.getPrivilege().getPrivilegeCode()).getExpirationYears();
+        LocalDate expirationDate = LocalDate.now().plusYears(baseExpirationYears);
         card.setExpirationDate(expirationDate);
 
     }
 
-    private LocalDate getExpirationDate(Card card) {
-        int baseExpirationYears = cardPrivilegeQueryService.findByCode(card.getPrivilege().getPrivilegeCode()).getExpirationYears();
-
-        return LocalDate.now().plusYears(baseExpirationYears);
-    }
-
+    //later use
     public void extendExpirationDate(Card card, int yearsToExtend) {
         card.setExpirationDate(card.getExpirationDate().plusYears(yearsToExtend));
     }
@@ -73,12 +70,32 @@ public class CardService {
         return cardMapper.toDto(card.getCardDetails());
     }
 
-//    public BigDecimal getAnnualFee(Card card) {
+
+    public void deleteCardById(long id) {
+        final String username = jwtUtil.getUsername();
+        Account account = accountQueryService.findByUsername(username);
+        Card card = cardQueryService.findById(id);
+
+        if(card.getAccount().getId() != account.getId()) {
+            throw new ForbiddenException("You are not allowed to delete this card");
+        }
+
+        cardQueryService.delete(card);
+    }
+
+
+    public String generateCardNumber() {
+        String sequence = String.valueOf(cardQueryService.getCardNumberSequence()).formatted("%012d");
+        return BIN + sequence;
+    }
+
+    //later reimplement
+    // public BigDecimal getAnnualFee(Card card) {
 //        String multiplierKind = "ANNUAL_FEE";
 //        BigDecimal pricingMultiplier = pricingMultiplierService
 //                .findByAccountTypeAndMultiplierKind(card.getAccount().getType(), multiplierKind)
 //                .getMultiplierValue();
-//        BigDecimal annualFee = cardPrivilegeQueryService.findByCode(card.getPrivilege().getPrivilegeCode()).getAnnualFee();
+//        BigDecimal annualFee = cardPrivilegeQueryService.findByPrivilegeCode(card.getPrivilege().getPrivilegeCode()).getAnnualFee();
 //
 //        return annualFee.multiply(pricingMultiplier);
 //    }
@@ -100,28 +117,9 @@ public class CardService {
 //        BigDecimal pricingMultiplier = pricingMultiplierService
 //                .findByAccountTypeAndMultiplierKind(card.getAccount().getType(), multiplierKind)
 //                .getMultiplierValue();
-//        BigDecimal baseCashbackRate = cardPrivilegeQueryService.findByCode(card.getPrivilege().getPrivilegeCode()).getCashbackRate();
+//        BigDecimal baseCashbackRate = cardPrivilegeQueryService.findByPrivilegeCode(card.getPrivilege().getPrivilegeCode()).getCashbackRate();
 //
 //        return baseCashbackRate.multiply(pricingMultiplier);
 //    }
-
-    public void deleteCardById(long id) {
-        final String username = jwtUtil.getUsername();
-        Account account = accountQueryService.findByUsername(username);
-        Card card = cardQueryService.findById(id);
-
-        if(card.getAccount().getId() != account.getId()) {
-            throw new ForbiddenException("You are not allowed to delete this card");
-        }
-
-        cardQueryService.delete(card);
-    }
-
-
-    public String generateCardNumber() {
-        String sequence = String.valueOf(cardQueryService.getCardNumberSequence()).formatted("%012d");
-        System.out.println(BIN + " " + sequence);
-        return BIN + sequence;
-    }
 
 }

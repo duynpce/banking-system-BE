@@ -1,8 +1,7 @@
 package com.example.banking_system.account.integration;
 
-import com.example.banking_system.account.TestCases;
+import com.example.banking_system.account.AccountTestCases;
 import com.example.banking_system.account.service.query.AccountQueryService;
-import com.example.banking_system.account.service.query.BusinessAccountQueryService;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.account.controller.AccountController;
 import com.example.banking_system.account.controller.BusinessAccountController;
@@ -28,7 +27,7 @@ import static org.mockito.Mockito.when;
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class AccountControllerIntegrationTest extends IntegrationTest {
 
-    private final TestCases testCases = TestCases.getInstance();
+    private final AccountTestCases accountTestCases = AccountTestCases.getInstance();
 
     @Autowired
     private AccountController accountController;
@@ -38,9 +37,6 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
 
     @Autowired
     private PersonalAccountController personalAccountController;
-
-    @Autowired
-    private BusinessAccountQueryService businessAccountQueryService;
 
     @Autowired
     private GovernmentAccountController governmentAccountController;
@@ -53,7 +49,7 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGet_BusinessAccount_Success() {
-        CreateBusinessAccountRequest createRequest = testCases.getCreateBusinessAccountRequestTestCase();
+        CreateBusinessAccountRequest createRequest = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(createRequest);
 
 
@@ -74,7 +70,7 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGet_PersonalAccount_Success() {
-        CreatePersonalAccountRequest createRequest = testCases.getCreatePersonalAccountRequestTestCase();
+        CreatePersonalAccountRequest createRequest = accountTestCases.getCreatePersonalAccountRequestTestCase();
         personalAccountController.create(createRequest);
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
@@ -93,7 +89,7 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
 
     @Test
     public void testGet_GovernmentAccount_Success() {
-        CreateGovernmentAccountRequest createRequest = testCases.getCreateGovernmentAccountRequestTestCase();
+        CreateGovernmentAccountRequest createRequest = accountTestCases.getCreateGovernmentAccountRequestTestCase();
         governmentAccountController.create(createRequest);
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
@@ -119,17 +115,18 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
 
     @Test
     public void testDelete_Success() {
-        CreateBusinessAccountRequest createRequest = testCases.getCreateBusinessAccountRequestTestCase();
+        CreateBusinessAccountRequest createRequest = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(createRequest);
+        final String username = createRequest.getUsername();
 
-        when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
+        when(jwtUtil.getUsername()).thenReturn(username);
 
         ResponseEntity<String> response = accountController.delete();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
         assertEquals("Account deleted successfully", response.getBody(), "Response message should match");
 
-        Assertions.assertThrows(NotFoundException.class, () -> accountQueryService.findByUsername(createRequest.getUsername()), "User not found with username: " + createRequest.getUsername());
+        Assertions.assertThrows(NotFoundException.class, () -> accountQueryService.findByUsername(username), "User not found with username: " + username);
     }
 
     @Test

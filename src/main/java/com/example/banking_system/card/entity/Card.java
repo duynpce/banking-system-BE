@@ -65,7 +65,8 @@ public class Card {
     public Card(){
     }
 
-    public Card(String cardNumber, CardType type, CardPrivilege privilege) {
+    public Card(String pinCode, String cardNumber, CardType type, CardPrivilege privilege) {
+        this.pinCode = pinCode;
         this.cardNumber = cardNumber;
         this.type = type;
         this.privilege = privilege;

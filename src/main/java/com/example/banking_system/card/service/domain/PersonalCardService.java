@@ -33,8 +33,8 @@ public class PersonalCardService {
 
         String cardNumber = cardService.generateCardNumber();
 
-        CardPrivilege privilege = cardPrivilegeQueryService.findByCode(request.getPrivilegeCode());
-        PersonalCard personalCard = new PersonalCard(cardNumber, request.getType(),privilege);
+        CardPrivilege privilege = cardPrivilegeQueryService.findByPrivilegeCode(request.getPrivilegeCode());
+        PersonalCard personalCard = new PersonalCard(request.getPinCode(), cardNumber, request.getType(),privilege);
         personalCard.getCard().setAccount(account);
         cardService.updateExpirationDateOnCreate(personalCard.getCard());
 

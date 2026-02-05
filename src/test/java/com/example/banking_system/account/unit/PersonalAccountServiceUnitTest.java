@@ -1,6 +1,6 @@
 package com.example.banking_system.account.unit;
 
-import com.example.banking_system.account.TestCases;
+import com.example.banking_system.account.AccountTestCases;
 import com.example.banking_system.account.service.domain.PersonalAccountService;
 import com.example.banking_system.account.service.query.PersonalAccountQueryService;
 import com.example.banking_system.common.UnitTest;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 
 public class PersonalAccountServiceUnitTest extends UnitTest {
 
-    private final TestCases testCases = TestCases.getInstance();
+    private final AccountTestCases accountTestCases = AccountTestCases.getInstance();
 
     @Mock
     AccountMapper accountMapper;
@@ -44,7 +44,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
 
     @Test
     public void createAccountSuccess() {
-        PersonalAccount personalAccount = testCases.getPersonalAccountTestCase();
+        PersonalAccount personalAccount = accountTestCases.getPersonalAccountTestCase();
         final String hashedPassword = "hashedPassword";
 
         CreatePersonalAccountRequest request = new CreatePersonalAccountRequest();
@@ -77,7 +77,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
 
     @Test
     public void updateAccountSuccess() {
-        PersonalAccount existingAccount = testCases.getPersonalAccountTestCase();
+        PersonalAccount existingAccount = accountTestCases.getPersonalAccountTestCase();
         String username = "username";
 
         UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();
@@ -98,7 +98,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
 
     @Test
     public void updateAccountFailure_InvalidInput() {
-        PersonalAccount existingAccount = testCases.getPersonalAccountTestCase();
+        PersonalAccount existingAccount = accountTestCases.getPersonalAccountTestCase();
         String username = "username";
 
         UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();

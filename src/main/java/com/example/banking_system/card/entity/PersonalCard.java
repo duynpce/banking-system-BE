@@ -19,7 +19,7 @@ public class PersonalCard extends CardDetails {
         setCard(new Card());
     }
 
-    public PersonalCard(String cardNumber, CardType type, CardPrivilege privilege) {
-        setCard(new Card(cardNumber, type, privilege));
+    public PersonalCard(String pinCode,String cardNumber, CardType type, CardPrivilege privilege) {
+        setCard(new Card(pinCode, cardNumber, type, privilege));
     }
 }

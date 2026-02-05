@@ -1,6 +1,6 @@
 package com.example.banking_system.account.unit;
 
-import com.example.banking_system.account.TestCases;
+import com.example.banking_system.account.AccountTestCases;
 import com.example.banking_system.account.dto.GetAccountResponse;
 import com.example.banking_system.account.entity.Account;
 import com.example.banking_system.account.mapper.AccountMapper;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 
 public class AccountServiceUnitTest extends UnitTest {
 
-    private final TestCases testCases = TestCases.getInstance();
+    private final AccountTestCases accountTestCases = AccountTestCases.getInstance();
 
     @Mock
     JwtUtil jwtUtil;
@@ -40,7 +40,7 @@ public class AccountServiceUnitTest extends UnitTest {
         final String username = "username";
         when(jwtUtil.getUsername()).thenReturn(username);
         GetAccountResponse response = new GetAccountResponse();
-        Account returnAccount = testCases.getBusinessAccountTestCase().getAccount();
+        Account returnAccount = accountTestCases.getBusinessAccountTestCase().getAccount();
         response.setEmail(returnAccount.getEmail());
 
         when(accountQueryService.findByUsername(username)).thenReturn(returnAccount);
@@ -69,7 +69,7 @@ public class AccountServiceUnitTest extends UnitTest {
     public void deleteSuccess() {
         final String username = "username";
         when(jwtUtil.getUsername()).thenReturn(username);
-        BusinessAccount account = testCases.getBusinessAccountTestCase();
+        BusinessAccount account = accountTestCases.getBusinessAccountTestCase();
 
         when(accountQueryService.findByUsername(username)).thenReturn(account.getAccount());
         doNothing().when(accountQueryService).delete(account.getAccount());

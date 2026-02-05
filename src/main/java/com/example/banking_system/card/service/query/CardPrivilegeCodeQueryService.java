@@ -12,9 +12,22 @@ public class CardPrivilegeCodeQueryService {
 
     private final CardPrivilegeCodeRepository cardPrivilegeCodeRepository;
 
+    public CardPrivilegeCode save(CardPrivilegeCode cardPrivilegeCode) {
+        return cardPrivilegeCodeRepository.save(cardPrivilegeCode);
+    }
+
     public CardPrivilegeCode findByCode(String code) {
         return cardPrivilegeCodeRepository.findById(code)
                 .orElseThrow(() -> new NotFoundException("Card privilege code not found with code: " + code));
+    }
+
+    public void delete(CardPrivilegeCode cardPrivilegeCode) {
+        cardPrivilegeCodeRepository.delete(cardPrivilegeCode);
+    }
+
+    public void deleteByCode(String code) {
+        CardPrivilegeCode cardPrivilegeCode = findByCode(code);
+        delete(cardPrivilegeCode);
     }
 
     public boolean existsByCode(String code) {

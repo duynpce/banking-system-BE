@@ -1,7 +1,7 @@
 package com.example.banking_system.account.integration;
 
 
-import com.example.banking_system.account.TestCases;
+import com.example.banking_system.account.AccountTestCases;
 import com.example.banking_system.account.service.query.BusinessAccountQueryService;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.account.controller.BusinessAccountController;
@@ -23,7 +23,7 @@ import static org.mockito.Mockito.when;
 
 public class BusinessAccountIntegrationTest extends IntegrationTest {
 
-    private final TestCases testCases = TestCases.getInstance();
+    private final AccountTestCases accountTestCases = AccountTestCases.getInstance();
 
     @Autowired
     private BusinessAccountController businessAccountController;
@@ -38,7 +38,7 @@ public class BusinessAccountIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreateBusinessAccount_Success(){
-        CreateBusinessAccountRequest request = testCases.getCreateBusinessAccountRequestTestCase();
+        CreateBusinessAccountRequest request = accountTestCases.getCreateBusinessAccountRequestTestCase();
 
         ResponseEntity<String> response = businessAccountController.create(request);
 
@@ -53,10 +53,10 @@ public class BusinessAccountIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreateBusinessAccount_DuplicateTaxIdNumber_Failure(){
-        CreateBusinessAccountRequest request1 = testCases.getCreateBusinessAccountRequestTestCase();
+        CreateBusinessAccountRequest request1 = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(request1);
 
-        CreateBusinessAccountRequest request2 = testCases.getCreateBusinessAccountRequestTestCase();
+        CreateBusinessAccountRequest request2 = accountTestCases.getCreateBusinessAccountRequestTestCase();
         request2.setUsername("newUsername");
         request2.setEmail("newEmail@gmail.com");
         request2.setPhoneNumber("newPhoneNumber");
@@ -74,12 +74,12 @@ public class BusinessAccountIntegrationTest extends IntegrationTest {
     @Test
     public void testUpdateBusinessAccount_Success(){
 
-        CreateBusinessAccountRequest createRequest = testCases.getCreateBusinessAccountRequestTestCase();
+        CreateBusinessAccountRequest createRequest = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(createRequest);
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
 
-        UpdateBusinessAccountRequest updateRequest = testCases.getUpdateBusinessAccountRequestTestCase();
+        UpdateBusinessAccountRequest updateRequest = accountTestCases.getUpdateBusinessAccountRequestTestCase();
         ResponseEntity<String> response = businessAccountController.update(updateRequest);
         BusinessAccount updatedAccount =  businessAccountQueryService.findByUsername(createRequest.getUsername());
 
@@ -97,7 +97,7 @@ public class BusinessAccountIntegrationTest extends IntegrationTest {
 
     @Test
     public void testUpdateBusinessAccount_AllFieldsNull_Failure(){
-        CreateBusinessAccountRequest createRequest = testCases.getCreateBusinessAccountRequestTestCase();
+        CreateBusinessAccountRequest createRequest = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(createRequest);
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());

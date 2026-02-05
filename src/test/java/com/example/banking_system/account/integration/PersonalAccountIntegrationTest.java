@@ -1,6 +1,6 @@
 package com.example.banking_system.account.integration;
 
-import com.example.banking_system.account.TestCases;
+import com.example.banking_system.account.AccountTestCases;
 import com.example.banking_system.account.service.query.PersonalAccountQueryService;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.account.controller.PersonalAccountController;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.when;
 
 public class PersonalAccountIntegrationTest extends IntegrationTest {
 
-    private final TestCases testCases = TestCases.getInstance();
+    private final AccountTestCases accountTestCases = AccountTestCases.getInstance();
 
     @Autowired
     private PersonalAccountController personalAccountController;
@@ -35,7 +35,7 @@ public class PersonalAccountIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreatePersonalAccount_Success(){
-        CreatePersonalAccountRequest request = testCases.getCreatePersonalAccountRequestTestCase();
+        CreatePersonalAccountRequest request = accountTestCases.getCreatePersonalAccountRequestTestCase();
 
         ResponseEntity<String> response = personalAccountController.create(request);
 
@@ -50,10 +50,10 @@ public class PersonalAccountIntegrationTest extends IntegrationTest {
 
     @Test
     public void testCreatePersonalAccount_DuplicateIdCardNumber_Failure(){
-        CreatePersonalAccountRequest request1 = testCases.getCreatePersonalAccountRequestTestCase();
+        CreatePersonalAccountRequest request1 = accountTestCases.getCreatePersonalAccountRequestTestCase();
         personalAccountController.create(request1);
 
-        CreatePersonalAccountRequest request2 = testCases.getCreatePersonalAccountRequestTestCase();
+        CreatePersonalAccountRequest request2 = accountTestCases.getCreatePersonalAccountRequestTestCase();
         request2.setUsername("newUsername");
         request2.setEmail("newEmail@gmail.com");
         request2.setPhoneNumber("newPhoneNumber");
@@ -66,12 +66,12 @@ public class PersonalAccountIntegrationTest extends IntegrationTest {
 
     @Test
     public void testUpdatePersonalAccount_Success(){
-        CreatePersonalAccountRequest createRequest = testCases.getCreatePersonalAccountRequestTestCase();
+        CreatePersonalAccountRequest createRequest = accountTestCases.getCreatePersonalAccountRequestTestCase();
         personalAccountController.create(createRequest);
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
 
-        UpdatePersonalAccountRequest updateRequest = testCases.getUpdatePersonalAccountRequestTestCase();
+        UpdatePersonalAccountRequest updateRequest = accountTestCases.getUpdatePersonalAccountRequestTestCase();
         ResponseEntity<String> response = personalAccountController.update(updateRequest);
         PersonalAccount updatedAccount = personalAccountQueryService.findByUsername(createRequest.getUsername());
 
@@ -89,7 +89,7 @@ public class PersonalAccountIntegrationTest extends IntegrationTest {
 
     @Test
     public void testUpdatePersonalAccount_AllFieldsNull_Failure(){
-        CreatePersonalAccountRequest createRequest = testCases.getCreatePersonalAccountRequestTestCase();
+        CreatePersonalAccountRequest createRequest = accountTestCases.getCreatePersonalAccountRequestTestCase();
         personalAccountController.create(createRequest);
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());

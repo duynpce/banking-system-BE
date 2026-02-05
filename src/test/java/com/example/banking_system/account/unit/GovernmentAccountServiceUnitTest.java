@@ -1,6 +1,6 @@
 package com.example.banking_system.account.unit;
 
-import com.example.banking_system.account.TestCases;
+import com.example.banking_system.account.AccountTestCases;
 import com.example.banking_system.account.service.domain.GovernmentAccountService;
 import com.example.banking_system.account.service.query.GovernmentAccountQueryService;
 import com.example.banking_system.common.UnitTest;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 
 public class GovernmentAccountServiceUnitTest extends UnitTest {
 
-    private final TestCases testCases = TestCases.getInstance();
+    private final AccountTestCases accountTestCases = AccountTestCases.getInstance();
 
     @Mock
     AccountMapper accountMapper;
@@ -44,7 +44,7 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
 
     @Test
     public void createAccountSuccess() {
-        GovernmentAccount governmentAccount = testCases.getGovernmentAccountTestCase();
+        GovernmentAccount governmentAccount = accountTestCases.getGovernmentAccountTestCase();
         final String hashedPassword = "hashedPassword";
 
         CreateGovernmentAccountRequest request = new CreateGovernmentAccountRequest();
@@ -77,7 +77,7 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
 
     @Test
     public void updateAccountSuccess() {
-        GovernmentAccount existingAccount = testCases.getGovernmentAccountTestCase();
+        GovernmentAccount existingAccount = accountTestCases.getGovernmentAccountTestCase();
         String username = "username";
         String newEmail =  "newEmail@example.com";
         String newDepartment = "NewDepartment";
@@ -104,7 +104,7 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
 
     @Test
     public void updateAccountFailure_InvalidInput() {
-        GovernmentAccount existingAccount = testCases.getGovernmentAccountTestCase();
+        GovernmentAccount existingAccount = accountTestCases.getGovernmentAccountTestCase();
         String username = "username";
 
         UpdateGovernmentAccountRequest request = new UpdateGovernmentAccountRequest();
