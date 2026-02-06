@@ -7,6 +7,7 @@ import com.example.banking_system.card.entity.CardPrivilege;
 import com.example.banking_system.card.entity.CardPrivilegeCode;
 import com.example.banking_system.card.mapper.CardPrivilegeMapper;
 import com.example.banking_system.card.service.domain.CardPrivilegeService;
+import com.example.banking_system.card.service.query.CardPrivilegeCodeQueryService;
 import com.example.banking_system.card.service.query.CardPrivilegeQueryService;
 import com.example.banking_system.card.validator.CardPrivilegeValidator;
 import com.example.banking_system.common.UnitTest;
@@ -31,6 +32,9 @@ public class CardPrivilegeServiceUnitTest extends UnitTest {
     @Mock
     CardPrivilegeQueryService cardPrivilegeQueryService;
 
+    @Mock
+    CardPrivilegeCodeQueryService cardPrivilegeCodeQueryService;
+
     @InjectMocks
     CardPrivilegeService cardPrivilegeService;
 
@@ -49,6 +53,7 @@ public class CardPrivilegeServiceUnitTest extends UnitTest {
 
         when(cardPrivilegeMapper.toEntity(request)).thenReturn(cardPrivilege);
         doNothing().when(cardPrivilegeValidator).validateCreate(cardPrivilege);
+        when(cardPrivilegeCodeQueryService.findByCode(request.getCode())).thenReturn(code);
         when(cardPrivilegeQueryService.save(cardPrivilege)).thenReturn(savedCardPrivilege);
 
         CardPrivilege result = cardPrivilegeService.create(request);
