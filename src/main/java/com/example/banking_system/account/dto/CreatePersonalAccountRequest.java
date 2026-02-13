@@ -16,7 +16,7 @@ public class CreatePersonalAccountRequest extends CreateAccountRequest{
     private String fullName;
     @NotBlank(message = "id card number cannot be blank")
     private String idCardNumber;
-    @NotBlank(message = "date of birth cannot be blank")
+    @NotNull(message = "date of birth cannot null")
     private LocalDate dateOfBirth;
     @NotNull(message = "gender cannot be null")
     private Gender gender;

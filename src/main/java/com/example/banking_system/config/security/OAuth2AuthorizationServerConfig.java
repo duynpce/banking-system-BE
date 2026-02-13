@@ -4,8 +4,6 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import jakarta.servlet.http.HttpServletResponse;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +28,7 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
@@ -66,21 +65,20 @@ public class OAuth2AuthorizationServerConfig {
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
+                )
+                .cors(cors ->cors.configurationSource(
+                        request -> {
+                            CorsConfiguration config = new CorsConfiguration();
+                            String origin = "http://localhost:5173";
+                            config.addAllowedOriginPattern(origin);
+                            config.setAllowCredentials(true);
+                            config.addAllowedHeader("*");
+                            config.addAllowedMethod("*");
+                            config.setMaxAge(3600L * 3); // 3 hour
+                            return config;
+                        })
                 );
 
-        return http.build();
-    }
-
-    // Default Security Filter Chain for handling user authentication
-    @Bean
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .authorizeHttpRequests(a -> a
-                        .requestMatchers("/error", "/login").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .formLogin(Customizer.withDefaults()) // for local user login on the AS consent/auth pages
-        ;
         return http.build();
     }
 

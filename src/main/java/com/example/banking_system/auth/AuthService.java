@@ -14,12 +14,14 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final AccountQueryService accountQueryService;
 
-    public void login(LoginRequest loginRequest) {
+    public long login(LoginRequest loginRequest) {
         Account account = accountQueryService.findByUsername(loginRequest.getUsername());
 
         if(!passwordEncoder.matches(loginRequest.getPassword(), account.getPassword())){
-            throw new UnauthorizedException("Invalid password");
+            throw new UnauthorizedException("incorrect password or username");
         }
+
+        return  account.getId();
 
     }
 }

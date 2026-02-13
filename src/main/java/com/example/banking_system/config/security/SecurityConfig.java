@@ -32,20 +32,13 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    //temp because do not have login page
     @Bean
-    AuthenticationEntryPoint authenticationEntryPoint() {
-        return new LoginUrlAuthenticationEntryPoint("/login");
+    AuthenticationEntryPoint restAuthenticationEntryPoint() {
+        return (request, response, authException) -> {
+            String message = "Unauthorized access, please login.";
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
+        };
     }
-
-    // Custom Authentication Entry Point for REST APIs,uncomment when have login page
-//    @Bean
-//    AuthenticationEntryPoint restAuthenticationEntryPoint() {
-//        return (request, response, authException) -> {
-//            String message = "Unauthorized access, please login.";
-//            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, message);
-//        };
-//    }
 
     // Custom Access Denied Handler, called when authenticated user tries to access a resource they don't have permission for
     @Bean
