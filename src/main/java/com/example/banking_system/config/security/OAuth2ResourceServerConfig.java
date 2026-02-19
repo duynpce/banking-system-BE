@@ -1,5 +1,6 @@
 package com.example.banking_system.config.security;
 
+import com.example.banking_system.common.OAuthProperties;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -15,43 +16,38 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+
+import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor
 public class OAuth2ResourceServerConfig {
         private final AuthenticationEntryPoint authenticationEntryPoint;
-
+        private final OAuthProperties oAuthProperties;
+        private final CorsConfigurationSource corsConfigurationSource;
 
         // Resource Server Security Filter Chain
         @Bean
-        @Order(2)
+        @Order(3)
         SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
                 httpSecurity.csrf(AbstractHttpConfigurer::disable)
-                        .sessionManagement(session -> session
-                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                        )
+//                        .sessionManagement(session -> session
+//                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+//                        )
                         .securityMatcher("/v1/**")
                         .authorizeHttpRequests(auth -> auth
                                 .requestMatchers("/v1/auth/**","/v1/test/**").permitAll()
-                                        .requestMatchers(HttpMethod.POST, "/v1/business-accounts","/v1/personal-accounts").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/v1/business-accounts","/v1/personal-accounts").permitAll()
                                 .anyRequest().authenticated()
 
                         )
                         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                         .exceptionHandling(ex -> ex
                                 .authenticationEntryPoint(authenticationEntryPoint)
-                        ).cors(cors ->cors.configurationSource(
-                                request -> {
-                                        CorsConfiguration config = new CorsConfiguration();
-                                        String origin = "http://localhost:5173";
-                                        config.addAllowedOriginPattern(origin);
-                                        config.setAllowCredentials(true);
-                                        config.addAllowedHeader("*");
-                                        config.addAllowedMethod("*");
-                                        config.setMaxAge(3600L * 3); // 3 hour
-                                        return config;
-                                })
-                        );
+                        )
+                        .csrf(AbstractHttpConfigurer::disable)
+                        .cors( cors -> cors.configurationSource(corsConfigurationSource));
                 return httpSecurity.build();
 
         }

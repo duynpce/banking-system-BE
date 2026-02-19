@@ -34,3 +34,17 @@ spring:
 
 value :
   bin:   "123"
+  redirect-uri: "http://localhost:8081/oauth2/callback"
+  client-id: "banking-system-client"
+  client-secret: "a-secret"
+  scope-read: "read"
+  scope-write: "write"
+  authorization-uri: "oauth2/authorize"
+  token-uri: "oauth2/token"
+  token-introspection-uri: "oauth2/introspect"
+  token-revocation-uri: "oauth2/revoke"
+  oicd-user-info-uri: "user-info"
+  jwk-set-uri: "oauth2/jwks"
+  logout-uri: "oauth2/logout"
+  origin-uri: "http://localhost:5173"
+  post-basic-secret: "YmFua2luZy1zeXN0ZW0tY2xpZW50OmEtc2VjcmV0"

@@ -1,5 +1,6 @@
 package com.example.banking_system.config.security;
 
+import com.example.banking_system.common.OAuthProperties;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -29,11 +31,13 @@ import org.springframework.security.oauth2.server.authorization.settings.TokenSe
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
+import java.util.List;
 import java.util.UUID;
 
 @Configuration
@@ -42,9 +46,8 @@ public class OAuth2AuthorizationServerConfig {
 
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationEntryPoint authenticationEntryPoint;
-
-    @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
-    private String jwkUri;
+    private final OAuthProperties oAuthProperties;
+    private final CorsConfigurationSource corsConfigurationSource;
 
     // Security Filter Chain for OAuth2 Authorization Server, used to issue tokens
     @Bean
@@ -66,34 +69,52 @@ public class OAuth2AuthorizationServerConfig {
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint(authenticationEntryPoint)
                 )
-                .cors(cors ->cors.configurationSource(
-                        request -> {
-                            CorsConfiguration config = new CorsConfiguration();
-                            String origin = "http://localhost:5173";
-                            config.addAllowedOriginPattern(origin);
-                            config.setAllowCredentials(true);
-                            config.addAllowedHeader("*");
-                            config.addAllowedMethod("*");
-                            config.setMaxAge(3600L * 3); // 3 hour
-                            return config;
-                        })
+                .csrf(AbstractHttpConfigurer::disable) //temp
+                .cors(cors -> cors.configurationSource(corsConfigurationSource));
+
+        return http.build();
+    }
+
+    @Bean
+    @Order(2)
+    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+
+        http
+                .securityMatcher("/login")
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
+                .csrf(AbstractHttpConfigurer::disable) //temp
+                .authorizeHttpRequests(authorize -> authorize
+                        .requestMatchers("/login").permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage(oAuthProperties.getOriginUri())
+                        .loginProcessingUrl("/login")
+                        .defaultSuccessUrl(oAuthProperties.getAuthorizationUri() + "?response_type=code&client_id="
+                                + oAuthProperties.getClientId() + "&scope=" + oAuthProperties.getScopeRead() + " " +
+                                oAuthProperties.getScopeWrite() + "&redirect_uri=" + oAuthProperties.getRedirectUri())
+                        .failureUrl("/login?error")
+                        .usernameParameter("username")
+                        .passwordParameter("password")
+                        .permitAll()
                 );
 
         return http.build();
     }
 
 
+
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
         RegisteredClient client = RegisteredClient.withId(UUID.randomUUID().toString())
-                .clientId("banking-system-client")
-                .clientSecret(passwordEncoder.encode("super-secret")) // bcrypt encoded client secret
+                .clientId(oAuthProperties.getClientId())
+                .clientSecret(passwordEncoder.encode(oAuthProperties.getClientSecret())) // bcrypt encoded client secret
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .redirectUri("http://localhost:8081/callback")
-                .scope("api:read")
-                .scope("api:write")
+                .redirectUri(oAuthProperties.getRedirectUri())
+                .scope(oAuthProperties.getScopeRead())
+                .scope(oAuthProperties.getScopeWrite())
                 .scope("openid")
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenTimeToLive(Duration.ofMinutes(15))
@@ -113,23 +134,14 @@ public class OAuth2AuthorizationServerConfig {
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
         return AuthorizationServerSettings.builder()
-                .jwkSetEndpoint(jwkUri)
-                //authorization endpoint , user logged in --> authorization code --> used the code to get tokens here
-                .authorizationEndpoint("/oauth2/authorize")
-
-                // refresh token endpoint
-                .tokenEndpoint("/oauth2/token")
-                //check if the token is valid endpoint
-                .tokenIntrospectionEndpoint("/oauth2/introspect")
-                //revoke token endpoint
-                .tokenRevocationEndpoint("/oauth2/revoke")
-                // provide public keys to resource servers to validate JWTs
-                .jwkSetEndpoint("/oauth2/jwks")
-                // logout endpoint
-                .oidcLogoutEndpoint("/oauth2/logout")
-
-                // take user's information endpoint from token
-                .oidcUserInfoEndpoint("/oauth2/userinfo")
+                .jwkSetEndpoint(oAuthProperties.getJwkSetUri())
+                .authorizationEndpoint(oAuthProperties.getAuthorizationUri())
+                .tokenEndpoint(oAuthProperties.getTokenUri())
+                .tokenIntrospectionEndpoint(oAuthProperties.getTokenIntrospectionUri())
+                .tokenRevocationEndpoint(oAuthProperties.getTokenRevocationUri())
+                .jwkSetEndpoint(oAuthProperties.getJwkSetUri())
+                .oidcLogoutEndpoint(oAuthProperties.getLogoutUri())
+                .oidcUserInfoEndpoint(oAuthProperties.getOicdUserInfoUri())
                 .build();
     }
 
@@ -147,7 +159,7 @@ public class OAuth2AuthorizationServerConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-            return  NimbusJwtDecoder.withJwkSetUri(jwkUri).build();
+            return  NimbusJwtDecoder.withJwkSetUri(oAuthProperties.getJwkSetUri()).build();
     }
 
     private static RSAKey generateRsa() {

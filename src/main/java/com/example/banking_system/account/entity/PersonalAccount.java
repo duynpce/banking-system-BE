@@ -5,6 +5,7 @@ import com.example.banking_system.account.constant.Gender;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
