@@ -44,7 +44,7 @@ public class SecurityConfig {
     @Bean
     AuthenticationEntryPoint authenticationEntryPoint() {
         return (request, response, authException) -> {
-            response.sendRedirect(oAuthProperties.getOriginUri());
+            response.sendRedirect(oAuthProperties.getOriginUri() + "/login");
         };
     }
 
