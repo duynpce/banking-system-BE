@@ -3,6 +3,7 @@ package com.example.banking_system.account.controller;
 import com.example.banking_system.account.dto.CreatePersonalAccountRequest;
 import com.example.banking_system.account.dto.UpdatePersonalAccountRequest;
 import com.example.banking_system.account.service.domain.PersonalAccountService;
+import com.example.banking_system.account.service.query.PersonalAccountQueryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class PersonalAccountController {
     private final PersonalAccountService personalAccountService;
+    private final PersonalAccountQueryService personalAccountQueryService;
 
     @PostMapping
     public ResponseEntity<String> create(@Valid @RequestBody CreatePersonalAccountRequest createPersonalAccountRequest) {
@@ -25,5 +27,10 @@ public class PersonalAccountController {
         personalAccountService.update(request);
         return ResponseEntity.ok("Personal account updated successfully");
     }
-}
 
+    @GetMapping("/exists/id-card-number/{idCardNumber}")
+    public ResponseEntity<Boolean> existsByIdCardNumber(@PathVariable(value = "idCardNumber") String idCardNumber) {
+        boolean exists = personalAccountQueryService.existsByIdCardNumber(idCardNumber);
+        return ResponseEntity.ok(exists);
+    }
+}

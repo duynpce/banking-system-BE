@@ -37,8 +37,8 @@ public class OAuth2ResourceServerConfig {
 //                        )
                         .securityMatcher("/v1/**")
                         .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/v1/auth/**","/v1/test/**").permitAll()
-                                .requestMatchers(HttpMethod.POST, "/v1/business-accounts","/v1/personal-accounts").permitAll()
+                                .requestMatchers("/v1/auth/**","/v1/test/**","**/exists/**").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/v1/business-accounts","/v1/personal-accounts", "v1/government-accounts").permitAll()
                                 .anyRequest().authenticated()
 
                         )
