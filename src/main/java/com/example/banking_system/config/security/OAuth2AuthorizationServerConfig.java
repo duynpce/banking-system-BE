@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -29,6 +30,7 @@ import org.springframework.security.oauth2.server.authorization.settings.Authori
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
@@ -92,13 +94,24 @@ public class OAuth2AuthorizationServerConfig {
                         .defaultSuccessUrl(oAuthProperties.getAuthorizationUri() + "?response_type=code&client_id="
                                 + oAuthProperties.getClientId() + "&scope=" + oAuthProperties.getScopeRead() + " " +
                                 oAuthProperties.getScopeWrite() + "&redirect_uri=" + oAuthProperties.getRedirectUri())
-                        .failureUrl("/login?error")
+                        .failureHandler(customLoginFailureHandler())
                         .usernameParameter("username")
                         .passwordParameter("password")
                         .permitAll()
                 );
 
         return http.build();
+    }
+
+    private AuthenticationFailureHandler customLoginFailureHandler() {
+        return (request, response, exception) -> {
+            if(exception instanceof BadCredentialsException){
+                response.sendRedirect(oAuthProperties.getOriginUri() +  "/login?error=invalid-credentials");
+            }
+            else {
+                response.sendRedirect(oAuthProperties.getOriginUri() + "/login?error=authentication-failed");
+            }
+        };
     }
 
 

@@ -2,6 +2,7 @@ package com.example.banking_system.config.security;
 
 import com.example.banking_system.account.entity.Account;
 import com.example.banking_system.account.service.query.AccountQueryService;
+import com.example.banking_system.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -17,11 +18,15 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Account account = accountQueryService.findByUsername(username);
-        return User.builder()
-                .username(account.getUsername())
-                .password(account.getPassword())
-                .roles(account.getRole().name())
-                .build();
+        try {
+            Account account = accountQueryService.findByUsername(username);
+            return User.builder()
+                    .username(account.getUsername())
+                    .password(account.getPassword())
+                    .roles(account.getRole().name())
+                    .build();
+        }catch(NotFoundException e){
+            throw new UsernameNotFoundException(e.getMessage());
+        }
     }
 }
