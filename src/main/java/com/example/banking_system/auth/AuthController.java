@@ -23,15 +23,6 @@ import java.time.Duration;
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
-    private final OAuthProperties oAuthProperties;
-
-//    @PostMapping("/login")
-//    public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest, HttpSession session, HttpServletRequest request) {
-//
-//        long accountId = authService.login(loginRequest);
-//        session.setAttribute("accountId", accountId);
-//        return ResponseEntity.ok("Login successful");
-//    }
 
     @PostMapping("/refresh-token")
     public ResponseEntity<String> refreshToken(@CookieValue("refreshToken") String refreshToken

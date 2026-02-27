@@ -25,21 +25,9 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    private final PasswordEncoder passwordEncoder;
-    private final AccountQueryService accountQueryService;
     private final OAuthProperties oAuthProperties;
     private final JwtUtil jwtUtil;
     private final WebClient webClient;
-
-    public long login(LoginRequest loginRequest) {
-        Account account = accountQueryService.findByUsername(loginRequest.getUsername());
-
-        if(!passwordEncoder.matches(loginRequest.getPassword(), account.getPassword())){
-            throw new UnauthorizedException("incorrect password or username");
-        }
-
-        return account.getId();
-    }
 
     public GetTokenResponse getToken(String code, HttpServletRequest request) {
         if(code == null || code.isEmpty()){
@@ -89,12 +77,18 @@ public class AuthService {
             throw new UnauthorizedException("invalid refresh token");
         }
 
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("grant_type", "refresh_token");
+        formData.add("redirect_uri", oAuthProperties.getRedirectUri());
+        formData.add("refresh_token", refreshToken);
 
         // Call the authentication service to refresh the token
         GetTokenResponse getTokenResponse = webClient.post()
-                .uri( oAuthProperties.getAuthServerUri() + oAuthProperties.getTokenUri())
-                .header("Authorization", "Bearer " + refreshToken)
+                .uri(oAuthProperties.getAuthServerUri() + oAuthProperties.getTokenUri())
+                .header(HttpHeaders.AUTHORIZATION,"Basic " + oAuthProperties.getPostBasicSecret())
                 .header(HttpHeaders.COOKIE, sessionId)
+                .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                .body(BodyInserters.fromFormData(formData))
                 .retrieve()
                 .bodyToMono(GetTokenResponse.class)
                 .block();
