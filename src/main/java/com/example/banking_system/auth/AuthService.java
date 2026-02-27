@@ -1,8 +1,5 @@
 package com.example.banking_system.auth;
 
-import com.example.banking_system.account.service.query.AccountQueryService;
-import com.example.banking_system.auth.dto.LoginRequest;
-import com.example.banking_system.account.entity.Account;
 import com.example.banking_system.auth.dto.GetTokenResponse;
 import com.example.banking_system.common.OAuthProperties;
 import com.example.banking_system.common.exception.UnauthorizedException;
@@ -12,15 +9,11 @@ import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,10 +23,6 @@ public class AuthService {
     private final WebClient webClient;
 
     public GetTokenResponse getToken(String code, HttpServletRequest request) {
-        if(code == null || code.isEmpty()){
-            throw new UnauthorizedException("hasn't authenticated with the authorization server, no code provided");
-        }
-
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("code", code);
         formData.add("grant_type", "authorization_code");
@@ -82,7 +71,6 @@ public class AuthService {
         formData.add("redirect_uri", oAuthProperties.getRedirectUri());
         formData.add("refresh_token", refreshToken);
 
-        // Call the authentication service to refresh the token
         GetTokenResponse getTokenResponse = webClient.post()
                 .uri(oAuthProperties.getAuthServerUri() + oAuthProperties.getTokenUri())
                 .header(HttpHeaders.AUTHORIZATION,"Basic " + oAuthProperties.getPostBasicSecret())
