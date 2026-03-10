@@ -27,6 +27,9 @@ public class Card {
     @Column(name = "expiration_date", nullable = false, updatable = false)
     private LocalDate expirationDate;
 
+    @Column(name = "card_holder", nullable = false)
+    private String cardHolder;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private CardType type;
@@ -65,9 +68,10 @@ public class Card {
     public Card(){
     }
 
-    public Card(String pinCode, String cardNumber, CardType type, CardPrivilege privilege) {
+    public Card(String pinCode, String cardNumber, String cardHolder, CardType type, CardPrivilege privilege) {
         this.pinCode = pinCode;
         this.cardNumber = cardNumber;
+        this.cardHolder = cardHolder;
         this.type = type;
         this.privilege = privilege;
         this.spendingLimitDaily = privilege.getSpendingLimitDaily();

@@ -36,6 +36,4 @@ public class CreateCardPrivilegeRequest {
     @NotNull
     private LocalDate effectiveTo;
 
-    private boolean isActive;
-
 }

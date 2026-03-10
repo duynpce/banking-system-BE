@@ -13,12 +13,6 @@ import org.springframework.stereotype.Service;
 public class AccountQueryService {
     private final AccountRepository accountRepository;
 
-//    public Account findByUsernameWithDetails(String username) {
-//        return accountRepository.findByUsernameWithDetails(username).orElseThrow(
-//                () -> new NotFoundException("User not found with username: " + username)
-//        );
-//    }
-
     public Account findByUsername(String username) {
         return accountRepository.findByUsername(username).orElseThrow(
                 () -> new NotFoundException("User not found with username: " + username)

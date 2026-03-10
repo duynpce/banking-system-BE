@@ -2,10 +2,7 @@ package com.example.banking_system.card;
 
 import com.example.banking_system.account.constant.AccountType;
 import com.example.banking_system.card.constant.CardType;
-import com.example.banking_system.card.dto.CreateBusinessCardRequest;
-import com.example.banking_system.card.dto.CreatePersonalCardRequest;
-import com.example.banking_system.card.dto.CreateCardPrivilegeRequest;
-import com.example.banking_system.card.dto.UpdateCardPrivilegeRequest;
+import com.example.banking_system.card.dto.*;
 import com.example.banking_system.card.entity.CardPrivilegeCode;
 import lombok.Getter;
 
@@ -28,7 +25,7 @@ public class CardTestCases {
     public CreateBusinessCardRequest getCreateBusinessCardRequestTestCase() {
         CreateBusinessCardRequest request = new CreateBusinessCardRequest();
         fillCreateCardRequest(request);
-        request.setAuthorizedPersonName("authorizedPersonName");
+        request.setCardHolder("John Doe");
         return request;
     }
 
@@ -38,7 +35,7 @@ public class CardTestCases {
         return request;
     }
 
-    private void fillCreateCardRequest(com.example.banking_system.card.dto.CreateCardRequest request) {
+    private void fillCreateCardRequest(CreateCardRequest request) {
         request.setPrivilegeCode("code");
         request.setPinCode("123456");
         request.setType(CardType.CREDIT);
@@ -62,6 +59,8 @@ public class CardTestCases {
         request.setCode("code");
         request.setAnnualFee(new BigDecimal("0.2"));
         request.setCashBackRate(new BigDecimal("0.2"));
+        request.setEffectiveFrom(LocalDate.now());
+        request.setEffectiveTo(LocalDate.now().plusYears(2));
         return request;
     }
 
@@ -70,6 +69,8 @@ public class CardTestCases {
         code.setCode("code");
         code.setExpirationYears(5);
         code.setSpendingLimitDaily(new BigDecimal("1000.00"));
+//        code.setEffectiveFrom(LocalDate.now());
+//        code.setEffectiveTo(LocalDate.now().plusYears(1));
         return code;
     }
 

@@ -11,4 +11,5 @@ public class GetCardResponse {
     private String expirationDate;
     private CardType type;
     private CardPrivilege cardPrivilege;
+    private String cardHolder;
 }

@@ -4,16 +4,13 @@ import com.example.banking_system.account.AccountTestCases;
 import com.example.banking_system.account.controller.PersonalAccountController;
 import com.example.banking_system.account.dto.CreatePersonalAccountRequest;
 import com.example.banking_system.card.CardTestCases;
-import com.example.banking_system.card.controller.CardController;
 import com.example.banking_system.card.controller.CardPrivilegeController;
 import com.example.banking_system.card.controller.PersonalCardController;
 import com.example.banking_system.card.dto.CreatePersonalCardRequest;
-import com.example.banking_system.card.dto.GetCardResponse;
 import com.example.banking_system.card.service.query.CardPrivilegeCodeQueryService;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.common.exception.NotFoundException;
 import com.example.banking_system.common.exception.UnauthorizedException;
-import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -21,8 +18,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
