@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 @Data
 @NoArgsConstructor
@@ -15,6 +16,9 @@ public class UpdateCardPrivilegeRequest {
     @NotBlank(message = "Code must not be blank")
     private String code;
 
+
     private BigDecimal AnnualFee;
     private BigDecimal CashBackRate;
+    private LocalDate effectiveFrom;
+    private LocalDate effectiveTo;
 }

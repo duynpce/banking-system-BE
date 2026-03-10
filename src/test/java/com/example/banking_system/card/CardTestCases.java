@@ -50,7 +50,6 @@ public class CardTestCases {
         request.setAccountType(AccountType.BUSINESS);
         request.setEffectiveFrom(LocalDate.now());
         request.setEffectiveTo(LocalDate.now().plusYears(1));
-        request.setActive(true);
         return request;
     }
 
@@ -69,8 +68,8 @@ public class CardTestCases {
         code.setCode("code");
         code.setExpirationYears(5);
         code.setSpendingLimitDaily(new BigDecimal("1000.00"));
-//        code.setEffectiveFrom(LocalDate.now());
-//        code.setEffectiveTo(LocalDate.now().plusYears(1));
+        code.setEffectiveFrom(LocalDate.now());
+        code.setEffectiveTo(LocalDate.now().plusYears(1));
         return code;
     }
 

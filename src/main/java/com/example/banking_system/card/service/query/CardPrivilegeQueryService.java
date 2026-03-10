@@ -6,6 +6,8 @@ import com.example.banking_system.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+
 @Service
 @RequiredArgsConstructor
 public class CardPrivilegeQueryService {
@@ -16,9 +18,15 @@ public class CardPrivilegeQueryService {
         return cardPrivilegeRepository.save(cardPrivilege);
     }
 
-    public CardPrivilege findByPrivilegeCode(String privilegeCode) {
-        return cardPrivilegeRepository.findByCardPrivilegeCode_CodeAndIsActiveTrue(privilegeCode).orElseThrow(
+    public CardPrivilege findByPrivilegeCodeAndIsActive(String privilegeCode) {
+        return cardPrivilegeRepository.findByPrivilegeCodeAndDate(privilegeCode, LocalDate.now()).orElseThrow(
                 () -> new NotFoundException(("Card privilege not found with code: " + privilegeCode))
+        );
+    }
+
+    public CardPrivilege findById(long id) {
+        return cardPrivilegeRepository.findById(id).orElseThrow(
+                () -> new NotFoundException(("Card privilege not found with id: " + id))
         );
     }
 
@@ -28,12 +36,18 @@ public class CardPrivilegeQueryService {
 
     //temporary for test
     public void deleteByPrivilegeCode(String privilegeCode) {
-        CardPrivilege cardPrivilege = findByPrivilegeCode(privilegeCode);
+        CardPrivilege cardPrivilege = findByPrivilegeCodeAndIsActive(privilegeCode);
         delete(cardPrivilege);
     }
 
-    public boolean isExistsAndActive(CardPrivilege cardPrivilege) {
-        return cardPrivilegeRepository.existsByAccountTypeAndCardTypeAndIsActiveTrue(cardPrivilege.getAccountType(), cardPrivilege.getCardType());
+    public void deleteById(long id) {
+        CardPrivilege cardPrivilege = findById(id);
+       cardPrivilegeRepository.deleteById(id);
+    }
+
+    public boolean hasOverlap(CardPrivilege cardPrivilege) {
+        return cardPrivilegeRepository.hasOverlap
+                (cardPrivilege.getAccountType(), cardPrivilege.getCardType(), cardPrivilege.getEffectiveFrom(), cardPrivilege.getEffectiveTo());
     }
 
 }

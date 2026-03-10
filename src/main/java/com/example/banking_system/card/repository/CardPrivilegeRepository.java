@@ -5,10 +5,33 @@ import com.example.banking_system.card.constant.CardType;
 import com.example.banking_system.card.entity.CardPrivilege;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.time.LocalDate;
 import java.util.Optional;
 
-public interface CardPrivilegeRepository extends JpaRepository<CardPrivilege,String> {
-    Optional<CardPrivilege> findByCardPrivilegeCode_CodeAndIsActiveTrue(String code);
+public interface CardPrivilegeRepository extends JpaRepository<CardPrivilege,Long> {
 
-    boolean existsByAccountTypeAndCardTypeAndIsActiveTrue(AccountType accountType, CardType cardType);
+    Optional<CardPrivilege> findByCardPrivilegeCode_CodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+            String code,
+            LocalDate from,
+            LocalDate to
+    );
+
+    default Optional<CardPrivilege> findByPrivilegeCodeAndDate(String privilegeCode, LocalDate date) {
+        return findByCardPrivilegeCode_CodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+                privilegeCode, date, date
+        );
+    }
+
+    boolean existsByAccountTypeAndCardTypeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+            AccountType accountType,
+            CardType cardType,
+            LocalDate effectiveTo,
+            LocalDate effectiveFrom
+    );
+
+    default boolean hasOverlap(AccountType accountType, CardType cardType, LocalDate effectiveFrom, LocalDate effectiveTo) {
+        return existsByAccountTypeAndCardTypeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+                accountType, cardType, effectiveTo, effectiveFrom
+        );
+    }
 }

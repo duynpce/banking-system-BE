@@ -36,7 +36,7 @@ public class CardService {
 
     public void updateExpirationDateOnCreate(Card card) {
 
-        int baseExpirationYears = cardPrivilegeQueryService.findByPrivilegeCode(card.getPrivilege().getPrivilegeCode()).getExpirationYears();
+        int baseExpirationYears = cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(card.getPrivilege().getPrivilegeCode()).getExpirationYears();
         LocalDate expirationDate = LocalDate.now().plusYears(baseExpirationYears);
         card.setExpirationDate(expirationDate);
 

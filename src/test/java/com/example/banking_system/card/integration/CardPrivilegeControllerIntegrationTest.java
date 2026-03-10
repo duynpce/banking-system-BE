@@ -8,7 +8,6 @@ import com.example.banking_system.card.service.query.CardPrivilegeCodeQueryServi
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.common.exception.ConflictDataException;
 import com.example.banking_system.common.exception.NotFoundException;
-import com.example.banking_system.common.exception.ValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +41,6 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         assertTrue(cardPrivilegeCodeQueryService.existsByCode(request.getCode()),
             "Card privilege should exist in database");
 
-        // Clean up
-        cardPrivilegeController.deleteCardPrivilege(request.getCode());
     }
 
     @Test
@@ -59,8 +56,6 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
             () -> cardPrivilegeController.create(request),
             "Should throw ValidationException for duplicate privilege code");
 
-        // Clean up
-        cardPrivilegeController.deleteCardPrivilege(request.getCode());
     }
 
     @Test
@@ -79,9 +74,6 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
         assertNotNull(response.getBody(), "Response body should not be null");
         assertEquals("Card privilege updated successfully", response.getBody());
-
-        // Clean up
-        cardPrivilegeController.deleteCardPrivilege(createRequest.getCode());
     }
 
     @Test
@@ -102,7 +94,7 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         cardPrivilegeController.create(createRequest);
 
         // Delete privilege
-        ResponseEntity<Void> response = cardPrivilegeController.deleteCardPrivilege(createRequest.getCode());
+        ResponseEntity<Void> response = cardPrivilegeController.deleteCardPrivilegeAndIsActive(createRequest.getCode());
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode(), "Response status should be NO_CONTENT");
     }
@@ -112,7 +104,7 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         String nonExistentCode = "NONEXISTENT_CODE";
 
         Assertions.assertThrows(NotFoundException.class,
-            () -> cardPrivilegeController.deleteCardPrivilege(nonExistentCode),
+            () -> cardPrivilegeController.deleteCardPrivilegeAndIsActive(nonExistentCode),
             "Should throw ValidationException when trying to delete non-existent privilege");
     }
 }

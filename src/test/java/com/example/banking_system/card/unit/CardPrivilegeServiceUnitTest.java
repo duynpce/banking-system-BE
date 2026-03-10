@@ -53,7 +53,7 @@ public class CardPrivilegeServiceUnitTest extends UnitTest {
 
         when(cardPrivilegeMapper.toEntity(request)).thenReturn(cardPrivilege);
         doNothing().when(cardPrivilegeValidator).validateCreate(cardPrivilege);
-        when(cardPrivilegeCodeQueryService.findByCode(request.getCode())).thenReturn(code);
+        when(cardPrivilegeCodeQueryService.findByCodeAndIsActive(request.getCode())).thenReturn(code);
         when(cardPrivilegeQueryService.save(cardPrivilege)).thenReturn(savedCardPrivilege);
 
         CardPrivilege result = cardPrivilegeService.create(request);
@@ -95,14 +95,14 @@ public class CardPrivilegeServiceUnitTest extends UnitTest {
         CardPrivilege updatedCardPrivilege = new CardPrivilege();
         updatedCardPrivilege.setCardPrivilegeCode(code);
 
-        when(cardPrivilegeQueryService.findByPrivilegeCode(request.getCode())).thenReturn(existingCardPrivilege);
+        when(cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getCode())).thenReturn(existingCardPrivilege);
         doNothing().when(cardPrivilegeValidator).validateUpdate(request, existingCardPrivilege);
         when(cardPrivilegeQueryService.save(existingCardPrivilege)).thenReturn(updatedCardPrivilege);
 
         CardPrivilege result = cardPrivilegeService.update(request);
 
         Assertions.assertEquals(updatedCardPrivilege, result);
-        verify(cardPrivilegeQueryService).findByPrivilegeCode(request.getCode());
+        verify(cardPrivilegeQueryService).findByPrivilegeCodeAndIsActive(request.getCode());
         verify(cardPrivilegeValidator).validateUpdate(request, existingCardPrivilege);
         verify(cardPrivilegeQueryService).save(existingCardPrivilege);
     }
@@ -113,48 +113,16 @@ public class CardPrivilegeServiceUnitTest extends UnitTest {
 
         CardPrivilege existingCardPrivilege = new CardPrivilege();
 
-        when(cardPrivilegeQueryService.findByPrivilegeCode(request.getCode())).thenReturn(existingCardPrivilege);
+        when(cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getCode())).thenReturn(existingCardPrivilege);
         doThrow(new ValidationException("Both fields cannot be null")).when(cardPrivilegeValidator).validateUpdate(request, existingCardPrivilege);
 
         RuntimeException exception = Assertions.assertThrows(ValidationException.class,
             () -> cardPrivilegeService.update(request));
 
         Assertions.assertEquals("Both fields cannot be null", exception.getMessage());
-        verify(cardPrivilegeQueryService).findByPrivilegeCode(request.getCode());
+        verify(cardPrivilegeQueryService).findByPrivilegeCodeAndIsActive(request.getCode());
         verify(cardPrivilegeValidator).validateUpdate(request, existingCardPrivilege);
         verify(cardPrivilegeQueryService, never()).save(any());
     }
 
-    @Test
-    public void deleteCardPrivilegeSuccess() {
-        final String code = "PRIV001";
-
-        CardPrivilegeCode privilegeCode = new CardPrivilegeCode();
-        privilegeCode.setCode(code);
-
-        CardPrivilege cardPrivilege = new CardPrivilege();
-        cardPrivilege.setCardPrivilegeCode(privilegeCode);
-
-        when(cardPrivilegeQueryService.findByPrivilegeCode(code)).thenReturn(cardPrivilege);
-        doNothing().when(cardPrivilegeQueryService).delete(cardPrivilege);
-
-        cardPrivilegeService.deleteByPrivilegeCode(code);
-
-        verify(cardPrivilegeQueryService).findByPrivilegeCode(code);
-        verify(cardPrivilegeQueryService).delete(cardPrivilege);
-    }
-
-    @Test
-    public void deleteCardPrivilegeFailure_NotFound() {
-        final String code = "NONEXISTENT";
-
-        when(cardPrivilegeQueryService.findByPrivilegeCode(code)).thenThrow(new ValidationException("Card privilege not found"));
-
-        RuntimeException exception = Assertions.assertThrows(ValidationException.class,
-            () -> cardPrivilegeService.deleteByPrivilegeCode(code));
-
-        Assertions.assertEquals("Card privilege not found", exception.getMessage());
-        verify(cardPrivilegeQueryService).findByPrivilegeCode(code);
-        verify(cardPrivilegeQueryService, never()).delete(any());
-    }
 }

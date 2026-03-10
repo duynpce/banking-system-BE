@@ -14,7 +14,6 @@ import com.example.banking_system.card.controller.PersonalCardController;
 import com.example.banking_system.card.dto.CreateBusinessCardRequest;
 import com.example.banking_system.card.dto.CreatePersonalCardRequest;
 import com.example.banking_system.card.dto.GetCardResponse;
-import com.example.banking_system.card.mapper.CardMapper;
 import com.example.banking_system.card.service.query.CardPrivilegeCodeQueryService;
 import com.example.banking_system.card.service.query.CardPrivilegeQueryService;
 import com.example.banking_system.card.service.query.CardQueryService;
@@ -104,7 +103,7 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         cardPrivilegeQueryService.deleteByPrivilegeCode(cardRequest.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCode(cardRequest.getPrivilegeCode());
+        cardPrivilegeCodeQueryService.deleteByCodeAndIsActive(cardRequest.getPrivilegeCode());
     }
 
     @Test
@@ -149,7 +148,7 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         cardPrivilegeQueryService.deleteByPrivilegeCode(cardRequest.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCode(cardRequest.getPrivilegeCode());
+        cardPrivilegeCodeQueryService.deleteByCodeAndIsActive(cardRequest.getPrivilegeCode());
     }
 
     @Test
@@ -195,7 +194,7 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         cardPrivilegeQueryService.deleteByPrivilegeCode(card1Request.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCode(card1Request.getPrivilegeCode());
+        cardPrivilegeCodeQueryService.deleteByCodeAndIsActive(card1Request.getPrivilegeCode());
     }
 
     @Test
@@ -231,7 +230,7 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         cardPrivilegeQueryService.deleteByPrivilegeCode(cardRequest.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCode(cardRequest.getPrivilegeCode());
+        cardPrivilegeCodeQueryService.deleteByCodeAndIsActive(cardRequest.getPrivilegeCode());
     }
 
     @Test
@@ -278,7 +277,7 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         cardPrivilegeQueryService.deleteByPrivilegeCode(card1Request.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCode(card1Request.getPrivilegeCode());
+        cardPrivilegeCodeQueryService.deleteByCodeAndIsActive(card1Request.getPrivilegeCode());
 
     }
 }

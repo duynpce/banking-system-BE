@@ -23,20 +23,16 @@ public class CardPrivilegeService {
         CardPrivilege cardPrivilege = CardPrivilegeMapper.toEntity(request);
         cardPrivilegeValidator.validateCreate(cardPrivilege);
 
-        CardPrivilegeCode cardPrivilegeCode  = cardPrivilegeCodeQueryService.findByCode(request.getCode());
+        CardPrivilegeCode cardPrivilegeCode  = cardPrivilegeCodeQueryService.findByCodeAndIsActive(request.getCode());
         cardPrivilege.setCardPrivilegeCode(cardPrivilegeCode);
-
         return cardPrivilegeQueryService.save(cardPrivilege);
     }
 
     public CardPrivilege update(UpdateCardPrivilegeRequest request) {
-        CardPrivilege cardPrivilege = cardPrivilegeQueryService.findByPrivilegeCode(request.getCode());
+        CardPrivilege cardPrivilege = cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getCode());
         cardPrivilegeValidator.validateUpdate(request, cardPrivilege);
         return cardPrivilegeQueryService.save(cardPrivilege);
     }
 
-    public void deleteByPrivilegeCode(String code) {
-        CardPrivilege cardPrivilege = cardPrivilegeQueryService.findByPrivilegeCode(code);
-        cardPrivilegeQueryService.delete(cardPrivilege);
-    }
+
 }

@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 
 @Entity
 @Table(
@@ -50,11 +49,8 @@ public class CardPrivilege {
     @Column(name = "effective_to", nullable = false)
     private LocalDate effectiveTo;
 
-    @Column(name = "is_active", nullable = false)
-    private boolean isActive;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "privilege_code", referencedColumnName = "code", nullable = false)
+    @JoinColumn(name = "privilege_code_id", referencedColumnName = "id", nullable = false)
     private CardPrivilegeCode cardPrivilegeCode;
 
 
@@ -71,4 +67,3 @@ public class CardPrivilege {
     }
 
 }
-    

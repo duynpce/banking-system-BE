@@ -2,7 +2,6 @@ package com.example.banking_system.card.validator;
 
 import com.example.banking_system.card.dto.UpdateCardPrivilegeRequest;
 import com.example.banking_system.card.entity.CardPrivilege;
-import com.example.banking_system.card.repository.CardPrivilegeRepository;
 import com.example.banking_system.card.service.query.CardPrivilegeQueryService;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.Util;
@@ -17,9 +16,11 @@ public class CardPrivilegeValidator {
 
     public void validateCreate(CardPrivilege cardPrivilege){
         util.assertUnique(
-                cardPrivilegeQueryService.isExistsAndActive(cardPrivilege),
+                cardPrivilegeQueryService.hasOverlap(cardPrivilege),
                 "An active card privilege already exists for this account type and card type"
         );
+
+
     }
 
     public void validateUpdate(UpdateCardPrivilegeRequest request, CardPrivilege existingCardPrivilege) {
