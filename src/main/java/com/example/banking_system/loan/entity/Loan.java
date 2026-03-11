@@ -1,4 +1,4 @@
-package com.example.banking_system.loan;
+package com.example.banking_system.loan.entity;
 
 import com.example.banking_system.loan.constant.LoanStatus;
 import com.example.banking_system.loan.constant.LoanType;
@@ -21,8 +21,11 @@ public class Loan {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "loan_amount", nullable = false)
+    @Column(name = "loan_amount", nullable = false, updatable = false)
     private BigDecimal loanAmount;
+
+    @Column(name ="left_amount", nullable = false)
+    private BigDecimal leftAmount;
 
     @Column(name = "interest_rate", nullable = false)
     private BigDecimal interestRate;
@@ -37,6 +40,9 @@ public class Loan {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private LoanType type;
+
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDate createdAt = LocalDate.now();
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false, updatable = false)

@@ -5,7 +5,7 @@ import com.example.banking_system.account.constant.AccountType;
 import com.example.banking_system.account.constant.CreditRank;
 import com.example.banking_system.auth.constant.Role;
 import com.example.banking_system.card.entity.CardDetails;
-import com.example.banking_system.loan.Loan;
+import com.example.banking_system.loan.entity.Loan;
 import com.example.banking_system.card.entity.Card;
 import jakarta.persistence.*;
 import lombok.Data;
