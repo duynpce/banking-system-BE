@@ -1,0 +1,60 @@
+# convention
+
+file name : PascalCase
+
+class name : PascalCase
+
+function name : camelCase
+
+variable name : camelCase
+
+constant name : UPPER_SNAKE_CASE
+
+folder name : lowercase
+
+# folder structure
+Feature-based folder structure. Each feature follows this pattern:
+
+    /account
+    ├── /constant               # Enums and constants (e.g., AccountStatus.java, AccountType.java, CreditRank.java, Gender.java)
+    ├── /controller             # REST controllers (e.g., AccountController.java, BusinessAccountController.java)
+    ├── /dto                    # Data Transfer Objects
+    │   ├── CreateXxxRequest    # Request DTOs for create operations (abstract base + subclass per account type)
+    │   ├── UpdateXxxRequest    # Request DTOs for update operations
+    │   └── GetXxxResponse      # Response DTOs (abstract base + subclass per account type)
+    ├── /entity                 # JPA entities (e.g., Account.java, PersonalAccount.java, BusinessAccount.java)
+    ├── /mapper                 # MapStruct mappers (e.g., AccountMapper.java) — interface annotated with @Mapper
+    ├── /repository             # Spring Data JPA repositories (e.g., AccountRepository.java)
+    ├── /service
+    │   ├── /domain             # Write/command services (e.g., AccountService.java) — annotated with @Service, use @Transactional
+    │   └── /query              # Read/query services (e.g., AccountQueryService.java) — use @Transactional(readOnly = true)
+    └── /validator              # Business rule validators (e.g., AccountValidator.java) — annotated with @Component
+
+# patterns & conventions
+
+    - Inheritance pattern: abstract base class (Account, CreateAccountRequest, GetAccountResponse) with concrete subclasses per type (Personal, Business, Government)
+    - DTOs are pure data classes using Lombok @Data; entities use @Data + @Entity + @NoArgsConstructor
+    - Mapper layer uses MapStruct (@Mapper(componentModel = "spring")), never map manually in service/controller
+    - Services are split into domain (write) and query (read) if the service is too large; controllers depend on both
+    - Validators are @Component classes injected into services; they throw exceptions on invalid input
+    - Repository layer is always a Spring Data JPA interface extending JpaRepository
+    - Constants/Enums go in /constant, never inline in entities or DTOs
+    - Use @Transactional on write methods; @Transactional(readOnly = true) on read methods
+    - Use Lombok (@Data, @RequiredArgsConstructor, @NoArgsConstructor) consistently; avoid writing boilerplate manually
+    - Exception handling: throw custom exceptions (e.g., NotFoundException, ForbiddenException) from the common/exception package
+    - JWT utility (JwtUtil) is used inside domain services to resolve the current authenticated user (getUsername())
+
+# principle
+
+    - Only allow to change the code that I allow
+    - strictly follow the coding convention
+    - if you think you have better solution, discuss with me before you implement it
+    - if you need more context information about the project, ask me before you implement it
+    - give the documents link where you found the solution if you are not sure about the solution you found
+    - never change unrelated code while implementing a feature
+    - always validate your changes with the existing patterns in the codebase before finalizing
+
+# commit
+    - Use Conventional Commits (feat:, fix:, chore:, refactor:).
+    - Write simple, clear and concise commit messages that describe the changes made.
+    - if there is conflict tell me before you resolve it, and explain the reason why you think your solution is the best one.
