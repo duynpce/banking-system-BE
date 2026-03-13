@@ -2,6 +2,7 @@ package com.example.banking_system.card.controller;
 
 import com.example.banking_system.card.dto.GetCardResponse;
 import com.example.banking_system.card.service.domain.CardService;
+import com.example.banking_system.common.dto.ResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,19 +18,20 @@ public class CardController {
 
     // Get all cards for the authenticated user by its username from JWT
     @GetMapping
-    public ResponseEntity<List<? extends GetCardResponse>> getAllFromByJwt(){
-        List<? extends GetCardResponse>response = cardService.GetAllCardByJwt();
-        return ResponseEntity.ok(response);
+    // add meta data later above it
+    public ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> getAllFromByJwt(){
+        List<? extends GetCardResponse> response = cardService.GetAllCardByJwt();
+        return ResponseEntity.ok(ResponseDto.success(response, "Cards retrieved successfully"));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<GetCardResponse> getById(@PathVariable long id){
+    public ResponseEntity<ResponseDto<GetCardResponse>> getById(@PathVariable long id){
         GetCardResponse response = cardService.getCardById(id);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(ResponseDto.success(response, "Card retrieved successfully"));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<GetCardResponse> delete(@PathVariable long id){
+    public ResponseEntity<?> delete(@PathVariable long id){
         cardService.deleteCardById( id);
         return ResponseEntity.noContent().build();
     }

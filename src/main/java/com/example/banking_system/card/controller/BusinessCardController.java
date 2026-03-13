@@ -2,6 +2,7 @@ package com.example.banking_system.card.controller;
 
 import com.example.banking_system.card.dto.CreateBusinessCardRequest;
 import com.example.banking_system.card.service.domain.BusinessCardService;
+import com.example.banking_system.common.dto.ResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,8 @@ public class BusinessCardController {
     private final BusinessCardService businessCardService;
 
     @PostMapping
-    public ResponseEntity<String> create(@Valid @RequestBody CreateBusinessCardRequest request) {
+    public ResponseEntity<ResponseDto<String>> create(@Valid @RequestBody CreateBusinessCardRequest request) {
         businessCardService.create(request);
-        return ResponseEntity.ok("Business card created successfully");
+        return ResponseEntity.ok(ResponseDto.success(null, "Business card created successfully"));
     }
 }

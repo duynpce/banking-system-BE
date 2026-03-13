@@ -25,7 +25,7 @@ public class AuthController {
     private final AuthService authService;
 
     @GetMapping("/callback")
-    public ResponseEntity<String> oauth2Callback(@NotBlank(message = "code cannot be blank") @RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ResponseDto<String>> oauth2Callback(@NotBlank(message = "code cannot be blank") @RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response) {
         GetTokenResponse getTokenResponse = authService.getToken(code, request);
         ResponseCookie cookie = ResponseCookie.from("refreshToken", getTokenResponse.getRefreshToken())
                 .httpOnly(true)
@@ -37,12 +37,12 @@ public class AuthController {
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return ResponseEntity
-                .ok(getTokenResponse.getAccessToken());
+                .ok(ResponseDto.success(getTokenResponse.getAccessToken(), "login successful"));
 
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<String> refreshToken(@CookieValue("refreshToken") String refreshToken
+    public ResponseEntity<ResponseDto<String>> refreshToken(@CookieValue("refreshToken") String refreshToken
             , HttpServletResponse response, HttpSession session, HttpServletRequest request) {
         GetTokenResponse getTokenResponse = authService.refreshToken(refreshToken, session, request);
 
@@ -56,6 +56,6 @@ public class AuthController {
 
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
-        return ResponseEntity.ok(getTokenResponse.getAccessToken());
+        return ResponseEntity.ok(ResponseDto.success(getTokenResponse.getAccessToken(), "token refreshed successfully"));
     }
 }

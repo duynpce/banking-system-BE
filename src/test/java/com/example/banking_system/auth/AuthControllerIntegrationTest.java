@@ -2,6 +2,7 @@ package com.example.banking_system.auth;
 
 import com.example.banking_system.auth.dto.GetTokenResponse;
 import com.example.banking_system.common.IntegrationTest;
+import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.UnauthorizedException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -11,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.Objects;
 
@@ -45,12 +45,12 @@ public class AuthControllerIntegrationTest extends IntegrationTest {
         when(authService.getToken(anyString(), any())).thenReturn(mockResponse);
 
         // Act
-        ResponseEntity<String> result = authController.oauth2Callback(code, request, response);
+        ResponseEntity<ResponseDto<String>> result = authController.oauth2Callback(code, request, response);
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode(), "Response status should be OK");
         assertNotNull(result.getBody(), "Response body should not be null");
-        assertEquals(accessToken, result.getBody(), "Access token should match");
+        assertEquals(accessToken, result.getBody().getData(), "Access token should match");
         assertNotNull(response.getHeader("Set-Cookie"), "Cookie should be set");
         assertTrue(Objects.requireNonNull(response.getHeader("Set-Cookie")).contains("refreshToken"), "Cookie should contain refresh token");
     }
@@ -90,12 +90,12 @@ public class AuthControllerIntegrationTest extends IntegrationTest {
         when(authService.refreshToken(anyString(), any(), any())).thenReturn(mockResponse);
 
         // Act
-        ResponseEntity<String> result = authController.refreshToken(refreshToken, response, request.getSession(), request);
+        ResponseEntity<ResponseDto<String>> result = authController.refreshToken(refreshToken, response, request.getSession(), request);
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode(), "Response status should be OK");
         assertNotNull(result.getBody(), "Response body should not be null");
-        assertEquals(newAccessToken, result.getBody(), "New access token should match");
+        assertEquals(newAccessToken, result.getBody().getData(), "New access token should match");
         assertNotNull(response.getHeader("Set-Cookie"), "Cookie should be set");
         assertTrue(Objects.requireNonNull(response.getHeader("Set-Cookie")).contains("refreshToken"), "Cookie should contain refresh token");
     }

@@ -25,7 +25,7 @@ public class Loan {
     private BigDecimal loanAmount;
 
     @Column(name ="left_amount", nullable = false)
-    private BigDecimal leftAmount;
+    private BigDecimal leftAmount;  
 
     @Column(name = "interest_rate", nullable = false)
     private BigDecimal interestRate;

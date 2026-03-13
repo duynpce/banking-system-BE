@@ -6,6 +6,7 @@ import com.example.banking_system.card.dto.CreateCardPrivilegeRequest;
 import com.example.banking_system.card.dto.UpdateCardPrivilegeRequest;
 import com.example.banking_system.card.service.query.CardPrivilegeCodeQueryService;
 import com.example.banking_system.common.IntegrationTest;
+import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.ConflictDataException;
 import com.example.banking_system.common.exception.NotFoundException;
 import org.junit.jupiter.api.Assertions;
@@ -31,11 +32,12 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         CreateCardPrivilegeRequest request = cardTestCases.getCreateCardPrivilegeRequestTestCase();
         cardPrivilegeCodeQueryService.save(cardTestCases.getCardPrivilegeCodeTestCase());
 
-        ResponseEntity<String> response = cardPrivilegeController.create(request);
+        ResponseEntity<ResponseDto<String>> response = cardPrivilegeController.create(request);
+        ResponseDto<String> responseDto = response.getBody();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertNotNull(response.getBody(), "Response body should not be null");
-        assertEquals("Card privilege created successfully", response.getBody());
+        assertNotNull(responseDto, "Response body should not be null");
+        assertTrue(responseDto.isSuccess(), "Response success flag should be true");
 
         // Verify privilege was created
         assertTrue(cardPrivilegeCodeQueryService.existsByCode(request.getCode()),
@@ -69,11 +71,12 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         UpdateCardPrivilegeRequest updateRequest = cardTestCases.getUpdateCardPrivilegeRequestTestCase();
         updateRequest.setCode(createRequest.getCode()); // Use the same code
 
-        ResponseEntity<String> response = cardPrivilegeController.update(updateRequest);
+        ResponseEntity<ResponseDto<String>> response = cardPrivilegeController.update(updateRequest);
+        ResponseDto<String> responseDto = response.getBody();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertNotNull(response.getBody(), "Response body should not be null");
-        assertEquals("Card privilege updated successfully", response.getBody());
+        assertNotNull(responseDto, "Response body should not be null");
+        assertTrue(responseDto.isSuccess(), "Response success flag should be true");
     }
 
     @Test
@@ -94,9 +97,12 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         cardPrivilegeController.create(createRequest);
 
         // Delete privilege
-        ResponseEntity<Void> response = cardPrivilegeController.deleteCardPrivilegeAndIsActive(createRequest.getCode());
+        ResponseEntity<ResponseDto<String>> response = cardPrivilegeController.deleteCardPrivilegeAndIsActive(createRequest.getCode());
+        ResponseDto<String> responseDto = response.getBody();
 
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode(), "Response status should be NO_CONTENT");
+        assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
+        assertNotNull(responseDto, "Response body should not be null");
+        assertTrue(responseDto.isSuccess(), "Response success flag should be true");
     }
 
     @Test

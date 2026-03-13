@@ -7,6 +7,7 @@ import com.example.banking_system.account.controller.PersonalAccountController;
 import com.example.banking_system.account.dto.CreatePersonalAccountRequest;
 import com.example.banking_system.account.dto.UpdatePersonalAccountRequest;
 import com.example.banking_system.account.entity.PersonalAccount;
+import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.ConflictDataException;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
@@ -37,7 +38,7 @@ public class PersonalAccountIntegrationTest extends IntegrationTest {
     public void testCreatePersonalAccount_Success(){
         CreatePersonalAccountRequest request = accountTestCases.getCreatePersonalAccountRequestTestCase();
 
-        ResponseEntity<String> response = personalAccountController.create(request);
+        ResponseEntity<ResponseDto<String>> response = personalAccountController.create(request);
 
         PersonalAccount createdAccount = personalAccountQueryService.findByUsername(request.getUsername());
 
@@ -45,7 +46,8 @@ public class PersonalAccountIntegrationTest extends IntegrationTest {
         assertEquals(createdAccount.getFullName(), request.getFullName(), "Full name should match" );
         assertEquals(createdAccount.getDateOfBirth(), request.getDateOfBirth(), "Date of birth should match" );
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertEquals("Personal account created successfully", response.getBody(), "Response body should match");
+        Assertions.assertNotNull(response.getBody());
+        assertEquals("Personal account created successfully", response.getBody().getMessage(), "Response body should match");
     }
 
     @Test
@@ -59,7 +61,7 @@ public class PersonalAccountIntegrationTest extends IntegrationTest {
         request2.setPhoneNumber("newPhoneNumber");
 
         Assertions.assertThrows(ConflictDataException.class, () -> {
-            ResponseEntity<String> response = personalAccountController.create(request2);
+            ResponseEntity<ResponseDto<String>> response = personalAccountController.create(request2);
             assertEquals(HttpStatus.CONFLICT, response.getStatusCode(), "Response status should be CONFLICT");
         }, "ID card number already exists");
     }
@@ -72,7 +74,7 @@ public class PersonalAccountIntegrationTest extends IntegrationTest {
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
 
         UpdatePersonalAccountRequest updateRequest = accountTestCases.getUpdatePersonalAccountRequestTestCase();
-        ResponseEntity<String> response = personalAccountController.update(updateRequest);
+        ResponseEntity<ResponseDto<String>> response = personalAccountController.update(updateRequest);
         PersonalAccount updatedAccount = personalAccountQueryService.findByUsername(createRequest.getUsername());
 
         // Verify response
@@ -97,7 +99,7 @@ public class PersonalAccountIntegrationTest extends IntegrationTest {
         UpdatePersonalAccountRequest updateRequest = new UpdatePersonalAccountRequest();
 
         Assertions.assertThrows(ValidationException.class, () -> {
-            ResponseEntity<String> response = personalAccountController.update(updateRequest);
+            ResponseEntity<ResponseDto<String>> response = personalAccountController.update(updateRequest);
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode(), "Response status should be BAD_REQUEST");
         }, "At least one field must be provided for update");
     }

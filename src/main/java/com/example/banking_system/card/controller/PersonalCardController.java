@@ -2,6 +2,7 @@ package com.example.banking_system.card.controller;
 
 import com.example.banking_system.card.dto.CreatePersonalCardRequest;
 import com.example.banking_system.card.service.domain.PersonalCardService;
+import com.example.banking_system.common.dto.ResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +18,8 @@ public class PersonalCardController {
     private final PersonalCardService personalCardService;
 
     @PostMapping
-    public ResponseEntity<String> create(@Valid @RequestBody CreatePersonalCardRequest request) {
+    public ResponseEntity<ResponseDto<String>> create(@Valid @RequestBody CreatePersonalCardRequest request) {
         personalCardService.create(request);
-        return ResponseEntity.ok("Personal card created successfully");
+        return ResponseEntity.ok(ResponseDto.success(null, "Personal card created successfully"));
     }
 }

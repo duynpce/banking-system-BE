@@ -8,6 +8,7 @@ import com.example.banking_system.account.controller.BusinessAccountController;
 import com.example.banking_system.account.dto.CreateBusinessAccountRequest;
 import com.example.banking_system.account.dto.UpdateBusinessAccountRequest;
 import com.example.banking_system.account.entity.BusinessAccount;
+import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.ConflictDataException;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
@@ -40,14 +41,15 @@ public class BusinessAccountIntegrationTest extends IntegrationTest {
     public void testCreateBusinessAccount_Success(){
         CreateBusinessAccountRequest request = accountTestCases.getCreateBusinessAccountRequestTestCase();
 
-        ResponseEntity<String> response = businessAccountController.create(request);
+        ResponseEntity<ResponseDto<String>> response = businessAccountController.create(request);
 
         BusinessAccount createdAccount = businessAccountQueryService.findByUsername(request.getUsername());
 
         assertEquals(createdAccount.getTaxIdNumber(), request.getTaxIdNumber(), "Tax ID number should match");
         assertEquals(createdAccount.getOrganizationName(), request.getOrganizationName(), "Organization name should match" );
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertEquals("Business account created successfully", response.getBody(), "Response body should match");
+        Assertions.assertNotNull(response.getBody());
+        assertEquals("Business account created successfully", response.getBody().getMessage(), "Response body should match");
 
     }
 
@@ -63,7 +65,7 @@ public class BusinessAccountIntegrationTest extends IntegrationTest {
 
         Assertions.assertThrows(ConflictDataException.class, () -> {
             //check exception message and status code
-            ResponseEntity<String> response = businessAccountController.create(request2);
+            ResponseEntity<ResponseDto<String>> response = businessAccountController.create(request2);
             assertEquals(HttpStatus.CONFLICT,response.getStatusCode(), "Response status should be CONFLICT");
             }, "Tax id number already exists");
 
@@ -80,7 +82,7 @@ public class BusinessAccountIntegrationTest extends IntegrationTest {
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
 
         UpdateBusinessAccountRequest updateRequest = accountTestCases.getUpdateBusinessAccountRequestTestCase();
-        ResponseEntity<String> response = businessAccountController.update(updateRequest);
+        ResponseEntity<ResponseDto<String>> response = businessAccountController.update(updateRequest);
         BusinessAccount updatedAccount =  businessAccountQueryService.findByUsername(createRequest.getUsername());
 
         // Verify response
@@ -105,7 +107,7 @@ public class BusinessAccountIntegrationTest extends IntegrationTest {
         UpdateBusinessAccountRequest updateRequest = new UpdateBusinessAccountRequest();
 
         Assertions.assertThrows(ValidationException.class, () -> {
-            ResponseEntity<String> response = businessAccountController.update(updateRequest);
+            ResponseEntity<ResponseDto<String>> response = businessAccountController.update(updateRequest);
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode(), "Response status should be BAD_REQUEST");
         }, "At least one field must be provided for update");
     }

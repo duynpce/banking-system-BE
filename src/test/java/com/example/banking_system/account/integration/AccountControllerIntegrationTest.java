@@ -8,6 +8,7 @@ import com.example.banking_system.account.controller.BusinessAccountController;
 import com.example.banking_system.account.controller.GovernmentAccountController;
 import com.example.banking_system.account.controller.PersonalAccountController;
 import com.example.banking_system.account.dto.*;
+import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.NotFoundException;
 import com.example.banking_system.common.exception.UnauthorizedException;
 import com.example.banking_system.common.utility.JwtUtil;
@@ -55,11 +56,12 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
 
-        ResponseEntity<GetAccountResponse> response = accountController.get();
+        ResponseEntity<ResponseDto<GetAccountResponse>> response = accountController.get();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
 
-        GetBusinessAccountResponse businessAccount = (GetBusinessAccountResponse) response.getBody();
+        assertNotNull(response.getBody());
+        GetBusinessAccountResponse businessAccount = (GetBusinessAccountResponse) response.getBody().getData();
         assertNotNull(businessAccount);
         assertEquals(createRequest.getOrganizationName(), businessAccount.getOrganizationName(), "Organization name should match");
         assertEquals(createRequest.getEmail(), businessAccount.getEmail(), "Username should match");
@@ -75,11 +77,12 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
 
-        ResponseEntity<GetAccountResponse> response = accountController.get();
+        ResponseEntity<ResponseDto<GetAccountResponse>> response = accountController.get();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
 
-        GetPersonalAccountResponse personalAccount = (GetPersonalAccountResponse) response.getBody();
+        assertNotNull(response.getBody());
+        GetPersonalAccountResponse personalAccount = (GetPersonalAccountResponse) response.getBody().getData();
         assertNotNull(personalAccount);
         assertEquals(createRequest.getFullName(), personalAccount.getFullName(), "Full name should match");
 
@@ -94,11 +97,12 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
 
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
 
-        ResponseEntity<GetAccountResponse> response = accountController.get();
+        ResponseEntity<ResponseDto<GetAccountResponse>> response = accountController.get();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
 
-        GetGovernmentAccountResponse governmentAccount = (GetGovernmentAccountResponse) response.getBody();
+        assertNotNull(response.getBody());
+        GetGovernmentAccountResponse governmentAccount = (GetGovernmentAccountResponse) response.getBody().getData();
         assertNotNull(governmentAccount);
         assertEquals(createRequest.getGovernmentDepartment(), governmentAccount.getGovernmentDepartment(), "Government department should match");
 
@@ -121,10 +125,11 @@ public class AccountControllerIntegrationTest extends IntegrationTest {
 
         when(jwtUtil.getUsername()).thenReturn(username);
 
-        ResponseEntity<String> response = accountController.delete();
+        ResponseEntity<ResponseDto<String>> response = accountController.delete();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertEquals("Account deleted successfully", response.getBody(), "Response message should match");
+        assertNotNull(response.getBody());
+        assertEquals("Account deleted successfully", response.getBody().getMessage(), "Response message should match");
 
         Assertions.assertThrows(NotFoundException.class, () -> accountQueryService.findByUsername(username), "User not found with username: " + username);
     }

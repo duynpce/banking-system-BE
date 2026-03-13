@@ -7,6 +7,7 @@ import com.example.banking_system.account.controller.GovernmentAccountController
 import com.example.banking_system.account.dto.CreateGovernmentAccountRequest;
 import com.example.banking_system.account.dto.UpdateGovernmentAccountRequest;
 import com.example.banking_system.account.entity.GovernmentAccount;
+import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.ConflictDataException;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
@@ -37,13 +38,14 @@ public class GovernmentAccountIntegrationTest extends IntegrationTest {
     public void testCreateGovernmentAccount_Success(){
         CreateGovernmentAccountRequest request = accountTestCases.getCreateGovernmentAccountRequestTestCase();
 
-        ResponseEntity<String> response = governmentAccountController.create(request);
+        ResponseEntity<ResponseDto<String>> response = governmentAccountController.create(request);
 
         GovernmentAccount createdAccount = governmentAccountQueryService.findByUsername(request.getUsername());
 
         assertEquals(createdAccount.getGovernmentDepartment(), request.getGovernmentDepartment(), "Government department should match");
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertEquals("Government account created successfully", response.getBody(), "Response body should match");
+        Assertions.assertNotNull(response.getBody());
+        assertEquals("Government account created successfully", response.getBody().getMessage(), "Response body should match");
     }
 
     @Test
@@ -66,7 +68,7 @@ public class GovernmentAccountIntegrationTest extends IntegrationTest {
         when(jwtUtil.getUsername()).thenReturn(createRequest.getUsername());
 
         UpdateGovernmentAccountRequest updateRequest = accountTestCases.getUpdateGovernmentAccountRequestTestCase();
-        ResponseEntity<String> response = governmentAccountController.update(updateRequest);
+        ResponseEntity<ResponseDto<String>> response = governmentAccountController.update(updateRequest);
         GovernmentAccount updatedAccount = governmentAccountQueryService.findByUsername(createRequest.getUsername());
 
         // Verify response
@@ -89,7 +91,7 @@ public class GovernmentAccountIntegrationTest extends IntegrationTest {
         UpdateGovernmentAccountRequest updateRequest = new UpdateGovernmentAccountRequest();
 
         Assertions.assertThrows(ValidationException.class, () -> {
-            ResponseEntity<String> response = governmentAccountController.update(updateRequest);
+            ResponseEntity<ResponseDto<String>> response = governmentAccountController.update(updateRequest);
             assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode(), "Response status should be BAD_REQUEST");
         }, "At least one field must be provided for update");
     }

@@ -4,6 +4,7 @@ import com.example.banking_system.account.dto.CreatePersonalAccountRequest;
 import com.example.banking_system.account.dto.UpdatePersonalAccountRequest;
 import com.example.banking_system.account.service.domain.PersonalAccountService;
 import com.example.banking_system.account.service.query.PersonalAccountQueryService;
+import com.example.banking_system.common.dto.ResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,20 +18,20 @@ public class PersonalAccountController {
     private final PersonalAccountQueryService personalAccountQueryService;
 
     @PostMapping
-    public ResponseEntity<String> create(@Valid @RequestBody CreatePersonalAccountRequest createPersonalAccountRequest) {
+    public ResponseEntity<ResponseDto<String>> create(@Valid @RequestBody CreatePersonalAccountRequest createPersonalAccountRequest) {
         personalAccountService.create(createPersonalAccountRequest);
-        return ResponseEntity.ok("Personal account created successfully");
+        return ResponseEntity.ok(ResponseDto.success(null, "Personal account created successfully"));
     }
 
     @PutMapping
-    public ResponseEntity<String> update(@Valid @RequestBody UpdatePersonalAccountRequest request) {
+    public ResponseEntity<ResponseDto<String>> update(@Valid @RequestBody UpdatePersonalAccountRequest request) {
         personalAccountService.update(request);
-        return ResponseEntity.ok("Personal account updated successfully");
+        return ResponseEntity.ok(ResponseDto.success(null, "Personal account updated successfully"));
     }
 
     @GetMapping("/exists/id-card-number/{idCardNumber}")
-    public ResponseEntity<Boolean> existsByIdCardNumber(@PathVariable(value = "idCardNumber") String idCardNumber) {
+    public ResponseEntity<ResponseDto<Boolean>> existsByIdCardNumber(@PathVariable(value = "idCardNumber") String idCardNumber) {
         boolean exists = personalAccountQueryService.existsByIdCardNumber(idCardNumber);
-        return ResponseEntity.ok(exists);
+        return ResponseEntity.ok(ResponseDto.success(exists));
     }
 }

@@ -4,6 +4,7 @@ import com.example.banking_system.card.dto.CreateCardPrivilegeRequest;
 import com.example.banking_system.card.dto.UpdateCardPrivilegeRequest;
 import com.example.banking_system.card.service.domain.CardPrivilegeService;
 import com.example.banking_system.card.service.query.CardPrivilegeQueryService;
+import com.example.banking_system.common.dto.ResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,27 +17,27 @@ public class CardPrivilegeController {
     private final CardPrivilegeService cardPrivilegeService;
     private final CardPrivilegeQueryService cardPrivilegeQueryService;
 
-    public ResponseEntity<String> create(@Valid @RequestBody CreateCardPrivilegeRequest request){
+    public ResponseEntity<ResponseDto<String>> create(@Valid @RequestBody CreateCardPrivilegeRequest request){
         cardPrivilegeService.create(request);
-        return ResponseEntity.ok("Card privilege created successfully");
+        return ResponseEntity.ok(ResponseDto.success(null, "Card privilege created successfully"));
     }
 
     @PutMapping
-    public ResponseEntity<String> update(@Valid @RequestBody UpdateCardPrivilegeRequest request) {
+    public ResponseEntity<ResponseDto<String>> update(@Valid @RequestBody UpdateCardPrivilegeRequest request) {
         cardPrivilegeService.update(request);
-        return ResponseEntity.ok("Card privilege updated successfully");
+        return ResponseEntity.ok(ResponseDto.success(null, "Card privilege updated successfully"));
     }
 
     @DeleteMapping("/{code}")
-    public ResponseEntity<Void> deleteCardPrivilegeAndIsActive(@PathVariable String code) {
+    public ResponseEntity<ResponseDto<String>> deleteCardPrivilegeAndIsActive(@PathVariable String code) {
         cardPrivilegeQueryService.deleteByPrivilegeCode(code);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ResponseDto.success(null, "Card privilege deleted by code"));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCardPrivilegeById(@PathVariable long id) {
+    public ResponseEntity<ResponseDto<String>> deleteCardPrivilegeById(@PathVariable long id) {
         cardPrivilegeQueryService.deleteById(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(ResponseDto.success(null, "Card privilege deleted by id"));
     }
 
 

@@ -14,6 +14,7 @@ import com.example.banking_system.card.controller.PersonalCardController;
 import com.example.banking_system.card.dto.CreateBusinessCardRequest;
 import com.example.banking_system.card.dto.CreatePersonalCardRequest;
 import com.example.banking_system.card.dto.GetCardResponse;
+import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.card.service.query.CardPrivilegeCodeQueryService;
 import com.example.banking_system.card.service.query.CardPrivilegeQueryService;
 import com.example.banking_system.card.service.query.CardQueryService;
@@ -91,14 +92,18 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         businessCardController.create(cardRequest);
 
         // Get all cards
-        ResponseEntity<List<? extends GetCardResponse>> response = cardController.getAllFromByJwt();
+        ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> response = cardController.getAllFromByJwt();
+        ResponseDto<List<? extends GetCardResponse>> responseDto = response.getBody();
+        List<? extends GetCardResponse> cardList = responseDto != null ? responseDto.getData() : null;
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertNotNull(response.getBody(), "Response body should not be null");
-        assertFalse(response.getBody().isEmpty(), "Card list should not be empty");
+        assertNotNull(responseDto, "Response body should not be null");
+        assertTrue(responseDto.isSuccess(), "Response success flag should be true");
+        assertNotNull(cardList, "Card list should not be null");
+        assertFalse(cardList.isEmpty(), "Card list should not be empty");
 
         // Clean up
-        cardController.delete(response.getBody().getFirst().getId());
+        cardController.delete(cardList.getFirst().getId());
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
         accountController.delete();
 
@@ -130,17 +135,24 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         personalCardController.create(cardRequest);
 
         // Get all cards to retrieve the card ID
-        ResponseEntity<List<? extends GetCardResponse>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseDto<List<? extends GetCardResponse>> allCardsDto = allCardsResponse.getBody();
+        List<? extends GetCardResponse> allCards = allCardsDto != null ? allCardsDto.getData() : null;
         assertNotNull(allCardsResponse, "Response should not be null");
-        assertNotNull(allCardsResponse.getBody(), "Response body should not be null");
-        long cardId = allCardsResponse.getBody().getFirst().getId();
+        assertNotNull(allCardsDto, "Response body should not be null");
+        assertTrue(allCardsDto.isSuccess(), "Response success flag should be true");
+        assertNotNull(allCards, "Card list should not be null");
+        long cardId = allCards.getFirst().getId();
 
         // Get card by ID
-        ResponseEntity<GetCardResponse> response = cardController.getById(cardId);
+        ResponseEntity<ResponseDto<GetCardResponse>> response = cardController.getById(cardId);
+        ResponseDto<GetCardResponse> responseDto = response.getBody();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertNotNull(response.getBody(), "Response body should not be null");
-        assertEquals(cardId, response.getBody().getId(), "Card ID should match");
+        assertNotNull(responseDto, "Response body should not be null");
+        assertTrue(responseDto.isSuccess(), "Response success flag should be true");
+        assertNotNull(responseDto.getData(), "Card DTO should not be null");
+        assertEquals(cardId, responseDto.getData().getId(), "Card ID should match");
 
         // Clean up
         cardController.delete(cardId);
@@ -164,10 +176,14 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         CreateBusinessCardRequest card1Request = cardTestCases.getCreateBusinessCardRequestTestCase();
         businessCardController.create(card1Request);
 
-        ResponseEntity<List<? extends GetCardResponse>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseDto<List<? extends GetCardResponse>> allCardsDto = allCardsResponse.getBody();
+        List<? extends GetCardResponse> allCards = allCardsDto != null ? allCardsDto.getData() : null;
         assertNotNull(allCardsResponse, "Response should not be null");
-        assertNotNull(allCardsResponse.getBody(), "Response body should not be null");
-        long cardId = allCardsResponse.getBody().getFirst().getId();
+        assertNotNull(allCardsDto, "Response body should not be null");
+        assertTrue(allCardsDto.isSuccess(), "Response success flag should be true");
+        assertNotNull(allCards, "Card list should not be null");
+        long cardId = allCards.getFirst().getId();
 
         // Create second account
         CreatePersonalAccountRequest account2Request = accountTestCases.getCreatePersonalAccountRequestTestCase();
@@ -211,15 +227,19 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         CreateBusinessCardRequest cardRequest = cardTestCases.getCreateBusinessCardRequestTestCase();
         businessCardController.create(cardRequest);
 
-        ResponseEntity<List<? extends GetCardResponse>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseDto<List<? extends GetCardResponse>> allCardsDto = allCardsResponse.getBody();
+        List<? extends GetCardResponse> allCards = allCardsDto != null ? allCardsDto.getData() : null;
         assertNotNull(allCardsResponse, "Response should not be null");
-        assertNotNull(allCardsResponse.getBody(), "Response body should not be null");
-        long cardId = allCardsResponse.getBody().getFirst().getId();
+        assertNotNull(allCardsDto, "Response body should not be null");
+        assertTrue(allCardsDto.isSuccess(), "Response success flag should be true");
+        assertNotNull(allCards, "Card list should not be null");
+        long cardId = allCards.getFirst().getId();
 
         // Delete card
-        ResponseEntity<GetCardResponse> response = cardController.delete(cardId);
+        ResponseEntity<?> response = cardController.delete(cardId);
 
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode(), "Response status should be NO_CONTENT");
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode(), "Response status should be OK");
 
         Assertions.assertThrows(NotFoundException.class,
             () -> cardQueryService.findById(cardId),
@@ -247,10 +267,14 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         CreateBusinessCardRequest card1Request = cardTestCases.getCreateBusinessCardRequestTestCase();
         businessCardController.create(card1Request);
 
-        ResponseEntity<List<? extends GetCardResponse>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseDto<List<? extends GetCardResponse>> allCardsDto = allCardsResponse.getBody();
+        List<? extends GetCardResponse> allCards = allCardsDto != null ? allCardsDto.getData() : null;
         assertNotNull(allCardsResponse, "Response should not be null");
-        assertNotNull(allCardsResponse.getBody(), "Response body should not be null");
-        long cardId = allCardsResponse.getBody().getFirst().getId();
+        assertNotNull(allCardsDto, "Response body should not be null");
+        assertTrue(allCardsDto.isSuccess(), "Response success flag should be true");
+        assertNotNull(allCards, "Card list should not be null");
+        long cardId = allCards.getFirst().getId();
 
 
         CreatePersonalAccountRequest account2Request = accountTestCases.getCreatePersonalAccountRequestTestCase();

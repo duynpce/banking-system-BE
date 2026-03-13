@@ -3,6 +3,7 @@ package com.example.banking_system.account.controller;
 import com.example.banking_system.account.dto.CreateGovernmentAccountRequest;
 import com.example.banking_system.account.dto.UpdateGovernmentAccountRequest;
 import com.example.banking_system.account.service.domain.GovernmentAccountService;
+import com.example.banking_system.common.dto.ResponseDto;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -15,15 +16,15 @@ public class GovernmentAccountController {
     private final GovernmentAccountService governmentAccountService;
 
     @PostMapping
-    public ResponseEntity<String> create(@Valid @RequestBody CreateGovernmentAccountRequest createGovernmentAccountRequest) {
+    public ResponseEntity<ResponseDto<String>> create(@Valid @RequestBody CreateGovernmentAccountRequest createGovernmentAccountRequest) {
         governmentAccountService.create(createGovernmentAccountRequest);
-        return ResponseEntity.ok("Government account created successfully");
+        return ResponseEntity.ok(ResponseDto.success(null, "Government account created successfully"));
     }
 
     @PutMapping
-    public ResponseEntity<String> update(@Valid @RequestBody UpdateGovernmentAccountRequest request) {
+    public ResponseEntity<ResponseDto<String>> update(@Valid @RequestBody UpdateGovernmentAccountRequest request) {
         governmentAccountService.update(request);
-        return ResponseEntity.ok("Government account updated successfully");
+        return ResponseEntity.ok(ResponseDto.success(null, "Government account updated successfully"));
     }
 }
 
