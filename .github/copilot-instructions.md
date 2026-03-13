@@ -50,6 +50,7 @@ Feature-based folder structure. Each feature follows this pattern:
     - strictly follow the coding convention
     - if you think you have better solution, discuss with me before you implement it
     - if you need more context information about the project, ask me before you implement it
+    - ask me if there are some cases that I haven't instructed you to do
     - give the documents link where you found the solution if you are not sure about the solution you found
     - never change unrelated code while implementing a feature
     - always validate your changes with the existing patterns in the codebase before finalizing
