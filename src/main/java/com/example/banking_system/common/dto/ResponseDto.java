@@ -18,7 +18,6 @@ public class ResponseDto<T> {
     private T data;
     private MetaDto meta;
 
-
     //no message and meta date
     public static <T> ResponseDto<T> success(T data) {
         return ResponseDto.<T>builder()
@@ -46,4 +45,10 @@ public class ResponseDto<T> {
                 .build();
     }
 
+    public static <T> ResponseDto<T> failure(String message) {
+        return ResponseDto.<T>builder()
+                .isSuccess(false)
+                .message(message)
+                .build();
+    }
 }

@@ -18,7 +18,7 @@ public class CardController {
 
     // Get all cards for the authenticated user by its username from JWT
     @GetMapping
-    // add meta data later above it
+    // add meta data later
     public ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> getAllFromByJwt(){
         List<? extends GetCardResponse> response = cardService.GetAllCardByJwt();
         return ResponseEntity.ok(ResponseDto.success(response, "Cards retrieved successfully"));
