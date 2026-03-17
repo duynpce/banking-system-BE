@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class PersonalAccountService {
     private final PersonalAccountQueryService personalAccountQueryService;
     private final AccountMapper accountMapper;
+    private final AccountService accountService;
     private final PersonalAccountValidator personalAccountValidator;
     private final PasswordEncoder passwordEncoder;
     private final JwtUtil jwtUtil;
@@ -28,6 +29,9 @@ public class PersonalAccountService {
 
         final String hashedPassword = passwordEncoder.encode(createPersonalAccountRequest.getPassword());
         personalAccount.getAccount().setPassword(hashedPassword);
+
+        String accountNumber = accountService.generateAccountNumber();
+        personalAccount.getAccount().setAccountNumber(accountNumber);
 
         return personalAccountQueryService.save(personalAccount);
     }

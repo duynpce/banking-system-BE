@@ -1,6 +1,7 @@
 package com.example.banking_system.account.unit;
 
 import com.example.banking_system.account.AccountTestCases;
+import com.example.banking_system.account.service.domain.AccountService;
 import com.example.banking_system.account.service.domain.GovernmentAccountService;
 import com.example.banking_system.account.service.query.GovernmentAccountQueryService;
 import com.example.banking_system.common.UnitTest;
@@ -37,6 +38,9 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
     PasswordEncoder passwordEncoder;
 
     @Mock
+    AccountService accountService;
+
+    @Mock
     JwtUtil jwtUtil;
 
     @InjectMocks
@@ -46,6 +50,7 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
     public void createAccountSuccess() {
         GovernmentAccount governmentAccount = accountTestCases.getGovernmentAccountTestCase();
         final String hashedPassword = "hashedPassword";
+        final String mockAccountNumber = "mockAccountNumber";
 
         CreateGovernmentAccountRequest request = new CreateGovernmentAccountRequest();
 
@@ -53,10 +58,12 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
         doNothing().when(governmentAccountValidator).validateCreate(governmentAccount);
         when(passwordEncoder.encode(request.getPassword())).thenReturn(hashedPassword);
         when(governmentAccountQueryService.save(governmentAccount)).thenReturn(governmentAccount);
+        when(accountService.generateAccountNumber()).thenReturn(mockAccountNumber);
 
         GovernmentAccount createdAccount = governmentAccountService.create(request);
 
         assertEquals(governmentAccount.getGovernmentDepartment(), createdAccount.getGovernmentDepartment());
+        assertEquals(mockAccountNumber, governmentAccount.getAccount().getAccountNumber());
         verify(governmentAccountQueryService, times(1)).save(governmentAccount);
     }
 

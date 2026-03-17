@@ -31,6 +31,10 @@ public class AccountQueryService {
         return accountRepository.existsByEmail(email);
     }
 
+    public boolean existsByAccountNumber(String accountNumber) {
+        return accountRepository.existsByAccountNumber(accountNumber);
+    }
+
     public void delete(Account account) {
         accountRepository.delete(account);
     }

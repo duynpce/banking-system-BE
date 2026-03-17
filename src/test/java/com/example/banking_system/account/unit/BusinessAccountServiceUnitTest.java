@@ -1,6 +1,7 @@
 package com.example.banking_system.account.unit;
 
 import com.example.banking_system.account.AccountTestCases;
+import com.example.banking_system.account.service.domain.AccountService;
 import com.example.banking_system.account.service.domain.BusinessAccountService;
 import com.example.banking_system.account.service.query.BusinessAccountQueryService;
 import com.example.banking_system.common.UnitTest;
@@ -17,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
 public class BusinessAccountServiceUnitTest extends UnitTest {
@@ -36,6 +38,9 @@ public class BusinessAccountServiceUnitTest extends UnitTest {
     PasswordEncoder passwordEncoder;
 
     @Mock
+    AccountService accountService;
+
+    @Mock
     JwtUtil jwtUtil;
 
     @InjectMocks
@@ -45,6 +50,7 @@ public class BusinessAccountServiceUnitTest extends UnitTest {
     public void createAccountSuccess() {
         BusinessAccount businessAccount = accountTestCases.getBusinessAccountTestCase();
         final String hashedPassword = "hashedPassword";
+        final String mockAccountNumber = "mockAccountNumber";
 
         CreateBusinessAccountRequest request = new CreateBusinessAccountRequest();
 
@@ -52,10 +58,13 @@ public class BusinessAccountServiceUnitTest extends UnitTest {
         doNothing().when(businessAccountValidator).validateCreate(businessAccount);
         when(passwordEncoder.encode(request.getPassword())).thenReturn(hashedPassword);
         when(businessAccountQueryService.save(businessAccount)).thenReturn(businessAccount);
+        when(accountService.generateAccountNumber()).thenReturn(mockAccountNumber);
 
         BusinessAccount createdAccount = businessAccountService.create(request);
 
-        Assertions.assertEquals(businessAccount, createdAccount);
+        assertEquals(businessAccount, createdAccount);
+        assertEquals(mockAccountNumber, businessAccount.getAccount().getAccountNumber());
+
         verify(businessAccountQueryService, times(1)).save(businessAccount);
     }
 
@@ -70,7 +79,7 @@ public class BusinessAccountServiceUnitTest extends UnitTest {
 
         RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> businessAccountService.create(request));
 
-        Assertions.assertEquals("invalid account", exception.getMessage());
+        assertEquals("invalid account", exception.getMessage());
         verify(businessAccountQueryService, never()).save(any());
     }
 
@@ -90,7 +99,7 @@ public class BusinessAccountServiceUnitTest extends UnitTest {
 
         BusinessAccount updatedAccount = businessAccountService.update(request);
 
-        Assertions.assertEquals(existingAccount, updatedAccount);
+        assertEquals(existingAccount, updatedAccount);
         verify(businessAccountValidator).validateUpdate(request, existingAccount);
         verify(businessAccountQueryService).save(existingAccount);
     }
@@ -109,7 +118,7 @@ public class BusinessAccountServiceUnitTest extends UnitTest {
 
         RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> businessAccountService.update(request));
 
-        Assertions.assertEquals("At least one field must be provided for update", exception.getMessage());
+        assertEquals("At least one field must be provided for update", exception.getMessage());
         verify(businessAccountQueryService, never()).save(any());
     }
 }

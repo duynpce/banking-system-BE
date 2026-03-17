@@ -19,6 +19,7 @@ public class BusinessAccountService {
     private final AccountMapper accountMapper;
     private final BusinessAccountValidator businessAccountValidator;
     private final PasswordEncoder passwordEncoder;
+    private final AccountService accountService;
     private final JwtUtil jwtUtil;
 
     @Transactional
@@ -29,7 +30,11 @@ public class BusinessAccountService {
         final String hashedPassword = passwordEncoder.encode(createBusinessAccountRequest.getPassword());
         businessAccount.getAccount().setPassword(hashedPassword);
 
+        String accountNumber = accountService.generateAccountNumber();
+        businessAccount.getAccount().setAccountNumber(accountNumber);
+
         return businessAccountQueryService.save(businessAccount);
+
     }
 
     @Transactional

@@ -28,6 +28,9 @@ public class Transaction {
     @Column(name = "transferred_amount", nullable = false)
     private BigDecimal transferredAmount;
 
+    @Column(name = "posted_balance", nullable = false)
+    private BigDecimal postedBalance;
+
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 

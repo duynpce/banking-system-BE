@@ -1,6 +1,7 @@
 package com.example.banking_system.account.unit;
 
 import com.example.banking_system.account.AccountTestCases;
+import com.example.banking_system.account.service.domain.AccountService;
 import com.example.banking_system.account.service.domain.PersonalAccountService;
 import com.example.banking_system.account.service.query.PersonalAccountQueryService;
 import com.example.banking_system.common.UnitTest;
@@ -37,6 +38,9 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
     PasswordEncoder passwordEncoder;
 
     @Mock
+    AccountService accountService;
+
+    @Mock
     JwtUtil jwtUtil;
 
     @InjectMocks
@@ -46,6 +50,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
     public void createAccountSuccess() {
         PersonalAccount personalAccount = accountTestCases.getPersonalAccountTestCase();
         final String hashedPassword = "hashedPassword";
+        final String mockAccountNumber = "mockAccountNumber";
 
         CreatePersonalAccountRequest request = new CreatePersonalAccountRequest();
 
@@ -53,10 +58,12 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
         doNothing().when(personalAccountValidator).validateCreate(personalAccount);
         when(passwordEncoder.encode(request.getPassword())).thenReturn(hashedPassword);
         when(personalAccountQueryService.save(personalAccount)).thenReturn(personalAccount);
+        when(accountService.generateAccountNumber()).thenReturn(mockAccountNumber);
 
         PersonalAccount createdAccount = personalAccountService.create(request);
 
         assertEquals(personalAccount, createdAccount);
+        assertEquals(mockAccountNumber, personalAccount.getAccount().getAccountNumber());
         verify(personalAccountQueryService, times(1)).save(personalAccount);
     }
 

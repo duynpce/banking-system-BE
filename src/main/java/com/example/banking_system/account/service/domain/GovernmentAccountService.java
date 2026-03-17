@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class GovernmentAccountService {
     private final GovernmentAccountQueryService governmentAccountQueryService;
+    private final AccountService accountService;
     private final AccountMapper accountMapper;
     private final GovernmentAccountValidator governmentAccountValidator;
     private final PasswordEncoder passwordEncoder;
@@ -28,6 +29,9 @@ public class GovernmentAccountService {
 
         final String hashedPassword = passwordEncoder.encode(createGovernmentAccountRequest.getPassword());
         governmentAccount.getAccount().setPassword(hashedPassword);
+
+        String accountNumber = accountService.generateAccountNumber();
+        governmentAccount.getAccount().setAccountNumber(accountNumber);
 
         return governmentAccountQueryService.save(governmentAccount);
     }
