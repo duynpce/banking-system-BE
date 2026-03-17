@@ -22,7 +22,8 @@ import java.util.List;
 public class Account {
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @SequenceGenerator(name = "account_id_seq", sequenceName = "account_id_seq", allocationSize = 1)
     private long id;
 
     @Column(name = "username", nullable = false, unique = true)
@@ -33,10 +34,10 @@ public class Account {
 
     @Column(name = "balance", nullable = false, precision = 19, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO;
-
+    
     @Column(name = "email", nullable = false, unique = true)
     private String email;
-
+    
     @Column(name = "phone_number", nullable = false, unique = true)
     private String phoneNumber;
 
