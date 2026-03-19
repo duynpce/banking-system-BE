@@ -37,7 +37,7 @@ Feature-based folder structure. Each feature follows this pattern:
     - Mapper layer uses MapStruct (@Mapper(componentModel = "spring")), never map manually in service/controller
     - Services are split into domain (write) and query (read) if the service is too large; controllers depend on both
     - Validators are @Component classes injected into services; they throw exceptions on invalid input
-    - Repository layer is always a Spring Data JPA interface extending JpaRepository
+    - Repository layer is always a Spring Data JPA interface extending JpaRepository and prioritizes method naming conventions for queries of jpa
     - Constants/Enums go in /constant, never inline in entities or DTOs
     - Use @Transactional on write methods; @Transactional(readOnly = true) on read methods
     - Use Lombok (@Data, @RequiredArgsConstructor, @NoArgsConstructor) consistently; avoid writing boilerplate manually
@@ -54,8 +54,35 @@ Feature-based folder structure. Each feature follows this pattern:
     - give the documents link where you found the solution if you are not sure about the solution you found
     - never change unrelated code while implementing a feature
     - always validate your changes with the existing patterns in the codebase before finalizing
+    - base on sample code to implement the feature, and make sure your code is consistent with the existing codebase
 
 # commit
     - Use Conventional Commits (feat:, fix:, chore:, refactor:).
     - Write simple, clear and concise commit messages that describe the changes made.
     - if there is conflict tell me before you resolve it, and explain the reason why you think your solution is the best one.
+
+# sample code
+
+    sample of a full flow query from controller to service to repository:
+    query service method example:
+      public Account findByUsername(String username) {
+        return accountRepository.findByUsername(username).orElseThrow(
+                () -> new NotFoundException("User not found with username: " + username)
+        );
+        }
+
+    domain service method example:
+      @Transactional(readOnly = true)
+        public GetAccountResponse get() {
+            String username = jwtUtil.getUsername();
+            Account account = accountQueryService.findByUsername(username);
+    
+            return accountMapper.toDto(account);
+        }
+
+    controller method example:
+        @GetMapping
+        public ResponseEntity<ResponseDto<GetAccountResponse>> get() {
+            GetAccountResponse Response = accountService.get();
+            return ResponseEntity.ok(ResponseDto.success(Response, "Account retrieved successfully"));
+        }

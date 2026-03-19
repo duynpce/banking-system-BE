@@ -34,9 +34,6 @@ public class Transaction {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
-    @Column(name = "due_date", nullable = false)
-    private LocalDate dueDate;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private TransactionStatus status = TransactionStatus.PENDING;

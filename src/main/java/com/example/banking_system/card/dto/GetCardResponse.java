@@ -6,10 +6,9 @@ import lombok.Data;
 
 @Data
 public class GetCardResponse {
-    private long id;
     private String cardNumber;
     private String expirationDate;
     private CardType type;
-    private CardPrivilege cardPrivilege;
+    private CardPrivilege privilege;
     private String cardHolder;
 }

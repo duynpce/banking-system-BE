@@ -30,6 +30,12 @@ public class CardController {
         return ResponseEntity.ok(ResponseDto.success(response, "Card retrieved successfully"));
     }
 
+    @GetMapping("/first")
+    public ResponseEntity<ResponseDto<GetCardResponse>> getFirstByJwt(){
+        GetCardResponse response = cardService.getFistCardByJwt();
+        return ResponseEntity.ok(ResponseDto.success(response, "First card retrieved successfully"));
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable long id){
         cardService.deleteCardById( id);

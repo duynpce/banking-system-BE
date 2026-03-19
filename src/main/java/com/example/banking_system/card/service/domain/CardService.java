@@ -57,6 +57,14 @@ public class CardService {
     }
 
     @Transactional(readOnly = true)
+    public GetCardResponse getFistCardByJwt() {
+        final String username = jwtUtil.getUsername();
+        Account account = accountQueryService.findByUsername(username);
+
+        return  cardMapper.toDto(account.getCardDetailsList().getFirst());
+    }
+
+    @Transactional(readOnly = true)
     public GetCardResponse getCardById(long id) {
         final String username = jwtUtil.getUsername();
         Account account = accountQueryService.findByUsername(username);
