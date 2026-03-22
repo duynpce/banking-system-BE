@@ -1,10 +1,10 @@
 package com.example.banking_system.account;
 
-import com.example.banking_system.account.constant.Gender;
-import com.example.banking_system.account.dto.*;
-import com.example.banking_system.account.entity.BusinessAccount;
-import com.example.banking_system.account.entity.GovernmentAccount;
-import com.example.banking_system.account.entity.PersonalAccount;
+import com.example.banking_system.domain.account.constant.Gender;
+import com.example.banking_system.domain.account.dto.*;
+import com.example.banking_system.domain.account.entity.BusinessAccount;
+import com.example.banking_system.domain.account.entity.GovernmentAccount;
+import com.example.banking_system.domain.account.entity.PersonalAccount;
 import lombok.Getter;
 
 import java.time.LocalDate;

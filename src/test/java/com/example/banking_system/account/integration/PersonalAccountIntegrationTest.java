@@ -1,12 +1,12 @@
 package com.example.banking_system.account.integration;
 
 import com.example.banking_system.account.AccountTestCases;
-import com.example.banking_system.account.service.query.PersonalAccountQueryService;
+import com.example.banking_system.domain.account.service.query.PersonalAccountQueryService;
 import com.example.banking_system.common.IntegrationTest;
-import com.example.banking_system.account.controller.PersonalAccountController;
-import com.example.banking_system.account.dto.CreatePersonalAccountRequest;
-import com.example.banking_system.account.dto.UpdatePersonalAccountRequest;
-import com.example.banking_system.account.entity.PersonalAccount;
+import com.example.banking_system.domain.account.controller.PersonalAccountController;
+import com.example.banking_system.domain.account.dto.CreatePersonalAccountRequest;
+import com.example.banking_system.domain.account.dto.UpdatePersonalAccountRequest;
+import com.example.banking_system.domain.account.entity.PersonalAccount;
 import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.ConflictDataException;
 import com.example.banking_system.common.exception.ValidationException;

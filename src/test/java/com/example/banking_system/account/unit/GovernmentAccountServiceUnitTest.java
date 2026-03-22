@@ -1,17 +1,17 @@
 package com.example.banking_system.account.unit;
 
 import com.example.banking_system.account.AccountTestCases;
-import com.example.banking_system.account.service.domain.AccountService;
-import com.example.banking_system.account.service.domain.GovernmentAccountService;
-import com.example.banking_system.account.service.query.GovernmentAccountQueryService;
+import com.example.banking_system.domain.account.service.domain.AccountService;
+import com.example.banking_system.domain.account.service.domain.GovernmentAccountService;
+import com.example.banking_system.domain.account.service.query.GovernmentAccountQueryService;
 import com.example.banking_system.common.UnitTest;
-import com.example.banking_system.account.dto.CreateGovernmentAccountRequest;
-import com.example.banking_system.account.dto.UpdateGovernmentAccountRequest;
-import com.example.banking_system.account.entity.GovernmentAccount;
+import com.example.banking_system.domain.account.dto.CreateGovernmentAccountRequest;
+import com.example.banking_system.domain.account.dto.UpdateGovernmentAccountRequest;
+import com.example.banking_system.domain.account.entity.GovernmentAccount;
 import com.example.banking_system.common.exception.ValidationException;
-import com.example.banking_system.account.mapper.AccountMapper;
+import com.example.banking_system.domain.account.mapper.AccountMapper;
 import com.example.banking_system.common.utility.JwtUtil;
-import com.example.banking_system.account.validator.GovernmentAccountValidator;
+import com.example.banking_system.domain.account.validator.GovernmentAccountValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;

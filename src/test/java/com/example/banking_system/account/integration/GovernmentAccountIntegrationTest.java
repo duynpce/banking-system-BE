@@ -1,12 +1,12 @@
 package com.example.banking_system.account.integration;
 
 import com.example.banking_system.account.AccountTestCases;
-import com.example.banking_system.account.service.query.GovernmentAccountQueryService;
+import com.example.banking_system.domain.account.service.query.GovernmentAccountQueryService;
 import com.example.banking_system.common.IntegrationTest;
-import com.example.banking_system.account.controller.GovernmentAccountController;
-import com.example.banking_system.account.dto.CreateGovernmentAccountRequest;
-import com.example.banking_system.account.dto.UpdateGovernmentAccountRequest;
-import com.example.banking_system.account.entity.GovernmentAccount;
+import com.example.banking_system.domain.account.controller.GovernmentAccountController;
+import com.example.banking_system.domain.account.dto.CreateGovernmentAccountRequest;
+import com.example.banking_system.domain.account.dto.UpdateGovernmentAccountRequest;
+import com.example.banking_system.domain.account.entity.GovernmentAccount;
 import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.ConflictDataException;
 import com.example.banking_system.common.exception.ValidationException;

@@ -1,13 +1,13 @@
 package com.example.banking_system.card.unit;
 
-import com.example.banking_system.account.entity.Account;
-import com.example.banking_system.account.service.query.AccountQueryService;
-import com.example.banking_system.card.dto.GetCardResponse;
-import com.example.banking_system.card.entity.Card;
-import com.example.banking_system.card.entity.PersonalCard;
-import com.example.banking_system.card.mapper.CardMapper;
-import com.example.banking_system.card.service.domain.CardService;
-import com.example.banking_system.card.service.query.CardQueryService;
+import com.example.banking_system.domain.account.entity.Account;
+import com.example.banking_system.domain.account.service.query.AccountQueryService;
+import com.example.banking_system.domain.card.dto.GetCardResponse;
+import com.example.banking_system.domain.card.entity.Card;
+import com.example.banking_system.domain.card.entity.PersonalCard;
+import com.example.banking_system.domain.card.mapper.CardMapper;
+import com.example.banking_system.domain.card.service.domain.CardService;
+import com.example.banking_system.domain.card.service.query.CardQueryService;
 import com.example.banking_system.common.UnitTest;
 import com.example.banking_system.common.exception.ForbiddenException;
 import com.example.banking_system.common.exception.NotFoundException;

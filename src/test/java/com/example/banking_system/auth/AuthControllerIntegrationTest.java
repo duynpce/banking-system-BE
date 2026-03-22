@@ -1,6 +1,8 @@
 package com.example.banking_system.auth;
 
-import com.example.banking_system.auth.dto.GetTokenResponse;
+import com.example.banking_system.domain.auth.AuthController;
+import com.example.banking_system.domain.auth.AuthService;
+import com.example.banking_system.domain.auth.dto.GetTokenResponse;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.UnauthorizedException;

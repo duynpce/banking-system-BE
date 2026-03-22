@@ -1,13 +1,13 @@
 package com.example.banking_system.account.unit;
 
 import com.example.banking_system.account.AccountTestCases;
-import com.example.banking_system.account.dto.GetAccountResponse;
-import com.example.banking_system.account.entity.Account;
-import com.example.banking_system.account.mapper.AccountMapper;
-import com.example.banking_system.account.service.domain.AccountService;
-import com.example.banking_system.account.service.query.AccountQueryService;
+import com.example.banking_system.domain.account.dto.GetAccountResponse;
+import com.example.banking_system.domain.account.entity.Account;
+import com.example.banking_system.domain.account.mapper.AccountMapper;
+import com.example.banking_system.domain.account.service.domain.AccountService;
+import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.example.banking_system.common.UnitTest;
-import com.example.banking_system.account.entity.BusinessAccount;
+import com.example.banking_system.domain.account.entity.BusinessAccount;
 import com.example.banking_system.common.exception.NotFoundException;
 import com.example.banking_system.common.utility.JwtUtil;
 import org.junit.jupiter.api.Assertions;

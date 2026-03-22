@@ -1,15 +1,15 @@
 package com.example.banking_system.card.unit;
 
 import com.example.banking_system.card.CardTestCases;
-import com.example.banking_system.card.dto.CreateCardPrivilegeRequest;
-import com.example.banking_system.card.dto.UpdateCardPrivilegeRequest;
-import com.example.banking_system.card.entity.CardPrivilege;
-import com.example.banking_system.card.entity.CardPrivilegeCode;
-import com.example.banking_system.card.mapper.CardPrivilegeMapper;
-import com.example.banking_system.card.service.domain.CardPrivilegeService;
-import com.example.banking_system.card.service.query.CardPrivilegeCodeQueryService;
-import com.example.banking_system.card.service.query.CardPrivilegeQueryService;
-import com.example.banking_system.card.validator.CardPrivilegeValidator;
+import com.example.banking_system.domain.card.dto.CreateCardPrivilegeRequest;
+import com.example.banking_system.domain.card.dto.UpdateCardPrivilegeRequest;
+import com.example.banking_system.domain.card.entity.CardPrivilege;
+import com.example.banking_system.domain.card.entity.CardPrivilegeCode;
+import com.example.banking_system.domain.card.mapper.CardPrivilegeMapper;
+import com.example.banking_system.domain.card.service.domain.CardPrivilegeService;
+import com.example.banking_system.domain.card.service.query.CardPrivilegeCodeQueryService;
+import com.example.banking_system.domain.card.service.query.CardPrivilegeQueryService;
+import com.example.banking_system.domain.card.validator.CardPrivilegeValidator;
 import com.example.banking_system.common.UnitTest;
 import com.example.banking_system.common.exception.ValidationException;
 import org.junit.jupiter.api.Assertions;

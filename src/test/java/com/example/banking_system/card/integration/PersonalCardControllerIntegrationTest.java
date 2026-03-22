@@ -1,13 +1,13 @@
 package com.example.banking_system.card.integration;
 
 import com.example.banking_system.account.AccountTestCases;
-import com.example.banking_system.account.controller.PersonalAccountController;
-import com.example.banking_system.account.dto.CreatePersonalAccountRequest;
+import com.example.banking_system.domain.account.controller.PersonalAccountController;
+import com.example.banking_system.domain.account.dto.CreatePersonalAccountRequest;
 import com.example.banking_system.card.CardTestCases;
-import com.example.banking_system.card.controller.CardPrivilegeController;
-import com.example.banking_system.card.controller.PersonalCardController;
-import com.example.banking_system.card.dto.CreatePersonalCardRequest;
-import com.example.banking_system.card.service.query.CardPrivilegeCodeQueryService;
+import com.example.banking_system.domain.card.controller.CardPrivilegeController;
+import com.example.banking_system.domain.card.controller.PersonalCardController;
+import com.example.banking_system.domain.card.dto.CreatePersonalCardRequest;
+import com.example.banking_system.domain.card.service.query.CardPrivilegeCodeQueryService;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.NotFoundException;

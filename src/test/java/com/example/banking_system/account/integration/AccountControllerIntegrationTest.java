@@ -1,13 +1,13 @@
 package com.example.banking_system.account.integration;
 
 import com.example.banking_system.account.AccountTestCases;
-import com.example.banking_system.account.service.query.AccountQueryService;
+import com.example.banking_system.domain.account.dto.*;
+import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.example.banking_system.common.IntegrationTest;
-import com.example.banking_system.account.controller.AccountController;
-import com.example.banking_system.account.controller.BusinessAccountController;
-import com.example.banking_system.account.controller.GovernmentAccountController;
-import com.example.banking_system.account.controller.PersonalAccountController;
-import com.example.banking_system.account.dto.*;
+import com.example.banking_system.domain.account.controller.AccountController;
+import com.example.banking_system.domain.account.controller.BusinessAccountController;
+import com.example.banking_system.domain.account.controller.GovernmentAccountController;
+import com.example.banking_system.domain.account.controller.PersonalAccountController;
 import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.NotFoundException;
 import com.example.banking_system.common.exception.UnauthorizedException;

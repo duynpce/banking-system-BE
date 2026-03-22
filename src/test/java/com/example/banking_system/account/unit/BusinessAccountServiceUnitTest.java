@@ -1,17 +1,17 @@
 package com.example.banking_system.account.unit;
 
 import com.example.banking_system.account.AccountTestCases;
-import com.example.banking_system.account.service.domain.AccountService;
-import com.example.banking_system.account.service.domain.BusinessAccountService;
-import com.example.banking_system.account.service.query.BusinessAccountQueryService;
+import com.example.banking_system.domain.account.service.domain.AccountService;
+import com.example.banking_system.domain.account.service.domain.BusinessAccountService;
+import com.example.banking_system.domain.account.service.query.BusinessAccountQueryService;
 import com.example.banking_system.common.UnitTest;
-import com.example.banking_system.account.dto.CreateBusinessAccountRequest;
-import com.example.banking_system.account.dto.UpdateBusinessAccountRequest;
-import com.example.banking_system.account.entity.BusinessAccount;
+import com.example.banking_system.domain.account.dto.CreateBusinessAccountRequest;
+import com.example.banking_system.domain.account.dto.UpdateBusinessAccountRequest;
+import com.example.banking_system.domain.account.entity.BusinessAccount;
 import com.example.banking_system.common.exception.ValidationException;
-import com.example.banking_system.account.mapper.AccountMapper;
+import com.example.banking_system.domain.account.mapper.AccountMapper;
 import com.example.banking_system.common.utility.JwtUtil;
-import com.example.banking_system.account.validator.BusinessAccountValidator;
+import com.example.banking_system.domain.account.validator.BusinessAccountValidator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.InjectMocks;

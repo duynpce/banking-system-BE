@@ -1,6 +1,7 @@
 package com.example.banking_system.auth;
 
-import com.example.banking_system.auth.dto.GetTokenResponse;
+import com.example.banking_system.domain.auth.AuthService;
+import com.example.banking_system.domain.auth.dto.GetTokenResponse;
 import com.example.banking_system.common.OAuthProperties;
 import com.example.banking_system.common.UnitTest;
 import com.example.banking_system.common.exception.UnauthorizedException;
@@ -11,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoSettings;
-import org.mockito.quality.Strictness;
 import org.springframework.http.HttpHeaders;
 import org.springframework.web.reactive.function.BodyInserter;
 import org.springframework.web.reactive.function.client.WebClient;

@@ -2,12 +2,12 @@ package com.example.banking_system.account.integration;
 
 
 import com.example.banking_system.account.AccountTestCases;
-import com.example.banking_system.account.service.query.BusinessAccountQueryService;
+import com.example.banking_system.domain.account.service.query.BusinessAccountQueryService;
 import com.example.banking_system.common.IntegrationTest;
-import com.example.banking_system.account.controller.BusinessAccountController;
-import com.example.banking_system.account.dto.CreateBusinessAccountRequest;
-import com.example.banking_system.account.dto.UpdateBusinessAccountRequest;
-import com.example.banking_system.account.entity.BusinessAccount;
+import com.example.banking_system.domain.account.controller.BusinessAccountController;
+import com.example.banking_system.domain.account.dto.CreateBusinessAccountRequest;
+import com.example.banking_system.domain.account.dto.UpdateBusinessAccountRequest;
+import com.example.banking_system.domain.account.entity.BusinessAccount;
 import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.ConflictDataException;
 import com.example.banking_system.common.exception.ValidationException;

@@ -1,7 +1,7 @@
 package com.example.banking_system.config.security;
 
-import com.example.banking_system.account.entity.Account;
-import com.example.banking_system.account.service.query.AccountQueryService;
+import com.example.banking_system.domain.account.entity.Account;
+import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.example.banking_system.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.User;

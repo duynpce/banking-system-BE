@@ -1,9 +1,9 @@
 package com.example.banking_system.card;
 
-import com.example.banking_system.account.constant.AccountType;
-import com.example.banking_system.card.constant.CardType;
-import com.example.banking_system.card.dto.*;
-import com.example.banking_system.card.entity.CardPrivilegeCode;
+import com.example.banking_system.domain.account.constant.AccountType;
+import com.example.banking_system.domain.card.constant.CardType;
+import com.example.banking_system.domain.card.dto.*;
+import com.example.banking_system.domain.card.entity.CardPrivilegeCode;
 import lombok.Getter;
 
 import java.math.BigDecimal;
