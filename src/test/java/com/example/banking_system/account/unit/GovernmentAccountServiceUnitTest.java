@@ -63,7 +63,7 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
         GovernmentAccount createdAccount = governmentAccountService.create(request);
 
         assertEquals(governmentAccount.getGovernmentDepartment(), createdAccount.getGovernmentDepartment());
-        assertEquals(mockAccountNumber, governmentAccount.getAccount().getAccountNumber());
+        assertEquals(mockAccountNumber, governmentAccount.getAccount().getNumber());
         verify(governmentAccountQueryService, times(1)).save(governmentAccount);
     }
 

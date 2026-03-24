@@ -31,7 +31,7 @@ public class PersonalAccountService {
         personalAccount.getAccount().setPassword(hashedPassword);
 
         String accountNumber = accountService.generateAccountNumber();
-        personalAccount.getAccount().setAccountNumber(accountNumber);
+        personalAccount.getAccount().setNumber(accountNumber);
 
         return personalAccountQueryService.save(personalAccount);
     }

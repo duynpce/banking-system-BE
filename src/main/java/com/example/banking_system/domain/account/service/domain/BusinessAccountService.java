@@ -31,7 +31,7 @@ public class BusinessAccountService {
         businessAccount.getAccount().setPassword(hashedPassword);
 
         String accountNumber = accountService.generateAccountNumber();
-        businessAccount.getAccount().setAccountNumber(accountNumber);
+        businessAccount.getAccount().setNumber(accountNumber);
 
         return businessAccountQueryService.save(businessAccount);
 

@@ -9,8 +9,8 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface TransactionMapper {
 
-    @Mapping(target = "fromAccountNumber", source = "fromAccount.accountNumber")
-    @Mapping(target = "toAccountNumber", source = "toAccount.accountNumber")
+    @Mapping(target = "fromAccountNumber", source = "fromAccount.number")
+    @Mapping(target = "toAccountNumber", source = "toAccount.number")
     GetTransactionResponse toDto(Transaction transaction);
 
     List<GetTransactionResponse> toDtoList(List<Transaction> transactions);

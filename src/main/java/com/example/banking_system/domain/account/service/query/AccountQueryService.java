@@ -30,7 +30,7 @@ public class AccountQueryService {
     }
 
     public boolean existsByAccountNumber(String accountNumber) {
-        return accountRepository.existsByAccountNumber(accountNumber);
+        return accountRepository.existsByNumber(accountNumber);
     }
 
     public void delete(Account account) {

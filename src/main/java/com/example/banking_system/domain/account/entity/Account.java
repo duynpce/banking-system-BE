@@ -35,8 +35,8 @@ public class Account {
     @Column(name = "balance", nullable = false, precision = 19, scale = 2)
     private BigDecimal balance = BigDecimal.ZERO;
 
-    @Column(name = "account_number", nullable = false, unique = true, updatable = false)
-    private String accountNumber;
+    @Column(name = "number", nullable = false, unique = true, updatable = false)
+    private String number;
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;

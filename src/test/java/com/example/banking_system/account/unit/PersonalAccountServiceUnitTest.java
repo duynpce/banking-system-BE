@@ -63,7 +63,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
         PersonalAccount createdAccount = personalAccountService.create(request);
 
         assertEquals(personalAccount, createdAccount);
-        assertEquals(mockAccountNumber, personalAccount.getAccount().getAccountNumber());
+        assertEquals(mockAccountNumber, personalAccount.getAccount().getNumber());
         verify(personalAccountQueryService, times(1)).save(personalAccount);
     }
 

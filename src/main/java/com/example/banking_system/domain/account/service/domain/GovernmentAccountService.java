@@ -31,7 +31,7 @@ public class GovernmentAccountService {
         governmentAccount.getAccount().setPassword(hashedPassword);
 
         String accountNumber = accountService.generateAccountNumber();
-        governmentAccount.getAccount().setAccountNumber(accountNumber);
+        governmentAccount.getAccount().setNumber(accountNumber);
 
         return governmentAccountQueryService.save(governmentAccount);
     }

@@ -63,7 +63,7 @@ public class BusinessAccountServiceUnitTest extends UnitTest {
         BusinessAccount createdAccount = businessAccountService.create(request);
 
         assertEquals(businessAccount, createdAccount);
-        assertEquals(mockAccountNumber, businessAccount.getAccount().getAccountNumber());
+        assertEquals(mockAccountNumber, businessAccount.getAccount().getNumber());
 
         verify(businessAccountQueryService, times(1)).save(businessAccount);
     }
