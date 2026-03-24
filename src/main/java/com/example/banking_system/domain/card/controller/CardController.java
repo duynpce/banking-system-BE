@@ -16,12 +16,22 @@ public class CardController {
     private final CardService cardService;
 
     // Get all cards for the authenticated user by its username from JWT
-    @GetMapping
+    @GetMapping(params = {"!page", "!limit"})
     // add meta data later
     public ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> getAllFromByJwt(){
         List<? extends GetCardResponse> response = cardService.GetAllCardByJwt();
         return ResponseEntity.ok(ResponseDto.success(response, "Cards retrieved successfully"));
     }
+
+    @GetMapping(params = {"page", "limit"})
+    public ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> getFromByJwtWithPagination(
+            @RequestParam int page,
+            @RequestParam int limit
+    ){
+        List<? extends GetCardResponse> response = cardService.getAllCardByJwtWithPagination(page, limit);
+        return ResponseEntity.ok(ResponseDto.success(response, "Cards retrieved successfully"));
+    }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto<GetCardResponse>> getById(@PathVariable long id){

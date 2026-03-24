@@ -12,6 +12,7 @@ import com.example.banking_system.common.exception.ForbiddenException;
 import com.example.banking_system.common.utility.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -55,6 +56,18 @@ public class CardService {
     }
 
     @Transactional(readOnly = true)
+    public List<? extends GetCardResponse> getAllCardByJwtWithPagination(int page, int limit) {
+        final String username = jwtUtil.getUsername();
+        Page<Card> cardPage = cardQueryService.findByUsernameWithPagination(username, page, limit);
+
+        List<CardDetails> cardDetailsList = cardPage.getContent().stream()
+                .map(Card::getCardDetails)
+                .toList();
+
+        return cardMapper.toDtoList(cardDetailsList);
+    }
+
+    @Transactional(readOnly = true)
     public GetCardResponse getFistCardByJwt() {
         final String username = jwtUtil.getUsername();
         Account account = accountQueryService.findByUsername(username);
@@ -94,7 +107,6 @@ public class CardService {
         String sequence = String.valueOf(cardQueryService.getCardNumberSequence()).formatted("%012d");
         return BIN + sequence;
     }
-
     //later reimplement
     // public BigDecimal getAnnualFee(Card card) {
 //        String multiplierKind = "ANNUAL_FEE";
