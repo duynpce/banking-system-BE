@@ -37,8 +37,9 @@ public class OAuth2ResourceServerConfig {
 //                        )
                         .securityMatcher("/v1/**")
                         .authorizeHttpRequests(auth -> auth
-                                .requestMatchers("/v1/auth/**","/v1/test/**",
-                                        "/v1/*/exists/**").permitAll()
+                                .requestMatchers(
+                                        "/v1/auth/**","/v1/test/**", "/v1/*/exists/**",
+                                        "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/v1/business-accounts","/v1/personal-accounts", "/v1/government-accounts").permitAll()
                                 .anyRequest().authenticated()
 

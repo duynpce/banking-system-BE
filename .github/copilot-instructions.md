@@ -86,3 +86,38 @@ Feature-based folder structure. Each feature follows this pattern:
             GetAccountResponse Response = accountService.get();
             return ResponseEntity.ok(ResponseDto.success(Response, "Account retrieved successfully"));
         }
+
+# pagination sample
+
+    sample of paginated query from controller to service to repository:
+    repository method example:
+      Page<Card> findByAccount_Username(String username, Pageable pageable);
+
+    query service method example:
+      public Page<Card> findByUsernameWithPagination(String username, int page, int limit) {
+          return cardRepository.findByAccount_Username(username, PageRequest.of(page, limit));
+      }
+
+    domain service method example:
+      @Transactional(readOnly = true)
+      public List<? extends GetCardResponse> getAllCardByJwtWithPagination(int page, int limit) {
+          String username = jwtUtil.getUsername();
+          Page<Card> cardPage = cardQueryService.findByUsernameWithPagination(username, page, limit);
+
+          List<CardDetails> cardDetailsList = cardPage.getContent().stream()
+                  .map(Card::getCardDetails)
+                  .toList();
+
+          return cardMapper.toDtoList(cardDetailsList);
+      }
+
+    controller method example:
+      @GetMapping(params = {"page", "limit"})
+      public ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> getAllFromByJwtWithPagination(
+              @RequestParam int page,
+              @RequestParam int limit
+      ){
+          List<? extends GetCardResponse> response = cardService.getAllCardByJwtWithPagination(page, limit);
+          return ResponseEntity.ok(ResponseDto.success(response, "Cards retrieved successfully"));
+      }
+
