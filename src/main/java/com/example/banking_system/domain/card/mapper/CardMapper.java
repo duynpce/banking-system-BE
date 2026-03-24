@@ -16,12 +16,12 @@ public interface CardMapper {
 
     @SubclassMapping(source = PersonalCard.class, target = GetPersonalCardResponse.class)
     @SubclassMapping(source = BusinessCard.class, target = GetBusinessCardResponse.class)
-    @Mapping(target = "cardNumber",     source = "card.cardNumber")
+    @Mapping(target = "number",     source = "card.number")
     @Mapping(target = "id",             source = "card.id")
     @Mapping(target = "expirationDate", source = "card.expirationDate")
     @Mapping(target = "type",           source = "card.type")
     @Mapping(target = "privilege",  source = "card.privilege")
-    @Mapping(target = "cardHolder",    source = "card.cardHolder")
+    @Mapping(target = "holder",    source = "card.holder")
     GetCardResponse toDto(CardDetails details);
 
     List<GetCardResponse> toDtoList(List<CardDetails> detailsList);

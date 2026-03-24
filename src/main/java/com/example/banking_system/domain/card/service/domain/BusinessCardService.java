@@ -33,7 +33,7 @@ public class BusinessCardService {
         String cardNumber = cardService.generateCardNumber();
 
         CardPrivilege privilege = cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getPrivilegeCode());
-        BusinessCard businessCard = new BusinessCard(request.getPinCode(), cardNumber, request.getCardHolder(), request.getType(), privilege);
+        BusinessCard businessCard = new BusinessCard(request.getPinCode(), cardNumber, request.getHolder(), request.getType(), privilege);
         businessCard.getCard().setAccount(account);
         cardService.updateExpirationDateOnCreate(businessCard.getCard());
 

@@ -25,7 +25,7 @@ public class CardTestCases {
     public CreateBusinessCardRequest getCreateBusinessCardRequestTestCase() {
         CreateBusinessCardRequest request = new CreateBusinessCardRequest();
         fillCreateCardRequest(request);
-        request.setCardHolder("John Doe");
+        request.setHolder("John Doe");
         return request;
     }
 

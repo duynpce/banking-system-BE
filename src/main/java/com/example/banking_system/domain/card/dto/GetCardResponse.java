@@ -7,9 +7,9 @@ import lombok.Data;
 @Data
 public class GetCardResponse {
     private Long id;
-    private String cardNumber;
+    private String number;
     private String expirationDate;
     private CardType type;
     private CardPrivilege privilege;
-    private String cardHolder;
+    private String holder;
 }

@@ -9,7 +9,7 @@ import lombok.EqualsAndHashCode;
 public class CreateBusinessCardRequest extends  CreateCardRequest{
 
     @NotBlank(message = "cardHolder must not be blank")
-    private String cardHolder;
+    private String holder;
 
     public  CreateBusinessCardRequest() {
 

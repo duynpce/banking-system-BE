@@ -19,14 +19,14 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
-    @Column(name = "card_number", nullable = false, updatable = false, unique = true)
-    private String cardNumber;
+    @Column(name = "number", nullable = false, updatable = false, unique = true)
+    private String number;
 
     @Column(name = "expiration_date", nullable = false, updatable = false)
     private LocalDate expirationDate;
 
-    @Column(name = "card_holder", nullable = false)
-    private String cardHolder;
+    @Column(name = "holder", nullable = false)
+    private String holder;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
@@ -66,10 +66,10 @@ public class Card {
     public Card(){
     }
 
-    public Card(String pinCode, String cardNumber, String cardHolder, CardType type, CardPrivilege privilege) {
+    public Card(String pinCode, String number, String holder, CardType type, CardPrivilege privilege) {
         this.pinCode = pinCode;
-        this.cardNumber = cardNumber;
-        this.cardHolder = cardHolder;
+        this.number = number;
+        this.holder = holder;
         this.type = type;
         this.privilege = privilege;
         this.spendingLimitDaily = privilege.getSpendingLimitDaily();
