@@ -5,6 +5,7 @@ import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,14 +32,14 @@ import org.springframework.security.oauth2.server.authorization.settings.TokenSe
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.logout.LogoutSuccessHandler;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
-import java.util.List;
 import java.util.UUID;
 
 @Configuration
@@ -46,7 +47,6 @@ import java.util.UUID;
 public class OAuth2AuthorizationServerConfig {
 
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationEntryPoint authenticationEntryPoint;
     private final OAuthProperties oAuthProperties;
     private final CorsConfigurationSource corsConfigurationSource;
 
@@ -60,15 +60,22 @@ public class OAuth2AuthorizationServerConfig {
         http
                 .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .requestMatchers(oAuthProperties.getLogoutUri()).permitAll()
                         .anyRequest().authenticated()
                 )
                 .with(authorizationServerConfigurer, (authorizationServer) ->
                         authorizationServer
                                 .registeredClientRepository(registeredClientRepository())
-                                .oidc(Customizer.withDefaults())
+                                .oidc(oidc -> oidc.logoutEndpoint(
+                                        logout -> logout.
+                                                logoutResponseHandler((request, response, authentication) -> response.sendRedirect(oAuthProperties.getOriginUri() + "/login?logout=success"))
+                                                .errorResponseHandler((request, response, exception) ->  response.sendRedirect(oAuthProperties.getOriginUri() + "/login?logout=error"))
+
+                                        )
+                                )
                 )
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .authenticationEntryPoint(authServerAuthenticationEntryPoint())
                 )
                 .csrf(AbstractHttpConfigurer::disable) //temp
                 .cors(cors -> cors.configurationSource(corsConfigurationSource));
@@ -93,11 +100,14 @@ public class OAuth2AuthorizationServerConfig {
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl(oAuthProperties.getAuthorizationUri() + "?response_type=code&client_id="
                                 + oAuthProperties.getClientId() + "&scope=" + oAuthProperties.getScopeRead() + " " +
-                                oAuthProperties.getScopeWrite() + "&redirect_uri=" + oAuthProperties.getRedirectUri())
+                                oAuthProperties.getScopeWrite() + " openid"+ "&redirect_uri=" + oAuthProperties.getRedirectUri())
                         .failureHandler(customLoginFailureHandler())
                         .usernameParameter("username")
                         .passwordParameter("password")
                         .permitAll()
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authServerAuthenticationEntryPoint())
                 );
 
         return http.build();
@@ -114,7 +124,9 @@ public class OAuth2AuthorizationServerConfig {
         };
     }
 
-
+    AuthenticationEntryPoint authServerAuthenticationEntryPoint() {
+        return (request, response, authException) -> response.sendRedirect(oAuthProperties.getOriginUri() + "/login");
+    }
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
@@ -171,7 +183,7 @@ public class OAuth2AuthorizationServerConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-            return  NimbusJwtDecoder.withJwkSetUri(oAuthProperties.getJwkSetUri()).build();
+            return  NimbusJwtDecoder.withJwkSetUri(oAuthProperties.getAuthServerUri() + oAuthProperties.getJwkSetUri()).build();
     }
 
     private static RSAKey generateRsa() {

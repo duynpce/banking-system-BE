@@ -72,6 +72,10 @@ public class CardService {
         final String username = jwtUtil.getUsername();
         Account account = accountQueryService.findByUsername(username);
 
+        if(account.getCardDetailsList().isEmpty()) {
+            return null;
+        }
+
         return  cardMapper.toDto(account.getCardDetailsList().getFirst());
     }
 

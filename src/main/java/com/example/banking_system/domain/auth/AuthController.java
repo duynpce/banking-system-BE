@@ -22,7 +22,7 @@ public class AuthController {
     private final AuthService authService;
 
     @GetMapping("/callback")
-    public ResponseEntity<ResponseDto<String>> oauth2Callback(@NotBlank(message = "code cannot be blank") @RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<ResponseDto<GetTokenResponse>> oauth2Callback(@NotBlank(message = "code cannot be blank") @RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response) {
         GetTokenResponse getTokenResponse = authService.getToken(code, request);
         ResponseCookie cookie = ResponseCookie.from("refreshToken", getTokenResponse.getRefreshToken())
                 .httpOnly(true)
@@ -32,9 +32,12 @@ public class AuthController {
                 .sameSite(Cookie.SameSite.NONE.toString())
                 .build();
 
+
+        getTokenResponse.setRefreshToken(null);
+
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
         return ResponseEntity
-                .ok(ResponseDto.success(getTokenResponse.getAccessToken(), "login successful"));
+                .ok(ResponseDto.success(getTokenResponse, "login successful"));
 
     }
 
@@ -55,4 +58,23 @@ public class AuthController {
 
         return ResponseEntity.ok(ResponseDto.success(getTokenResponse.getAccessToken(), "token refreshed successfully"));
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseDto<String>> logout(@CookieValue("refreshToken") String refreshToken, HttpSession session, HttpServletRequest request, HttpServletResponse response) {
+
+        ResponseEntity<ResponseDto<String>> responseEntity = authService.logout(refreshToken, request);
+        ResponseCookie cookie = ResponseCookie.from("refreshToken", null)
+                .httpOnly(true)
+                .secure(true) // Set to true in production (requires HTTPS)
+                .path("/")
+                .maxAge(0)
+                .sameSite(Cookie.SameSite.NONE.toString())
+                .build();
+
+        response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+
+        return responseEntity;
+    }
+
+
 }

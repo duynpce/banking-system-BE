@@ -47,7 +47,7 @@ public class AuthControllerIntegrationTest extends IntegrationTest {
         when(authService.getToken(anyString(), any())).thenReturn(mockResponse);
 
         // Act
-        ResponseEntity<ResponseDto<String>> result = authController.oauth2Callback(code, request, response);
+        ResponseEntity<ResponseDto<GetTokenResponse>> result = authController.oauth2Callback(code, request, response);
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode(), "Response status should be OK");

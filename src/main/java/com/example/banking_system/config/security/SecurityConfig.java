@@ -41,13 +41,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    AuthenticationEntryPoint authenticationEntryPoint() {
-        return (request, response, authException) -> {
-            response.sendRedirect(oAuthProperties.getOriginUri() + "/login");
-        };
-    }
-
     // Custom Access Denied Handler, called when authenticated user tries to access a resource they don't have permission for
     @Bean
     AccessDeniedHandler accessDeniedHandler() {

@@ -59,6 +59,7 @@ public class AuthServiceUnitTest extends UnitTest {
         request.setAttribute(HttpHeaders.COOKIE, "SESSION=" + sessionId);
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
+        String idToken = "idToken";
 
         when(oAuthProperties.getRedirectUri()).thenReturn("http://localhost:8080/v1/auth/callback");
         when(oAuthProperties.getAuthServerUri()).thenReturn("http://auth-server.com");
@@ -73,7 +74,7 @@ public class AuthServiceUnitTest extends UnitTest {
         when(requestBodySpec.contentType(any())).thenReturn(requestBodySpec);
         when(requestBodySpec.body(any(BodyInserter.class))).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
-        when(responseSpec.bodyToMono(GetTokenResponse.class)).thenReturn(Mono.just(new GetTokenResponse(accessToken, refreshToken)));
+        when(responseSpec.bodyToMono(GetTokenResponse.class)).thenReturn(Mono.just(new GetTokenResponse(accessToken, refreshToken, idToken)));
 
         GetTokenResponse response = authService.getToken(code, request);
 
@@ -131,7 +132,7 @@ public class AuthServiceUnitTest extends UnitTest {
         when(requestBodySpec.body(any(BodyInserter.class))).thenReturn(requestHeadersSpec);
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(GetTokenResponse.class))
-                .thenReturn(Mono.just(new GetTokenResponse("access", "refresh")));
+                .thenReturn(Mono.just(new GetTokenResponse("access", "refresh", "idToken")));
 
         GetTokenResponse result = authService.refreshToken(refreshToken, session, request);
 

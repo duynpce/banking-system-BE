@@ -1,7 +1,9 @@
 package com.example.banking_system.config.security;
 
 import com.example.banking_system.common.OAuthProperties;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,10 +23,9 @@ import org.springframework.web.cors.CorsConfigurationSource;
 import java.util.List;
 
 @Configuration
+@Slf4j
 @RequiredArgsConstructor
 public class OAuth2ResourceServerConfig {
-        private final AuthenticationEntryPoint authenticationEntryPoint;
-        private final OAuthProperties oAuthProperties;
         private final CorsConfigurationSource corsConfigurationSource;
 
         // Resource Server Security Filter Chain
@@ -46,12 +47,35 @@ public class OAuth2ResourceServerConfig {
                         )
                         .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()))
                         .exceptionHandling(ex -> ex
-                                .authenticationEntryPoint(authenticationEntryPoint)
+                                .authenticationEntryPoint(resourceServerAuthenticationEntryPoint())
                         )
                         .csrf(AbstractHttpConfigurer::disable)
                         .cors( cors -> cors.configurationSource(corsConfigurationSource));
                 return httpSecurity.build();
 
         }
+
+        private AuthenticationEntryPoint resourceServerAuthenticationEntryPoint() {
+                return (request, response, authException) -> {
+                        String authHeader = request.getHeader("Authorization");
+                        String message;
+
+                        if (authHeader == null) {
+                                message = "MISSING_AUTHORIZATION.";
+                        }else if(!authHeader.startsWith("Bearer")){
+                                message = "INVALID_AUTHORIZATION_HEADER.";
+                        }
+                        else {
+                                message = "INVALID_OR_EXPIRED_TOKEN.";
+                        }
+
+
+                        String path = request.getRequestURI();
+                        response.setContentType("application/json");
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        log.error(message + " with the path: " + path);
+                        response.getWriter().write(message);
+                        };
+        };
 
 }
