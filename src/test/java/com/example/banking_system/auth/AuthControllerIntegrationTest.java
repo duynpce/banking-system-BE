@@ -52,7 +52,7 @@ public class AuthControllerIntegrationTest extends IntegrationTest {
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode(), "Response status should be OK");
         assertNotNull(result.getBody(), "Response body should not be null");
-        assertEquals(accessToken, result.getBody().getData(), "Access token should match");
+        assertEquals(accessToken, result.getBody().getData().getAccessToken(), "Access token should match");
         assertNotNull(response.getHeader("Set-Cookie"), "Cookie should be set");
         assertTrue(Objects.requireNonNull(response.getHeader("Set-Cookie")).contains("refreshToken"), "Cookie should contain refresh token");
     }
