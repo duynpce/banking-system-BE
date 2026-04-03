@@ -49,7 +49,7 @@ public class CardTestCases {
         request.setCashbackRate(new BigDecimal("0.1"));
         request.setCardType(CardType.CREDIT);
         request.setAccountType(AccountType.BUSINESS);
-        request.setEffectiveFrom(LocalDate.now().minusDays(1));
+        request.setEffectiveFrom(LocalDate.now());
         request.setEffectiveTo(LocalDate.now().plusYears(1));
         return request;
     }
@@ -60,6 +60,26 @@ public class CardTestCases {
         request.setAnnualFee(new BigDecimal("0.2"));
         request.setCashbackRate(new BigDecimal("0.2"));
         request.setEffectiveFrom(LocalDate.now());
+        request.setEffectiveTo(LocalDate.now().plusYears(2));
+        return request;
+    }
+
+    public CreateCardPrivilegeCodeRequest getCreateCardPrivilegeCodeRequestTestCase() {
+        CreateCardPrivilegeCodeRequest request = new CreateCardPrivilegeCodeRequest();
+        request.setCode(privilegeCode);
+        request.setExpirationYears(5);
+        request.setSpendingLimitDaily(new BigDecimal("1000.00"));
+        request.setEffectiveFrom(LocalDate.now());
+        request.setEffectiveTo(LocalDate.now().plusYears(1));
+        return request;
+    }
+
+    public UpdateCardPrivilegeCodeRequest getUpdateCardPrivilegeCodeRequestTestCase() {
+        UpdateCardPrivilegeCodeRequest request = new UpdateCardPrivilegeCodeRequest();
+        request.setCode(privilegeCode);
+        request.setExpirationYears(7);
+        request.setSpendingLimitDaily(new BigDecimal("1200.00"));
+        request.setEffectiveFrom(LocalDate.now().plusDays(1));
         request.setEffectiveTo(LocalDate.now().plusYears(2));
         return request;
     }

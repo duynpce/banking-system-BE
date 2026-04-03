@@ -193,3 +193,60 @@ Feature-based folder structure. Each feature follows this pattern:
           return ResponseEntity.ok(ResponseDto.success(null, "Card privilege code updated successfully"));
       }
 
+# test sample
+
+    unit test sample (service):
+      @Test
+      public void createCardPrivilegeCodeSuccess() {
+          // arrange valid request + mapper + validator + query save mocks
+          // act service.create(request)
+          // assert saved entity returned and dependencies invoked
+      }
+
+      @Test
+      public void createCardPrivilegeCodeFailureValidationError() {
+          // arrange validator throws ValidationException
+          // act/assert service.create(request) throws ValidationException
+          // verify save is never called
+      }
+
+      @Test
+      public void updateCardPrivilegeCodeSuccess() {
+          // arrange active entity lookup + validator update + save mocks
+          // act service.update(request)
+          // assert updated entity returned and dependencies invoked
+      }
+
+      @Test
+      public void updateCardPrivilegeCodeFailureValidationError() {
+          // arrange validator throws ValidationException
+          // act/assert service.update(request) throws ValidationException
+          // verify save is never called
+      }
+
+    integration test sample (controller):
+      @Test
+      public void testCreateCardPrivilegeCodeSuccess() {
+          // arrange valid request DTO
+          // act controller.create(request)
+          // assert ResponseDto success and data persisted
+      }
+
+      @Test
+      public void testCreateCardPrivilegeCodeFailValidation() {
+          // arrange invalid payload (e.g. effectiveTo <= effectiveFrom)
+          // act/assert controller.create(request) throws ValidationException
+      }
+
+      @Test
+      public void testUpdateCardPrivilegeCodeSuccess() {
+          // arrange existing code via create then call update
+          // assert ResponseDto success and persisted values changed
+      }
+
+      @Test
+      public void testUpdateCardPrivilegeCodeFailValidation() {
+          // arrange update request with no updatable fields
+          // act/assert controller.update(request) throws ValidationException
+      }
+
