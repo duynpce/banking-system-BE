@@ -2,8 +2,6 @@ package com.example.banking_system.domain.card.repository;
 
 import com.example.banking_system.domain.card.entity.CardPrivilegeCode;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
@@ -11,18 +9,18 @@ import java.util.Optional;
 
 @Repository
 public interface CardPrivilegeCodeRepository extends JpaRepository<CardPrivilegeCode, Long> {
-    @Query(value = """
-    SELECT EXISTS(
-        SELECT 1 FROM card_privilege_code
-        WHERE code = :code
-        AND daterange(effective_from, effective_to, '[]')
-            && daterange(:from, :to, '[]')
-    )
-    """, nativeQuery = true)
-    boolean existsByCodeAndDateRangeOverlap(
-            @Param("code") String code,
-            @Param("from") LocalDate effectiveFrom,
-            @Param("to") LocalDate effectiveTo
+
+    boolean existsByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+            String code,
+            LocalDate effectiveTo,
+            LocalDate effectiveFrom
+    );
+
+    boolean existsByCodeAndIdNotAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+            String code,
+            Long excludeId,
+            LocalDate effectiveTo,
+            LocalDate effectiveFrom
     );
 
     //find code that is effective on a specific date
@@ -33,9 +31,20 @@ public interface CardPrivilegeCodeRepository extends JpaRepository<CardPrivilege
     );
 
     default Optional<CardPrivilegeCode> findByCodeAndDate(String code, LocalDate date) {
-
         return findByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
                 code, date, date
+        );
+    }
+
+    default boolean hasOverlap(String code, LocalDate effectiveFrom, LocalDate effectiveTo) {
+        return existsByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+                code, effectiveTo, effectiveFrom
+        );
+    }
+
+    default boolean hasOverlapExcludingId(String code, LocalDate effectiveFrom, LocalDate effectiveTo, Long excludeId) {
+        return existsByCodeAndIdNotAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+                code, excludeId, effectiveTo, effectiveFrom
         );
     }
 
