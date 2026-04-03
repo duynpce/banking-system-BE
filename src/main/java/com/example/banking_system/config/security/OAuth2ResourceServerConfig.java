@@ -27,15 +27,16 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OAuth2ResourceServerConfig {
         private final CorsConfigurationSource corsConfigurationSource;
+        private final OAuthProperties  oAuthProperties;
 
         // Resource Server Security Filter Chain
         @Bean
         @Order(3)
         SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
                 httpSecurity.csrf(AbstractHttpConfigurer::disable)
-//                        .sessionManagement(session -> session
-//                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-//                        )
+                        .sessionManagement(session -> session
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        )
                         .securityMatcher("/v1/**")
                         .authorizeHttpRequests(auth -> auth
                                 .requestMatchers(
@@ -69,11 +70,12 @@ public class OAuth2ResourceServerConfig {
                                 message = "INVALID_OR_EXPIRED_TOKEN.";
                         }
 
-
+                        //temp log for development  delete later
                         String path = request.getRequestURI();
+                        log.error(message + " with the path: " + path);
+
                         response.setContentType("application/json");
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                        log.error(message + " with the path: " + path);
                         response.getWriter().write(message);
                         };
         };
