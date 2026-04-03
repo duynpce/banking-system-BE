@@ -85,7 +85,7 @@ public class CardPrivilegeServiceUnitTest extends UnitTest {
     @Test
     public void updateCardPrivilegeSuccess() {
         UpdateCardPrivilegeRequest request = cardTestCases.getUpdateCardPrivilegeRequestTestCase();
-
+        
         CardPrivilegeCode code = new CardPrivilegeCode();
         code.setCode(request.getCode());
 
