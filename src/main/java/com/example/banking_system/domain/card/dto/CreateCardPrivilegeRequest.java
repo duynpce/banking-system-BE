@@ -2,6 +2,8 @@ package com.example.banking_system.domain.card.dto;
 
 import com.example.banking_system.domain.account.constant.AccountType;
 import com.example.banking_system.domain.card.constant.CardType;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -19,9 +21,11 @@ public class CreateCardPrivilegeRequest {
     private String code;
 
     @NotNull(message = "Base annual fee must not be null")
+    @Min(value = 0, message = "Base annual fee must be non-negative")
     private BigDecimal annualFee;
 
     @NotNull(message = "Cashback percentage must not be null")
+    @Min(value = 0, message = "Cashback percentage must be non-negative")
     private BigDecimal cashbackRate;
 
     @NotNull(message = "Account type is required")
@@ -30,10 +34,12 @@ public class CreateCardPrivilegeRequest {
     @NotNull(message = "Card type is required")
     private CardType cardType;
 
-    @NotNull
+    @NotNull(message = "Effective from date is required")
+    @FutureOrPresent(message = "Effective from date must be today or in the future")
     private LocalDate effectiveFrom;
 
-    @NotNull
+    @NotNull(message = "Effective to date is required")
+    @FutureOrPresent(message = "Effective to date must be today or in the future")
     private LocalDate effectiveTo;
 
 }

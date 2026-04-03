@@ -11,14 +11,7 @@ import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Entity
-@Table(
-        name = "card_privilege",
-        uniqueConstraints = {
-        @UniqueConstraint(
-        name = "uk_card_privilege_acc_type_card_type",
-        columnNames = { "for_account_type", "for_card_type" }
-)
-    })
+@Table(name = "card_privilege")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

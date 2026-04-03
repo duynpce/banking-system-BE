@@ -93,6 +93,7 @@ public class AuthService {
     }
 
 
+    //temp
     //will create blacklist for access token in redis later
     public ResponseEntity<ResponseDto<String>> logout (String refreshToken, HttpServletRequest request) {
         if (refreshToken == null || refreshToken.isEmpty()) {
