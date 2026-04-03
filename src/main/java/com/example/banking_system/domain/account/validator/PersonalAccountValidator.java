@@ -8,6 +8,9 @@ import com.example.banking_system.common.utility.Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+
 @Component
 @RequiredArgsConstructor
 public class PersonalAccountValidator {
@@ -18,6 +21,7 @@ public class PersonalAccountValidator {
     public void validateCreate(PersonalAccount personalAccount) {
         accountValidator.validateUniqueAccountDetails(personalAccount.getAccount());
         validateUniqueAccountPersonalDetails(personalAccount);
+        validateAdult(personalAccount.getDateOfBirth());
     }
 
     public void validateUniqueAccountPersonalDetails(PersonalAccount personalAccount) {
@@ -45,6 +49,7 @@ public class PersonalAccountValidator {
         }
 
         if (request.getDateOfBirth() != null) {
+            validateAdult(request.getDateOfBirth());
             existingAccount.setDateOfBirth(request.getDateOfBirth());
         }
 
@@ -55,6 +60,13 @@ public class PersonalAccountValidator {
 
         if (request.getGender() != null) {
             existingAccount.setGender(request.getGender());
+        }
+    }
+
+    private void validateAdult(LocalDate dateOfBirth) {
+        LocalDate todayUtc = LocalDate.now(ZoneOffset.UTC);
+        if (dateOfBirth.isAfter(todayUtc.minusYears(18))) {
+            throw new ValidationException("date of birth must be at least 18 years old");
         }
     }
 }

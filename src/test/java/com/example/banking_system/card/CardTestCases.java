@@ -11,6 +11,7 @@ import java.time.LocalDate;
 
 @Getter
 public class CardTestCases {
+    private final String privilegeCode = "CODE";
 
     private static CardTestCases instance;
 
@@ -36,28 +37,28 @@ public class CardTestCases {
     }
 
     private void fillCreateCardRequest(CreateCardRequest request) {
-        request.setPrivilegeCode("code");
+        request.setPrivilegeCode(privilegeCode);
         request.setPinCode("123456");
         request.setType(CardType.CREDIT);
     }
 
     public CreateCardPrivilegeRequest getCreateCardPrivilegeRequestTestCase() {
         CreateCardPrivilegeRequest request = new CreateCardPrivilegeRequest();
-        request.setCode("code");
+        request.setCode(privilegeCode);
         request.setAnnualFee(new BigDecimal("0.1"));
         request.setCashbackRate(new BigDecimal("0.1"));
         request.setCardType(CardType.CREDIT);
         request.setAccountType(AccountType.BUSINESS);
-        request.setEffectiveFrom(LocalDate.now());
+        request.setEffectiveFrom(LocalDate.now().minusDays(1));
         request.setEffectiveTo(LocalDate.now().plusYears(1));
         return request;
     }
 
     public UpdateCardPrivilegeRequest getUpdateCardPrivilegeRequestTestCase() {
         UpdateCardPrivilegeRequest request = new UpdateCardPrivilegeRequest();
-        request.setCode("code");
+        request.setCode(privilegeCode);
         request.setAnnualFee(new BigDecimal("0.2"));
-        request.setCashBackRate(new BigDecimal("0.2"));
+        request.setCashbackRate(new BigDecimal("0.2"));
         request.setEffectiveFrom(LocalDate.now());
         request.setEffectiveTo(LocalDate.now().plusYears(2));
         return request;
@@ -65,7 +66,7 @@ public class CardTestCases {
 
     public CardPrivilegeCode getCardPrivilegeCodeTestCase() {
         CardPrivilegeCode code = new CardPrivilegeCode();
-        code.setCode("code");
+        code.setCode(privilegeCode);
         code.setExpirationYears(5);
         code.setSpendingLimitDaily(new BigDecimal("1000.00"));
         code.setEffectiveFrom(LocalDate.now());

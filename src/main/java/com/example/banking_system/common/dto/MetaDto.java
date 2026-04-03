@@ -6,7 +6,7 @@ import lombok.Data;
 @Data
 @Builder
 public class MetaDto {
-    private long totalItems;
+    private int totalItems;
     private int totalPages;
     private int currentPage;
     private int pageSize;

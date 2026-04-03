@@ -17,6 +17,7 @@ public class CardPrivilegeController {
     private final CardPrivilegeService cardPrivilegeService;
     private final CardPrivilegeQueryService cardPrivilegeQueryService;
 
+    @PostMapping
     public ResponseEntity<ResponseDto<String>> create(@Valid @RequestBody CreateCardPrivilegeRequest request){
         cardPrivilegeService.create(request);
         return ResponseEntity.ok(ResponseDto.success(null, "Card privilege created successfully"));

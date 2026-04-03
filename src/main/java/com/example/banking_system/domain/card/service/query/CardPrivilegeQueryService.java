@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 
 @Service
 @RequiredArgsConstructor
@@ -19,7 +20,7 @@ public class CardPrivilegeQueryService {
     }
 
     public CardPrivilege findByPrivilegeCodeAndIsActive(String privilegeCode) {
-        return cardPrivilegeRepository.findByPrivilegeCodeAndDate(privilegeCode, LocalDate.now()).orElseThrow(
+        return cardPrivilegeRepository.findByPrivilegeCodeAndDate(privilegeCode, LocalDate.now(ZoneOffset.UTC)).orElseThrow(
                 () -> new NotFoundException(("Card privilege not found with code: " + privilegeCode))
         );
     }
