@@ -3,6 +3,7 @@ package com.example.banking_system.card;
 import com.example.banking_system.domain.account.constant.AccountType;
 import com.example.banking_system.domain.card.constant.CardType;
 import com.example.banking_system.domain.card.dto.*;
+import com.example.banking_system.domain.card.entity.CardPrivilege;
 import com.example.banking_system.domain.card.entity.CardPrivilegeCode;
 import lombok.Getter;
 
@@ -92,6 +93,47 @@ public class CardTestCases {
         code.setEffectiveFrom(LocalDate.now());
         code.setEffectiveTo(LocalDate.now().plusYears(1));
         return code;
+    }
+
+    public CardPrivilege getCardPrivilegeTestCase() {
+        CreateCardPrivilegeRequest request = getCreateCardPrivilegeRequestTestCase();
+        CardPrivilege cardPrivilege = new CardPrivilege();
+        cardPrivilege.setAccountType(request.getAccountType());
+        cardPrivilege.setCardType(request.getCardType());
+        cardPrivilege.setAnnualFee(request.getAnnualFee());
+        cardPrivilege.setCashbackRate(request.getCashbackRate());
+        cardPrivilege.setEffectiveFrom(request.getEffectiveFrom());
+        cardPrivilege.setEffectiveTo(request.getEffectiveTo());
+        cardPrivilege.setCardPrivilegeCode(getCardPrivilegeCodeTestCase());
+        return cardPrivilege;
+    }
+
+    public GetCardPrivilegeResponse getCardPrivilegeResponseTestCase() {
+        CardPrivilege cardPrivilege = getCardPrivilegeTestCase();
+        GetCardPrivilegeResponse response = new GetCardPrivilegeResponse();
+        response.setId(1L);
+        response.setPrivilegeCode(cardPrivilege.getPrivilegeCode());
+        response.setAccountType(cardPrivilege.getAccountType());
+        response.setCardType(cardPrivilege.getCardType());
+        response.setAnnualFee(cardPrivilege.getAnnualFee());
+        response.setCashbackRate(cardPrivilege.getCashbackRate());
+        response.setExpirationYears(cardPrivilege.getExpirationYears());
+        response.setSpendingLimitDaily(cardPrivilege.getSpendingLimitDaily());
+        response.setEffectiveFrom(cardPrivilege.getEffectiveFrom());
+        response.setEffectiveTo(cardPrivilege.getEffectiveTo());
+        return response;
+    }
+
+    public GetCardPrivilegeCodeResponse getCardPrivilegeCodeResponseTestCase() {
+        CardPrivilegeCode cardPrivilegeCode = getCardPrivilegeCodeTestCase();
+        GetCardPrivilegeCodeResponse response = new GetCardPrivilegeCodeResponse();
+        response.setId(1L);
+        response.setCode(cardPrivilegeCode.getCode());
+        response.setExpirationYears(cardPrivilegeCode.getExpirationYears());
+        response.setSpendingLimitDaily(cardPrivilegeCode.getSpendingLimitDaily());
+        response.setEffectiveFrom(cardPrivilegeCode.getEffectiveFrom());
+        response.setEffectiveTo(cardPrivilegeCode.getEffectiveTo());
+        return response;
     }
 
 }
