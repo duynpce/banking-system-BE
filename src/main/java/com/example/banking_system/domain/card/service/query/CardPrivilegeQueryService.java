@@ -4,10 +4,13 @@ import com.example.banking_system.domain.card.entity.CardPrivilege;
 import com.example.banking_system.domain.card.repository.CardPrivilegeRepository;
 import com.example.banking_system.common.exception.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +32,14 @@ public class CardPrivilegeQueryService {
         return cardPrivilegeRepository.findById(id).orElseThrow(
                 () -> new NotFoundException(("Card privilege not found with id: " + id))
         );
+    }
+
+    public List<CardPrivilege> findAll() {
+        return cardPrivilegeRepository.findAll();
+    }
+
+    public Page<CardPrivilege> findAllWithPagination(int page, int limit) {
+        return cardPrivilegeRepository.findAll(PageRequest.of(page, limit));
     }
 
     public void delete(CardPrivilege cardPrivilege) {

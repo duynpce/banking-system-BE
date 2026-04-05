@@ -25,10 +25,10 @@ public class CardPrivilegeCode {
     @Column(name = "spending_limit_daily", nullable = false, precision = 12, scale = 4)
     private BigDecimal spendingLimitDaily;
 
-    @Column(name = "effective_from", nullable = false ,updatable = false)
+    @Column(name = "effective_from", nullable = false)
     private LocalDate effectiveFrom;
 
-    @Column(name = "effective_to", nullable = false, updatable = false)
+    @Column(name = "effective_to", nullable = false)
     private LocalDate effectiveTo;
 
 }

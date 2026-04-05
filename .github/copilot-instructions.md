@@ -121,3 +121,132 @@ Feature-based folder structure. Each feature follows this pattern:
           return ResponseEntity.ok(ResponseDto.success(response, "Cards retrieved successfully"));
       }
 
+# create and update sample
+
+    sample of create and update flow from controller to service to repository:
+    mapper method example:
+      @Mapper(componentModel = "spring", imports = Locale.class)
+      public interface CardPrivilegeCodeMapper {
+          @Mapping(target = "id", ignore = true)
+          @Mapping(target = "code", expression = "java(request.getCode() == null ? null : request.getCode().toUpperCase(Locale.ROOT))")
+          CardPrivilegeCode toEntity(CreateCardPrivilegeCodeRequest request);
+      }
+
+    repository methods example:
+      boolean existsByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+              String code,
+              LocalDate effectiveTo,
+              LocalDate effectiveFrom
+      );
+      boolean existsByCodeAndIdNotAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+              String code,
+              Long excludeId,
+              LocalDate effectiveTo,
+              LocalDate effectiveFrom
+      );
+      Optional<CardPrivilegeCode> findByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+              String code,
+              LocalDate from,
+              LocalDate to
+      );
+
+      default boolean hasOverlap(String code, LocalDate effectiveFrom, LocalDate effectiveTo) {
+          return existsByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+                  code, effectiveTo, effectiveFrom
+          );
+      }
+
+    domain service create method example:
+      @Transactional
+      public CardPrivilegeCode create(CreateCardPrivilegeCodeRequest request) {
+          CardPrivilegeCode cardPrivilegeCode = cardPrivilegeCodeMapper.toEntity(request);
+          cardPrivilegeCodeValidator.validateCreate(cardPrivilegeCode);
+          return cardPrivilegeCodeQueryService.save(cardPrivilegeCode);
+      }
+
+    domain service update method example:
+      @Transactional
+      public CardPrivilegeCode update(UpdateCardPrivilegeCodeRequest request) {
+          String normalizedCode = request.getCode().toUpperCase(Locale.ROOT);
+          CardPrivilegeCode existingCardPrivilegeCode = cardPrivilegeCodeQueryService.findByCodeAndIsActive(normalizedCode);
+
+          cardPrivilegeCodeValidator.validateUpdate(request, existingCardPrivilegeCode);
+
+          return cardPrivilegeCodeQueryService.save(existingCardPrivilegeCode);
+      }
+
+    validator update method example:
+      public void validateUpdate(UpdateCardPrivilegeCodeRequest request, CardPrivilegeCode existingCardPrivilegeCode) {
+          // validate update payload, overlap, and apply non-null fields into existing entity
+      }
+
+    controller methods example:
+      @PostMapping
+      public ResponseEntity<ResponseDto<String>> create(@Valid @RequestBody CreateCardPrivilegeCodeRequest request) {
+          cardPrivilegeCodeService.create(request);
+          return ResponseEntity.ok(ResponseDto.success(null, "Card privilege code created successfully"));
+      }
+
+      @PutMapping
+      public ResponseEntity<ResponseDto<String>> update(@Valid @RequestBody UpdateCardPrivilegeCodeRequest request) {
+          cardPrivilegeCodeService.update(request);
+          return ResponseEntity.ok(ResponseDto.success(null, "Card privilege code updated successfully"));
+      }
+
+# test sample
+
+    unit test sample (service):
+      @Test
+      public void createCardPrivilegeCodeSuccess() {
+          // arrange valid request + mapper + validator + query save mocks
+          // act service.create(request)
+          // assert saved entity returned and dependencies invoked
+      }
+
+      @Test
+      public void createCardPrivilegeCodeFailureValidationError() {
+          // arrange validator throws ValidationException
+          // act/assert service.create(request) throws ValidationException
+          // verify save is never called
+      }
+
+      @Test
+      public void updateCardPrivilegeCodeSuccess() {
+          // arrange active entity lookup + validator update + save mocks
+          // act service.update(request)
+          // assert updated entity returned and dependencies invoked
+      }
+
+      @Test
+      public void updateCardPrivilegeCodeFailureValidationError() {
+          // arrange validator throws ValidationException
+          // act/assert service.update(request) throws ValidationException
+          // verify save is never called
+      }
+
+    integration test sample (controller):
+      @Test
+      public void testCreateCardPrivilegeCodeSuccess() {
+          // arrange valid request DTO
+          // act controller.create(request)
+          // assert ResponseDto success and data persisted
+      }
+
+      @Test
+      public void testCreateCardPrivilegeCodeFailValidation() {
+          // arrange invalid payload (e.g. effectiveTo <= effectiveFrom)
+          // act/assert controller.create(request) throws ValidationException
+      }
+
+      @Test
+      public void testUpdateCardPrivilegeCodeSuccess() {
+          // arrange existing code via create then call update
+          // assert ResponseDto success and persisted values changed
+      }
+
+      @Test
+      public void testUpdateCardPrivilegeCodeFailValidation() {
+          // arrange update request with no updatable fields
+          // act/assert controller.update(request) throws ValidationException
+      }
+
