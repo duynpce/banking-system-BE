@@ -15,7 +15,6 @@ import com.example.banking_system.domain.card.dto.CreateBusinessCardRequest;
 import com.example.banking_system.domain.card.dto.CreatePersonalCardRequest;
 import com.example.banking_system.domain.card.dto.GetCardResponse;
 import com.example.banking_system.common.dto.ResponseDto;
-import com.example.banking_system.domain.card.service.query.CardPrivilegeCodeQueryService;
 import com.example.banking_system.domain.card.service.query.CardPrivilegeQueryService;
 import com.example.banking_system.domain.card.service.query.CardQueryService;
 import com.example.banking_system.common.IntegrationTest;
@@ -69,9 +68,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
     private CardPrivilegeController cardPrivilegeController;
 
     @Autowired
-    private CardPrivilegeCodeQueryService cardPrivilegeCodeQueryService;
-
-    @Autowired
     private CardPrivilegeQueryService cardPrivilegeQueryService;
 
     @MockitoBean
@@ -82,7 +78,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         //set up
         CreateBusinessAccountRequest accountRequest = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(accountRequest);
-        cardPrivilegeCodeQueryService.save(cardTestCases.getCardPrivilegeCodeTestCase());
         cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
 
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
@@ -108,7 +103,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         cardPrivilegeQueryService.deleteByPrivilegeCode(cardRequest.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCodeAndIsActive(cardRequest.getPrivilegeCode());
     }
 
     @Test
@@ -125,7 +119,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         //set up
         CreatePersonalAccountRequest accountRequest = accountTestCases.getCreatePersonalAccountRequestTestCase();
         personalAccountController.create(accountRequest);
-        cardPrivilegeCodeQueryService.save(cardTestCases.getCardPrivilegeCodeTestCase());
         cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
 
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
@@ -160,7 +153,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         cardPrivilegeQueryService.deleteByPrivilegeCode(cardRequest.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCodeAndIsActive(cardRequest.getPrivilegeCode());
     }
 
     @Test
@@ -168,7 +160,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         //set up
         CreateBusinessAccountRequest account1Request = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(account1Request);
-        cardPrivilegeCodeQueryService.save(cardTestCases.getCardPrivilegeCodeTestCase());
         cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
 
         when(jwtUtil.getUsername()).thenReturn(account1Request.getUsername());
@@ -210,7 +201,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         cardPrivilegeQueryService.deleteByPrivilegeCode(card1Request.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCodeAndIsActive(card1Request.getPrivilegeCode());
     }
 
     @Test
@@ -218,7 +208,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         // set up
         CreateBusinessAccountRequest accountRequest = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(accountRequest);
-        cardPrivilegeCodeQueryService.save(cardTestCases.getCardPrivilegeCodeTestCase());
         cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
 
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
@@ -250,7 +239,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         cardPrivilegeQueryService.deleteByPrivilegeCode(cardRequest.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCodeAndIsActive(cardRequest.getPrivilegeCode());
     }
 
     @Test
@@ -259,7 +247,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         CreateBusinessAccountRequest account1Request = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(account1Request);
 
-        cardPrivilegeCodeQueryService.save(cardTestCases.getCardPrivilegeCodeTestCase());
         cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
 
         when(jwtUtil.getUsername()).thenReturn(account1Request.getUsername());
@@ -301,7 +288,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         cardPrivilegeQueryService.deleteByPrivilegeCode(card1Request.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCodeAndIsActive(card1Request.getPrivilegeCode());
 
     }
 }

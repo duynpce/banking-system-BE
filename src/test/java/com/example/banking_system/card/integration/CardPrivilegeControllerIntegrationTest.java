@@ -1,15 +1,10 @@
 package com.example.banking_system.card.integration;
 
 import com.example.banking_system.card.CardTestCases;
-import com.example.banking_system.domain.account.constant.AccountType;
-import com.example.banking_system.domain.card.constant.CardType;
 import com.example.banking_system.domain.card.controller.CardPrivilegeController;
 import com.example.banking_system.domain.card.dto.CreateCardPrivilegeRequest;
 import com.example.banking_system.domain.card.dto.GetCardPrivilegeResponse;
 import com.example.banking_system.domain.card.dto.UpdateCardPrivilegeRequest;
-import com.example.banking_system.domain.card.entity.CardPrivilege;
-import com.example.banking_system.domain.card.entity.CardPrivilegeCode;
-import com.example.banking_system.domain.card.service.query.CardPrivilegeCodeQueryService;
 import com.example.banking_system.domain.card.service.query.CardPrivilegeQueryService;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.common.dto.ResponseDto;
@@ -23,7 +18,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -36,15 +30,11 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
     private CardPrivilegeController cardPrivilegeController;
 
     @Autowired
-    private CardPrivilegeCodeQueryService cardPrivilegeCodeQueryService;
-
-    @Autowired
     private CardPrivilegeQueryService cardPrivilegeQueryService;
 
     @Test
     public void testCreateCardPrivilege_Success() {
         CreateCardPrivilegeRequest request = cardTestCases.getCreateCardPrivilegeRequestTestCase();
-        saveActiveCode(request.getCode());
 
         ResponseEntity<ResponseDto<String>> response = cardPrivilegeController.create(request);
         ResponseDto<String> responseDto = response.getBody();
@@ -54,15 +44,15 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         assertTrue(responseDto.isSuccess(), "Response success flag should be true");
 
         // Verify privilege was created
-        assertTrue(cardPrivilegeCodeQueryService.existsByCode(request.getCode()),
+        assertTrue(cardPrivilegeQueryService.existsByCode(request.getCode()),
             "Card privilege should exist in database");
 
+        cleanupCreatedCardPrivilege(request.getCode());
     }
 
     @Test
     public void testCreateCardPrivilege_DuplicateCode_Failure() {
         CreateCardPrivilegeRequest request = cardTestCases.getCreateCardPrivilegeRequestTestCase();
-        saveActiveCode(request.getCode());
 
         // Create first privilege
         cardPrivilegeController.create(request);
@@ -72,13 +62,13 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
             () -> cardPrivilegeController.create(request),
             "Should throw ValidationException for duplicate privilege code");
 
+        cleanupCreatedCardPrivilege(request.getCode());
     }
 
     @Test
     public void testUpdateCardPrivilege_Success() {
         // Create privilege first
         CreateCardPrivilegeRequest createRequest = cardTestCases.getCreateCardPrivilegeRequestTestCase();
-        saveActiveCode(createRequest.getCode());
         cardPrivilegeController.create(createRequest);
 
         // Update privilege
@@ -91,6 +81,8 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
         assertNotNull(responseDto, "Response body should not be null");
         assertTrue(responseDto.isSuccess(), "Response success flag should be true");
+
+        cleanupCreatedCardPrivilege(createRequest.getCode());
     }
 
     @Test
@@ -107,7 +99,6 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void testGetAllCardPrivilege_Success() {
         CreateCardPrivilegeRequest createRequest = cardTestCases.getCreateCardPrivilegeRequestTestCase();
-        saveActiveCode(createRequest.getCode());
         cardPrivilegeController.create(createRequest);
 
         ResponseEntity<ResponseDto<List<GetCardPrivilegeResponse>>> response = cardPrivilegeController.getAll();
@@ -127,7 +118,6 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void testGetByPageCardPrivilege_Success() {
         CreateCardPrivilegeRequest createRequest = cardTestCases.getCreateCardPrivilegeRequestTestCase();
-        saveActiveCode(createRequest.getCode());
         cardPrivilegeController.create(createRequest);
 
         ResponseEntity<ResponseDto<List<GetCardPrivilegeResponse>>> response = cardPrivilegeController.getByPage(0, 10);
@@ -155,7 +145,6 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void testGetCardPrivilegeById_Success() {
         CreateCardPrivilegeRequest createRequest = cardTestCases.getCreateCardPrivilegeRequestTestCase();
-        saveActiveCode(createRequest.getCode());
         cardPrivilegeController.create(createRequest);
 
         long id = cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(createRequest.getCode()).getId();
@@ -183,7 +172,6 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public void testGetCardPrivilegeByCodeAndIsActive_Success() {
         CreateCardPrivilegeRequest createRequest = cardTestCases.getCreateCardPrivilegeRequestTestCase();
-        saveActiveCode(createRequest.getCode());
         cardPrivilegeController.create(createRequest);
 
         ResponseEntity<ResponseDto<GetCardPrivilegeResponse>> response = cardPrivilegeController.getByCodeAndIsActive(createRequest.getCode());
@@ -210,7 +198,6 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
     public void testDeleteCardPrivilege_Success() {
         // Create privilege first
         CreateCardPrivilegeRequest createRequest = cardTestCases.getCreateCardPrivilegeRequestTestCase();
-        saveActiveCode(createRequest.getCode());
         cardPrivilegeController.create(createRequest);
 
         // Delete privilege
@@ -231,15 +218,8 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
             "Should throw ValidationException when trying to delete non-existent privilege");
     }
 
-    private void saveActiveCode(String code) {
-        CardPrivilegeCode cardPrivilegeCode = cardTestCases.getCardPrivilegeCodeTestCase();
-        cardPrivilegeCode.setCode(code);
-        cardPrivilegeCodeQueryService.save(cardPrivilegeCode);
-    }
-
     private void cleanupCreatedCardPrivilege(String code) {
         cardPrivilegeQueryService.deleteByPrivilegeCode(code);
-        cardPrivilegeCodeQueryService.deleteByCodeAndIsActive(code);
     }
 
 }

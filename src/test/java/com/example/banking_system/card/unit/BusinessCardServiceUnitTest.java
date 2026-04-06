@@ -6,7 +6,6 @@ import com.example.banking_system.card.CardTestCases;
 import com.example.banking_system.domain.card.dto.CreateBusinessCardRequest;
 import com.example.banking_system.domain.card.entity.BusinessCard;
 import com.example.banking_system.domain.card.entity.CardPrivilege;
-import com.example.banking_system.domain.card.entity.CardPrivilegeCode;
 import com.example.banking_system.domain.card.repository.BusinessCardRepository;
 import com.example.banking_system.domain.card.service.domain.BusinessCardService;
 import com.example.banking_system.domain.card.service.domain.CardService;
@@ -55,12 +54,7 @@ public class BusinessCardServiceUnitTest extends UnitTest {
         Account account = new Account();
         account.setId(1L);
         account.setUsername(username);
-
-        CardPrivilegeCode cardPrivilegeCode = new CardPrivilegeCode();
-        cardPrivilegeCode.setCode("STANDARD");
-        CardPrivilege privilege = new CardPrivilege();
-        privilege.setCardPrivilegeCode(cardPrivilegeCode);
-
+        CardPrivilege  cardPrivilege = cardTestCases.getCardPrivilegeTestCase();
         CreateBusinessCardRequest request = cardTestCases.getCreateBusinessCardRequestTestCase();
 
         BusinessCard businessCard = new BusinessCard();
@@ -69,7 +63,7 @@ public class BusinessCardServiceUnitTest extends UnitTest {
         when(accountQueryService.findByUsername(username)).thenReturn(account);
         doNothing().when(businessCardValidator).validateCreate(account);
         when(cardService.generateCardNumber()).thenReturn(cardNumber);
-        when(cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getPrivilegeCode())).thenReturn(privilege);
+        when(cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getPrivilegeCode())).thenReturn(cardPrivilege);
         doNothing().when(cardService).updateExpirationDateOnCreate(any());
         when(businessCardRepository.save(any(BusinessCard.class))).thenReturn(businessCard);
 

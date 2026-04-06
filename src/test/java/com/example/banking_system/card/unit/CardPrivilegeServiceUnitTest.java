@@ -5,10 +5,8 @@ import com.example.banking_system.domain.card.dto.CreateCardPrivilegeRequest;
 import com.example.banking_system.domain.card.dto.GetCardPrivilegeResponse;
 import com.example.banking_system.domain.card.dto.UpdateCardPrivilegeRequest;
 import com.example.banking_system.domain.card.entity.CardPrivilege;
-import com.example.banking_system.domain.card.entity.CardPrivilegeCode;
 import com.example.banking_system.domain.card.mapper.CardPrivilegeMapper;
 import com.example.banking_system.domain.card.service.domain.CardPrivilegeService;
-import com.example.banking_system.domain.card.service.query.CardPrivilegeCodeQueryService;
 import com.example.banking_system.domain.card.service.query.CardPrivilegeQueryService;
 import com.example.banking_system.domain.card.validator.CardPrivilegeValidator;
 import com.example.banking_system.common.UnitTest;
@@ -38,9 +36,6 @@ public class CardPrivilegeServiceUnitTest extends UnitTest {
     @Mock
     CardPrivilegeQueryService cardPrivilegeQueryService;
 
-    @Mock
-    CardPrivilegeCodeQueryService cardPrivilegeCodeQueryService;
-
     @InjectMocks
     CardPrivilegeService cardPrivilegeService;
 
@@ -48,18 +43,14 @@ public class CardPrivilegeServiceUnitTest extends UnitTest {
     public void createCardPrivilegeSuccess() {
         CreateCardPrivilegeRequest request = cardTestCases.getCreateCardPrivilegeRequestTestCase();
 
-        CardPrivilegeCode code = new CardPrivilegeCode();
-        code.setCode(request.getCode());
-
         CardPrivilege cardPrivilege = new CardPrivilege();
-        cardPrivilege.setCardPrivilegeCode(code);
+        cardPrivilege.setCode(request.getCode());
 
         CardPrivilege savedCardPrivilege = new CardPrivilege();
-        savedCardPrivilege.setCardPrivilegeCode(code);
+        savedCardPrivilege.setCode(request.getCode());
 
         when(cardPrivilegeMapper.toEntity(request)).thenReturn(cardPrivilege);
         doNothing().when(cardPrivilegeValidator).validateCreate(cardPrivilege);
-        when(cardPrivilegeCodeQueryService.findByCodeAndIsActive(request.getCode())).thenReturn(code);
         when(cardPrivilegeQueryService.save(cardPrivilege)).thenReturn(savedCardPrivilege);
 
         CardPrivilege result = cardPrivilegeService.create(request);
@@ -92,14 +83,11 @@ public class CardPrivilegeServiceUnitTest extends UnitTest {
     public void updateCardPrivilegeSuccess() {
         UpdateCardPrivilegeRequest request = cardTestCases.getUpdateCardPrivilegeRequestTestCase();
         
-        CardPrivilegeCode code = new CardPrivilegeCode();
-        code.setCode(request.getCode());
-
         CardPrivilege existingCardPrivilege = new CardPrivilege();
-        existingCardPrivilege.setCardPrivilegeCode(code);
+        existingCardPrivilege.setCode(request.getCode());
 
         CardPrivilege updatedCardPrivilege = new CardPrivilege();
-        updatedCardPrivilege.setCardPrivilegeCode(code);
+        updatedCardPrivilege.setCode(request.getCode());
 
         when(cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getCode())).thenReturn(existingCardPrivilege);
         doNothing().when(cardPrivilegeValidator).validateUpdate(request, existingCardPrivilege);
