@@ -7,7 +7,6 @@ import com.example.banking_system.card.CardTestCases;
 import com.example.banking_system.domain.card.controller.CardPrivilegeController;
 import com.example.banking_system.domain.card.controller.PersonalCardController;
 import com.example.banking_system.domain.card.dto.CreatePersonalCardRequest;
-import com.example.banking_system.domain.card.service.query.CardPrivilegeCodeQueryService;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.NotFoundException;
@@ -38,9 +37,6 @@ public class PersonalCardControllerIntegrationTest extends IntegrationTest {
     @Autowired
     private CardPrivilegeController cardPrivilegeController;
 
-    @Autowired
-    private CardPrivilegeCodeQueryService cardPrivilegeCodeQueryService;
-
     @MockitoBean
     private JwtUtil jwtUtil;
 
@@ -49,7 +45,6 @@ public class PersonalCardControllerIntegrationTest extends IntegrationTest {
         // Create personal account
         CreatePersonalAccountRequest accountRequest = accountTestCases.getCreatePersonalAccountRequestTestCase();
         personalAccountController.create(accountRequest);
-        cardPrivilegeCodeQueryService.save(cardTestCases.getCardPrivilegeCodeTestCase());
         cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
 
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());

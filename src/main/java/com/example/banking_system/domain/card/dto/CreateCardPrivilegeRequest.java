@@ -20,6 +20,14 @@ public class CreateCardPrivilegeRequest {
     @NotBlank(message = "Code must not be blank")
     private String code;
 
+    @NotNull(message = "Expiration years must not be null")
+    @Min(value = 1, message = "Expiration years must be at least 1")
+    private Integer expirationYears;
+
+    @NotNull(message = "Daily spending limit must not be null")
+    @Min(value = 0, message = "Daily spending limit must be non-negative")
+    private BigDecimal spendingLimitDaily;
+
     @NotNull(message = "Base annual fee must not be null")
     @Min(value = 0, message = "Base annual fee must be non-negative")
     private BigDecimal annualFee;

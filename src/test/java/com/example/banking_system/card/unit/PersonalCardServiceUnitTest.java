@@ -4,9 +4,9 @@ import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.account.entity.PersonalAccount;
 import com.example.banking_system.domain.account.service.query.PersonalAccountQueryService;
 import com.example.banking_system.card.CardTestCases;
+import com.example.banking_system.domain.card.dto.CreateBusinessCardRequest;
 import com.example.banking_system.domain.card.dto.CreatePersonalCardRequest;
 import com.example.banking_system.domain.card.entity.CardPrivilege;
-import com.example.banking_system.domain.card.entity.CardPrivilegeCode;
 import com.example.banking_system.domain.card.entity.PersonalCard;
 import com.example.banking_system.domain.card.repository.PersonalCardRepository;
 import com.example.banking_system.domain.card.service.domain.CardService;
@@ -59,11 +59,8 @@ public class PersonalCardServiceUnitTest extends UnitTest {
         PersonalAccount personalAccount = new PersonalAccount();
         personalAccount.setAccount(account);
 
-        CardPrivilegeCode cardPrivilegeCode = new CardPrivilegeCode();
-        cardPrivilegeCode.setCode("STANDARD");
-        CardPrivilege privilege = new CardPrivilege();
-        privilege.setCardPrivilegeCode(cardPrivilegeCode);
 
+        CardPrivilege  cardPrivilege = cardTestCases.getCardPrivilegeTestCase();
         CreatePersonalCardRequest request = cardTestCases.getCreatePersonalCardRequestTestCase();
 
         PersonalCard personalCard = new PersonalCard();
@@ -72,7 +69,7 @@ public class PersonalCardServiceUnitTest extends UnitTest {
         when(personalAccountQueryService.findByUsername(username)).thenReturn(personalAccount);
         doNothing().when(personalCardValidator).validateCreate(account);
         when(cardService.generateCardNumber()).thenReturn(cardNumber);
-        when(cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getPrivilegeCode())).thenReturn(privilege);
+        when(cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getPrivilegeCode())).thenReturn(cardPrivilege);
         doNothing().when(cardService).updateExpirationDateOnCreate(any());
         when(personalCardRepository.save(any(PersonalCard.class))).thenReturn(personalCard);
 

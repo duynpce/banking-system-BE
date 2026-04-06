@@ -36,27 +36,23 @@ public class CardPrivilege {
     @Column(name = "cashback_rate", nullable = false, precision = 10, scale = 4)
     private BigDecimal cashbackRate;
 
+    @Column(name = "code", nullable = false)
+    private String code;
+
+    @Column(name = "expiration_years", nullable = false)
+    private int expirationYears;
+
+    @Column(name = "spending_limit_daily", nullable = false, precision = 12, scale = 4)
+    private BigDecimal spendingLimitDaily;
+
     @Column(name = "effective_from", nullable = false)
     private LocalDate effectiveFrom;
 
     @Column(name = "effective_to", nullable = false)
     private LocalDate effectiveTo;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "privilege_code_id", referencedColumnName = "id", nullable = false)
-    private CardPrivilegeCode cardPrivilegeCode;
-
-
     public String getPrivilegeCode() {
-        return cardPrivilegeCode != null ? cardPrivilegeCode.getCode() : null;
-    }
-
-    public int getExpirationYears() {
-        return cardPrivilegeCode != null ? cardPrivilegeCode.getExpirationYears() : 0;
-    }
-
-    public BigDecimal getSpendingLimitDaily() {
-        return cardPrivilegeCode != null ? cardPrivilegeCode.getSpendingLimitDaily() : BigDecimal.ZERO;
+        return code;
     }
 
 }

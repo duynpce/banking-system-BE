@@ -23,6 +23,12 @@ public class UpdateCardPrivilegeRequest {
     @Min(value = 0, message = "Cashback percentage must be non-negative")
     private BigDecimal cashbackRate;
 
+    @Min(value = 1, message = "Expiration years must be at least 1")
+    private Integer expirationYears;
+
+    @Min(value = 0, message = "Daily spending limit must be non-negative")
+    private BigDecimal spendingLimitDaily;
+
     @FutureOrPresent(message = "Effective from date must be today or in the future")
     private LocalDate effectiveFrom;
 

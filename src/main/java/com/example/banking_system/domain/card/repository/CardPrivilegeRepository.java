@@ -10,15 +10,40 @@ import java.util.Optional;
 
 public interface CardPrivilegeRepository extends JpaRepository<CardPrivilege,Long> {
 
-    Optional<CardPrivilege> findByCardPrivilegeCode_CodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+    Optional<CardPrivilege> findByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
             String code,
             LocalDate from,
             LocalDate to
     );
 
     default Optional<CardPrivilege> findByPrivilegeCodeAndDate(String privilegeCode, LocalDate date) {
-        return findByCardPrivilegeCode_CodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+        return findByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
                 privilegeCode, date, date
+        );
+    }
+
+    boolean existsByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+            String code,
+            LocalDate effectiveTo,
+            LocalDate effectiveFrom
+    );
+
+    boolean existsByCodeAndIdNotAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+            String code,
+            Long excludeId,
+            LocalDate effectiveTo,
+            LocalDate effectiveFrom
+    );
+
+    default boolean hasCodeOverlap(String code, LocalDate effectiveFrom, LocalDate effectiveTo) {
+        return existsByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+                code, effectiveTo, effectiveFrom
+        );
+    }
+
+    default boolean hasCodeOverlapExcludingId(String code, LocalDate effectiveFrom, LocalDate effectiveTo, Long excludeId) {
+        return existsByCodeAndIdNotAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+                code, excludeId, effectiveTo, effectiveFrom
         );
     }
 
