@@ -9,8 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.ZoneOffset;
-
 @Component
 @RequiredArgsConstructor
 public class CardPrivilegeValidator {
@@ -25,7 +23,14 @@ public class CardPrivilegeValidator {
                 "An active card privilege already exists for this account type and card type"
         );
 
-
+        util.assertUnique(
+                cardPrivilegeQueryService.hasCodeOverlap(
+                        cardPrivilege.getCode(),
+                        cardPrivilege.getEffectiveFrom(),
+                        cardPrivilege.getEffectiveTo()
+                ),
+                "An overlapping card privilege code already exists"
+        );
     }
 
     public void validateUpdate(UpdateCardPrivilegeRequest request, CardPrivilege existingCardPrivilege) {
@@ -42,6 +47,16 @@ public class CardPrivilegeValidator {
 
         validateEffectiveDateRange(nextEffectiveFrom, nextEffectiveTo);
 
+        util.assertUnique(
+                cardPrivilegeQueryService.hasCodeOverlapExcludingId(
+                        existingCardPrivilege.getCode(),
+                        nextEffectiveFrom,
+                        nextEffectiveTo,
+                        existingCardPrivilege.getId()
+                ),
+                "An overlapping card privilege code already exists"
+        );
+
         // Set non-null fields to existing card privilege
         setNonNullFieldsToUpdateCardPrivilege(request, existingCardPrivilege);
     }
@@ -49,6 +64,8 @@ public class CardPrivilegeValidator {
     private boolean isAllFieldsNull(UpdateCardPrivilegeRequest request) {
         return request.getAnnualFee() == null
                 && request.getCashbackRate() == null
+                && request.getExpirationYears() == null
+                && request.getSpendingLimitDaily() == null
                 && request.getEffectiveFrom() == null
                 && request.getEffectiveTo() == null;
     }
@@ -60,6 +77,14 @@ public class CardPrivilegeValidator {
 
         if (request.getCashbackRate() != null) {
             existingCardPrivilege.setCashbackRate(request.getCashbackRate());
+        }
+
+        if (request.getExpirationYears() != null) {
+            existingCardPrivilege.setExpirationYears(request.getExpirationYears());
+        }
+
+        if (request.getSpendingLimitDaily() != null) {
+            existingCardPrivilege.setSpendingLimitDaily(request.getSpendingLimitDaily());
         }
 
         if (request.getEffectiveFrom() != null) {

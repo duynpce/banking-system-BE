@@ -53,13 +53,25 @@ public class CardPrivilegeQueryService {
     }
 
     public void deleteById(long id) {
-        CardPrivilege cardPrivilege = findById(id);
+        findById(id);
        cardPrivilegeRepository.deleteById(id);
     }
 
     public boolean hasOverlap(CardPrivilege cardPrivilege) {
         return cardPrivilegeRepository.hasOverlap
                 (cardPrivilege.getAccountType(), cardPrivilege.getCardType(), cardPrivilege.getEffectiveFrom(), cardPrivilege.getEffectiveTo());
+    }
+
+    public boolean hasCodeOverlap(String code, LocalDate effectiveFrom, LocalDate effectiveTo) {
+        return cardPrivilegeRepository.hasCodeOverlap(code, effectiveFrom, effectiveTo);
+    }
+
+    public boolean hasCodeOverlapExcludingId(String code, LocalDate effectiveFrom, LocalDate effectiveTo, Long excludeId) {
+        return cardPrivilegeRepository.hasCodeOverlapExcludingId(code, effectiveFrom, effectiveTo, excludeId);
+    }
+
+    public boolean existsByCode(String code) {
+        return cardPrivilegeRepository.findByPrivilegeCodeAndDate(code, LocalDate.now(ZoneOffset.UTC)).isPresent();
     }
 
 }
