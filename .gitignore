@@ -35,3 +35,6 @@ build/
 ### environment file ###
 application.yaml
 *.env
+
+### ignore local files ###
+*.local.*

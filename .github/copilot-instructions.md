@@ -55,6 +55,7 @@ Feature-based folder structure. Each feature follows this pattern:
     - never change unrelated code while implementing a feature
     - always validate your changes with the existing patterns in the codebase before finalizing
     - base on sample code to implement the feature, and make sure your code is consistent with the existing codebase
+    - read docs in docs folder before implement to understand the business rules and requirements
 
 # commit
     - Use Conventional Commits (feat:, fix:, chore:, refactor:).
