@@ -44,9 +44,6 @@ public class Card {
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
-    @Column(name = "spending_limit_daily", precision = 12, scale = 4)
-    private BigDecimal spendingLimitDaily;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_privilege_id", referencedColumnName = "id", nullable = false, updatable = false)
     private CardPrivilege privilege;
@@ -72,7 +69,6 @@ public class Card {
         this.holder = holder;
         this.type = type;
         this.privilege = privilege;
-        this.spendingLimitDaily = privilege.getSpendingLimitDaily();
     }
 
 

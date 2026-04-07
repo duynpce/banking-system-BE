@@ -20,8 +20,9 @@ public interface CardMapper {
     @Mapping(target = "id",             source = "card.id")
     @Mapping(target = "expirationDate", source = "card.expirationDate")
     @Mapping(target = "type",           source = "card.type")
-    @Mapping(target = "privilege",  source = "card.privilege")
+    @Mapping(target = "privilege",  source = "card.privilege.code")
     @Mapping(target = "holder",    source = "card.holder")
+    @Mapping(target = "balance" ,source = "card.balance")
     GetCardResponse toDto(CardDetails details);
 
     List<GetCardResponse> toDtoList(List<CardDetails> detailsList);
