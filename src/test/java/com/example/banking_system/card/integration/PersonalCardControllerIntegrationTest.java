@@ -6,6 +6,7 @@ import com.example.banking_system.domain.account.dto.CreatePersonalAccountReques
 import com.example.banking_system.card.CardTestCases;
 import com.example.banking_system.domain.card.controller.CardPrivilegeController;
 import com.example.banking_system.domain.card.controller.PersonalCardController;
+import com.example.banking_system.domain.card.dto.CreateCardPrivilegeRequest;
 import com.example.banking_system.domain.card.dto.CreatePersonalCardRequest;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.common.dto.ResponseDto;
@@ -44,8 +45,11 @@ public class PersonalCardControllerIntegrationTest extends IntegrationTest {
     public void testCreatePersonalCard_Success() {
         // Create personal account
         CreatePersonalAccountRequest accountRequest = accountTestCases.getCreatePersonalAccountRequestTestCase();
+        CreateCardPrivilegeRequest createCardPrivilegeRequest = cardTestCases.getCreateCardPrivilegeRequestTestCase();
+        createCardPrivilegeRequest.setAccountType(accountRequest.getType());
         personalAccountController.create(accountRequest);
-        cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
+        cardPrivilegeController.create(createCardPrivilegeRequest);
+
 
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
 

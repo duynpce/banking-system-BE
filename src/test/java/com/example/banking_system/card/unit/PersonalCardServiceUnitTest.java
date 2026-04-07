@@ -4,7 +4,6 @@ import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.account.entity.PersonalAccount;
 import com.example.banking_system.domain.account.service.query.PersonalAccountQueryService;
 import com.example.banking_system.card.CardTestCases;
-import com.example.banking_system.domain.card.dto.CreateBusinessCardRequest;
 import com.example.banking_system.domain.card.dto.CreatePersonalCardRequest;
 import com.example.banking_system.domain.card.entity.CardPrivilege;
 import com.example.banking_system.domain.card.entity.PersonalCard;
@@ -60,7 +59,7 @@ public class PersonalCardServiceUnitTest extends UnitTest {
         personalAccount.setAccount(account);
 
 
-        CardPrivilege  cardPrivilege = cardTestCases.getCardPrivilegeTestCase();
+        CardPrivilege cardPrivilege = cardTestCases.getCardPrivilegeTestCase();
         CreatePersonalCardRequest request = cardTestCases.getCreatePersonalCardRequestTestCase();
 
         PersonalCard personalCard = new PersonalCard();
@@ -69,7 +68,7 @@ public class PersonalCardServiceUnitTest extends UnitTest {
         when(personalAccountQueryService.findByUsername(username)).thenReturn(personalAccount);
         doNothing().when(personalCardValidator).validateCreate(account);
         when(cardService.generateCardNumber()).thenReturn(cardNumber);
-        when(cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getPrivilegeCode())).thenReturn(cardPrivilege);
+        when(cardPrivilegeQueryService.findByCodeAndAccountTypeAndCardTypeAndIsActive(request.getPrivilegeCode(), request.getAccountType(), request.getType())).thenReturn(cardPrivilege);
         doNothing().when(cardService).updateExpirationDateOnCreate(any());
         when(personalCardRepository.save(any(PersonalCard.class))).thenReturn(personalCard);
 
@@ -78,7 +77,7 @@ public class PersonalCardServiceUnitTest extends UnitTest {
         Assertions.assertEquals(personalCard, createdCard);
         verify(personalCardValidator).validateCreate(account);
         verify(cardService).generateCardNumber();
-        verify(cardPrivilegeQueryService).findByPrivilegeCodeAndIsActive(request.getPrivilegeCode());
+        verify(cardPrivilegeQueryService).findByCodeAndAccountTypeAndCardTypeAndIsActive(request.getPrivilegeCode(), request.getAccountType(), request.getType());
         verify(personalCardRepository, times(1)).save(any(PersonalCard.class));
     }
 

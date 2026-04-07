@@ -58,12 +58,11 @@ public class CardTestCases {
 
     public UpdateCardPrivilegeRequest getUpdateCardPrivilegeRequestTestCase() {
         UpdateCardPrivilegeRequest request = new UpdateCardPrivilegeRequest();
-        request.setCode(privilegeCode);
+        request.setId(1L);
         request.setExpirationYears(7);
         request.setSpendingLimitDaily(new BigDecimal("1200.00"));
         request.setAnnualFee(new BigDecimal("0.2"));
         request.setCashbackRate(new BigDecimal("0.2"));
-        request.setEffectiveFrom(LocalDate.now());
         request.setEffectiveTo(LocalDate.now().plusYears(2));
         return request;
     }
@@ -71,6 +70,7 @@ public class CardTestCases {
     public CardPrivilege getCardPrivilegeTestCase() {
         CreateCardPrivilegeRequest request = getCreateCardPrivilegeRequestTestCase();
         CardPrivilege cardPrivilege = new CardPrivilege();
+        cardPrivilege.setId(1L);
         cardPrivilege.setAccountType(request.getAccountType());
         cardPrivilege.setCardType(request.getCardType());
         cardPrivilege.setAnnualFee(request.getAnnualFee());

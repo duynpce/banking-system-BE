@@ -1,6 +1,7 @@
 package com.example.banking_system.card.integration;
 
 import com.example.banking_system.account.AccountTestCases;
+import com.example.banking_system.domain.account.constant.AccountType;
 import com.example.banking_system.domain.account.controller.AccountController;
 import com.example.banking_system.domain.account.controller.BusinessAccountController;
 import com.example.banking_system.domain.account.controller.PersonalAccountController;
@@ -11,6 +12,8 @@ import com.example.banking_system.domain.card.controller.BusinessCardController;
 import com.example.banking_system.domain.card.controller.CardController;
 import com.example.banking_system.domain.card.controller.CardPrivilegeController;
 import com.example.banking_system.domain.card.controller.PersonalCardController;
+import com.example.banking_system.domain.card.constant.CardType;
+import com.example.banking_system.domain.card.dto.CreateCardPrivilegeRequest;
 import com.example.banking_system.domain.card.dto.CreateBusinessCardRequest;
 import com.example.banking_system.domain.card.dto.CreatePersonalCardRequest;
 import com.example.banking_system.domain.card.dto.GetCardResponse;
@@ -100,9 +103,7 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         // Clean up
         cardController.delete(cardList.getFirst().getId());
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
-        accountController.delete();
-
-        cardPrivilegeQueryService.deleteByPrivilegeCode(cardRequest.getPrivilegeCode());
+        cleanUpCardPrivilege(cardRequest.getPrivilegeCode(), cardRequest.getAccountType(), cardRequest.getType());
     }
 
     @Test
@@ -119,7 +120,9 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         //set up
         CreatePersonalAccountRequest accountRequest = accountTestCases.getCreatePersonalAccountRequestTestCase();
         personalAccountController.create(accountRequest);
-        cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
+        CreateCardPrivilegeRequest createCardPrivilegeRequest = cardTestCases.getCreateCardPrivilegeRequestTestCase();
+        createCardPrivilegeRequest.setAccountType(AccountType.PERSONAL);
+        cardPrivilegeController.create(createCardPrivilegeRequest);
 
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
 
@@ -150,9 +153,7 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         // Clean up
         cardController.delete(cardId);
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
-        accountController.delete();
-
-        cardPrivilegeQueryService.deleteByPrivilegeCode(cardRequest.getPrivilegeCode());
+        cleanUpCardPrivilege(cardRequest.getPrivilegeCode(), cardRequest.getAccountType(), cardRequest.getType());
     }
 
     @Test
@@ -198,9 +199,7 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         when(jwtUtil.getUsername()).thenReturn(account2Request.getUsername());
-        accountController.delete();
-
-        cardPrivilegeQueryService.deleteByPrivilegeCode(card1Request.getPrivilegeCode());
+        cleanUpCardPrivilege(card1Request.getPrivilegeCode(), card1Request.getAccountType(), card1Request.getType());
     }
 
     @Test
@@ -236,9 +235,8 @@ public class CardControllerIntegrationTest extends IntegrationTest {
 
         // Clean up account
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
-        accountController.delete();
 
-        cardPrivilegeQueryService.deleteByPrivilegeCode(cardRequest.getPrivilegeCode());
+        cleanUpCardPrivilege(cardRequest.getPrivilegeCode(), cardRequest.getAccountType(), cardRequest.getType());
     }
 
     @Test
@@ -285,9 +283,14 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         when(jwtUtil.getUsername()).thenReturn(account2Request.getUsername());
+
+
+        cleanUpCardPrivilege(card1Request.getPrivilegeCode(), card1Request.getAccountType(), card1Request.getType());
+
+    }
+
+    public void cleanUpCardPrivilege(String code, AccountType accountType, CardType cardType) {
         accountController.delete();
-
-        cardPrivilegeQueryService.deleteByPrivilegeCode(card1Request.getPrivilegeCode());
-
+        cardPrivilegeQueryService.deleteByPrivilegeCodeAndAccountTypeAndCardType(code, accountType, cardType);
     }
 }

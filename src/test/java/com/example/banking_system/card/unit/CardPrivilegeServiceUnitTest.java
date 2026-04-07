@@ -83,22 +83,21 @@ public class CardPrivilegeServiceUnitTest extends UnitTest {
     public void updateCardPrivilegeSuccess() {
         UpdateCardPrivilegeRequest request = cardTestCases.getUpdateCardPrivilegeRequestTestCase();
         
-        CardPrivilege existingCardPrivilege = new CardPrivilege();
-        existingCardPrivilege.setCode(request.getCode());
+        CardPrivilege cardPrivilege = cardTestCases.getCardPrivilegeTestCase();
 
         CardPrivilege updatedCardPrivilege = new CardPrivilege();
-        updatedCardPrivilege.setCode(request.getCode());
+        updatedCardPrivilege.setId(request.getId());
 
-        when(cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getCode())).thenReturn(existingCardPrivilege);
-        doNothing().when(cardPrivilegeValidator).validateUpdate(request, existingCardPrivilege);
-        when(cardPrivilegeQueryService.save(existingCardPrivilege)).thenReturn(updatedCardPrivilege);
+        when(cardPrivilegeQueryService.findById(updatedCardPrivilege.getId())).thenReturn(cardPrivilege);
+        doNothing().when(cardPrivilegeValidator).validateUpdate(request, cardPrivilege);
+        when(cardPrivilegeQueryService.save(cardPrivilege)).thenReturn(updatedCardPrivilege);
 
         CardPrivilege result = cardPrivilegeService.update(request);
 
         Assertions.assertEquals(updatedCardPrivilege, result);
-        verify(cardPrivilegeQueryService).findByPrivilegeCodeAndIsActive(request.getCode());
-        verify(cardPrivilegeValidator).validateUpdate(request, existingCardPrivilege);
-        verify(cardPrivilegeQueryService).save(existingCardPrivilege);
+        verify(cardPrivilegeQueryService).findById(updatedCardPrivilege.getId());
+        verify(cardPrivilegeValidator).validateUpdate(request, cardPrivilege);
+        verify(cardPrivilegeQueryService).save(cardPrivilege);
     }
 
     @Test
@@ -107,14 +106,14 @@ public class CardPrivilegeServiceUnitTest extends UnitTest {
 
         CardPrivilege existingCardPrivilege = new CardPrivilege();
 
-        when(cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getCode())).thenReturn(existingCardPrivilege);
+        when(cardPrivilegeQueryService.findById(request.getId())).thenReturn(existingCardPrivilege);
         doThrow(new ValidationException("Both fields cannot be null")).when(cardPrivilegeValidator).validateUpdate(request, existingCardPrivilege);
 
         RuntimeException exception = Assertions.assertThrows(ValidationException.class,
             () -> cardPrivilegeService.update(request));
 
         Assertions.assertEquals("Both fields cannot be null", exception.getMessage());
-        verify(cardPrivilegeQueryService).findByPrivilegeCodeAndIsActive(request.getCode());
+        verify(cardPrivilegeQueryService).findById(request.getId());
         verify(cardPrivilegeValidator).validateUpdate(request, existingCardPrivilege);
         verify(cardPrivilegeQueryService, never()).save(any());
     }
@@ -149,30 +148,42 @@ public class CardPrivilegeServiceUnitTest extends UnitTest {
     }
 
     @Test
-    public void getCardPrivilegeByCodeAndIsActiveSuccess() {
+    public void getCardPrivilegeByAccountTypeAndCardTypeAndIsActiveSuccess() {
         CardPrivilege cardPrivilege = cardTestCases.getCardPrivilegeTestCase();
         GetCardPrivilegeResponse expectedResponse = cardTestCases.getCardPrivilegeResponseTestCase();
 
-        when(cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive("CODE")).thenReturn(cardPrivilege);
+        when(cardPrivilegeQueryService.findByCodeAndAccountTypeAndCardTypeAndIsActive(
+                cardPrivilege.getPrivilegeCode(),
+                cardPrivilege.getAccountType(),
+                cardPrivilege.getCardType()
+        )).thenReturn(cardPrivilege);
         when(cardPrivilegeMapper.toDto(cardPrivilege)).thenReturn(expectedResponse);
 
-        GetCardPrivilegeResponse result = cardPrivilegeService.getByCodeAndIsActive("code");
+        GetCardPrivilegeResponse result = cardPrivilegeService.getByCodeAndAccountTypeAndCardTypeAndIsActive(
+                cardPrivilege.getPrivilegeCode(),
+                cardPrivilege.getAccountType(),
+                cardPrivilege.getCardType()
+        );
 
         Assertions.assertEquals(expectedResponse, result);
-        verify(cardPrivilegeQueryService).findByPrivilegeCodeAndIsActive("CODE");
+        verify(cardPrivilegeQueryService).findByCodeAndAccountTypeAndCardTypeAndIsActive(
+                cardPrivilege.getPrivilegeCode(),
+                cardPrivilege.getAccountType(),
+                cardPrivilege.getCardType()
+        );
         verify(cardPrivilegeMapper).toDto(cardPrivilege);
     }
 
     @Test
-    public void getCardPrivilegeByCodeAndIsActiveFailure_NotFound() {
-        when(cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive("MISSING"))
-                .thenThrow(new NotFoundException("Card privilege not found with code: MISSING"));
+    public void getCardPrivilegeByAccountTypeAndCardTypeAndIsActiveFailure_NotFound() {
+        when(cardPrivilegeQueryService.findByCodeAndAccountTypeAndCardTypeAndIsActive("MISSING", null, null))
+                .thenThrow(new NotFoundException("no active Card privilege found with code: MISSING and account type: null and card type: null"));
 
         RuntimeException exception = Assertions.assertThrows(NotFoundException.class,
-                () -> cardPrivilegeService.getByCodeAndIsActive("missing"));
+                () -> cardPrivilegeService.getByCodeAndAccountTypeAndCardTypeAndIsActive("missing", null, null));
 
-        Assertions.assertEquals("Card privilege not found with code: MISSING", exception.getMessage());
-        verify(cardPrivilegeQueryService).findByPrivilegeCodeAndIsActive("MISSING");
+        Assertions.assertEquals("no active Card privilege found with code: MISSING and account type: null and card type: null", exception.getMessage());
+        verify(cardPrivilegeQueryService).findByCodeAndAccountTypeAndCardTypeAndIsActive("MISSING", null, null);
         verify(cardPrivilegeMapper, never()).toDto(any());
     }
 

@@ -63,7 +63,7 @@ public class BusinessCardServiceUnitTest extends UnitTest {
         when(accountQueryService.findByUsername(username)).thenReturn(account);
         doNothing().when(businessCardValidator).validateCreate(account);
         when(cardService.generateCardNumber()).thenReturn(cardNumber);
-        when(cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getPrivilegeCode())).thenReturn(cardPrivilege);
+        when(cardPrivilegeQueryService.findByCodeAndAccountTypeAndCardTypeAndIsActive(request.getPrivilegeCode(), request.getAccountType(), request.getType())).thenReturn(cardPrivilege);
         doNothing().when(cardService).updateExpirationDateOnCreate(any());
         when(businessCardRepository.save(any(BusinessCard.class))).thenReturn(businessCard);
 
@@ -72,7 +72,7 @@ public class BusinessCardServiceUnitTest extends UnitTest {
         Assertions.assertEquals(businessCard, createdCard);
         verify(businessCardValidator).validateCreate(account);
         verify(cardService).generateCardNumber();
-        verify(cardPrivilegeQueryService).findByPrivilegeCodeAndIsActive(request.getPrivilegeCode());
+        verify(cardPrivilegeQueryService).findByCodeAndAccountTypeAndCardTypeAndIsActive(request.getPrivilegeCode(), request.getAccountType(), request.getType());
         verify(businessCardRepository, times(1)).save(any(BusinessCard.class));
     }
 

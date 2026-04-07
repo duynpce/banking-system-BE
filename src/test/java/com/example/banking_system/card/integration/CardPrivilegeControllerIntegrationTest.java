@@ -1,10 +1,13 @@
 package com.example.banking_system.card.integration;
 
 import com.example.banking_system.card.CardTestCases;
+import com.example.banking_system.domain.account.constant.AccountType;
+import com.example.banking_system.domain.card.constant.CardType;
 import com.example.banking_system.domain.card.controller.CardPrivilegeController;
 import com.example.banking_system.domain.card.dto.CreateCardPrivilegeRequest;
 import com.example.banking_system.domain.card.dto.GetCardPrivilegeResponse;
 import com.example.banking_system.domain.card.dto.UpdateCardPrivilegeRequest;
+import com.example.banking_system.domain.card.entity.CardPrivilege;
 import com.example.banking_system.domain.card.service.query.CardPrivilegeQueryService;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.common.dto.ResponseDto;
@@ -19,9 +22,11 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
 
     private final CardTestCases cardTestCases = CardTestCases.getInstance();
@@ -43,11 +48,18 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         assertNotNull(responseDto, "Response body should not be null");
         assertTrue(responseDto.isSuccess(), "Response success flag should be true");
 
-        // Verify privilege was created
-        assertTrue(cardPrivilegeQueryService.existsByCode(request.getCode()),
-            "Card privilege should exist in database");
+        CardPrivilege result = cardPrivilegeQueryService.findByCodeAndAccountTypeAndCardTypeAndIsActive(
+                request.getCode(),
+                request.getAccountType(),
+                request.getCardType()
+        );
 
-        cleanupCreatedCardPrivilege(request.getCode());
+        assertEquals(request.getCode(), result.getCode(), "Card privilege code should match");
+        assertEquals(request.getAccountType(), result.getAccountType(), "Card privilege account type should match");
+
+
+        cleanupCreatedCardPrivilege(request.getCode(), request.getAccountType(), request.getCardType());
+
     }
 
     @Test
@@ -62,7 +74,9 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
             () -> cardPrivilegeController.create(request),
             "Should throw ValidationException for duplicate privilege code");
 
-        cleanupCreatedCardPrivilege(request.getCode());
+
+        cleanupCreatedCardPrivilege(request.getCode(), request.getAccountType(), request.getCardType());
+
     }
 
     @Test
@@ -72,8 +86,15 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         cardPrivilegeController.create(createRequest);
 
         // Update privilege
+        GetCardPrivilegeResponse cardPrivilege = Objects.requireNonNull(
+                cardPrivilegeController.getByCodeAndAccountTypeAndCardTypeAndIsActive(
+                        createRequest.getCode(),
+                        createRequest.getAccountType(),
+                        createRequest.getCardType()
+                ).getBody()
+        ).getData();
         UpdateCardPrivilegeRequest updateRequest = cardTestCases.getUpdateCardPrivilegeRequestTestCase();
-        updateRequest.setCode(createRequest.getCode()); // Use the same code
+        updateRequest.setId(cardPrivilege.getId());
 
         ResponseEntity<ResponseDto<String>> response = cardPrivilegeController.update(updateRequest);
         ResponseDto<String> responseDto = response.getBody();
@@ -82,13 +103,14 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         assertNotNull(responseDto, "Response body should not be null");
         assertTrue(responseDto.isSuccess(), "Response success flag should be true");
 
-        cleanupCreatedCardPrivilege(createRequest.getCode());
+        cleanupCreatedCardPrivilege(createRequest.getCode(), createRequest.getAccountType(), createRequest.getCardType());
     }
 
     @Test
     public void testUpdateCardPrivilege_NotFound_Failure() {
         UpdateCardPrivilegeRequest request = cardTestCases.getUpdateCardPrivilegeRequestTestCase();
-        request.setCode("NONEXISTENT_CODE");
+        long notExistingId = 0;
+        request.setId(notExistingId);
 
         Assertions.assertThrows(NotFoundException.class,
             () -> cardPrivilegeController.update(request),
@@ -96,7 +118,7 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    
     public void testGetAllCardPrivilege_Success() {
         CreateCardPrivilegeRequest createRequest = cardTestCases.getCreateCardPrivilegeRequestTestCase();
         cardPrivilegeController.create(createRequest);
@@ -111,11 +133,11 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         assertNotNull(responseList, "Response data should not be null");
         assertFalse(responseList.isEmpty(), "Response data should not be empty");
 
-        cleanupCreatedCardPrivilege(createRequest.getCode());
+        cleanupCreatedCardPrivilege(createRequest.getCode(), createRequest.getAccountType(), createRequest.getCardType());
     }
 
     @Test
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    
     public void testGetByPageCardPrivilege_Success() {
         CreateCardPrivilegeRequest createRequest = cardTestCases.getCreateCardPrivilegeRequestTestCase();
         cardPrivilegeController.create(createRequest);
@@ -130,11 +152,11 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         assertNotNull(responseList, "Response data should not be null");
         assertFalse(responseList.isEmpty(), "Response data should not be empty");
 
-        cleanupCreatedCardPrivilege(createRequest.getCode());
+        cleanupCreatedCardPrivilege(createRequest.getCode(), createRequest.getAccountType(), createRequest.getCardType());
     }
 
     @Test
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    
     public void testGetByPageCardPrivilege_InvalidPage_Failure() {
         Assertions.assertThrows(IllegalArgumentException.class,
                 () -> cardPrivilegeController.getByPage(-1, 10),
@@ -142,12 +164,16 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    
     public void testGetCardPrivilegeById_Success() {
         CreateCardPrivilegeRequest createRequest = cardTestCases.getCreateCardPrivilegeRequestTestCase();
         cardPrivilegeController.create(createRequest);
 
-        long id = cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(createRequest.getCode()).getId();
+        long id = cardPrivilegeQueryService.findByCodeAndAccountTypeAndCardTypeAndIsActive(
+                createRequest.getCode(),
+                createRequest.getAccountType(),
+                createRequest.getCardType()
+        ).getId();
         ResponseEntity<ResponseDto<GetCardPrivilegeResponse>> response = cardPrivilegeController.getById(id);
         ResponseDto<GetCardPrivilegeResponse> responseDto = response.getBody();
 
@@ -157,11 +183,11 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         assertNotNull(responseDto.getData(), "Response data should not be null");
         assertEquals(id, responseDto.getData().getId(), "Card privilege id should match");
 
-        cleanupCreatedCardPrivilege(createRequest.getCode());
+        cleanupCreatedCardPrivilege(createRequest.getCode(), createRequest.getAccountType(), createRequest.getCardType());
     }
 
     @Test
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    
     public void testGetCardPrivilegeById_NotFound_Failure() {
         Assertions.assertThrows(NotFoundException.class,
                 () -> cardPrivilegeController.getById(Long.MAX_VALUE),
@@ -169,12 +195,16 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void testGetCardPrivilegeByCodeAndIsActive_Success() {
+    
+    public void testGetCardPrivilegeByAccountTypeAndCardTypeAndIsActive_Success() {
         CreateCardPrivilegeRequest createRequest = cardTestCases.getCreateCardPrivilegeRequestTestCase();
         cardPrivilegeController.create(createRequest);
 
-        ResponseEntity<ResponseDto<GetCardPrivilegeResponse>> response = cardPrivilegeController.getByCodeAndIsActive(createRequest.getCode());
+        ResponseEntity<ResponseDto<GetCardPrivilegeResponse>> response = cardPrivilegeController.getByCodeAndAccountTypeAndCardTypeAndIsActive(
+                createRequest.getCode(),
+                createRequest.getAccountType(),
+                createRequest.getCardType()
+        );
         ResponseDto<GetCardPrivilegeResponse> responseDto = response.getBody();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
@@ -183,14 +213,14 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         assertNotNull(responseDto.getData(), "Response data should not be null");
         assertEquals(createRequest.getCode(), responseDto.getData().getPrivilegeCode(), "Card privilege code should match");
 
-        cleanupCreatedCardPrivilege(createRequest.getCode());
+        cleanupCreatedCardPrivilege(createRequest.getCode(), createRequest.getAccountType(), createRequest.getCardType());
     }
 
     @Test
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public void testGetCardPrivilegeByCodeAndIsActive_NotFound_Failure() {
+    
+    public void testGetCardPrivilegeByAccountTypeAndCardTypeAndIsActive_NotFound_Failure() {
         Assertions.assertThrows(NotFoundException.class,
-                () -> cardPrivilegeController.getByCodeAndIsActive("NONEXISTENT_CODE"),
+                () -> cardPrivilegeController.getByCodeAndAccountTypeAndCardTypeAndIsActive("NONEXISTENT_CODE", null, null),
                 "Should throw NotFoundException when code does not exist");
     }
 
@@ -201,7 +231,11 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         cardPrivilegeController.create(createRequest);
 
         // Delete privilege
-        ResponseEntity<ResponseDto<String>> response = cardPrivilegeController.deleteCardPrivilegeAndIsActive(createRequest.getCode());
+        ResponseEntity<ResponseDto<String>> response = cardPrivilegeController.deleteCardPrivilegeAndIsActive(
+                createRequest.getCode(),
+                createRequest.getAccountType(),
+                createRequest.getCardType()
+        );
         ResponseDto<String> responseDto = response.getBody();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
@@ -214,12 +248,12 @@ public class CardPrivilegeControllerIntegrationTest extends IntegrationTest {
         String nonExistentCode = "NONEXISTENT_CODE";
 
         Assertions.assertThrows(NotFoundException.class,
-            () -> cardPrivilegeController.deleteCardPrivilegeAndIsActive(nonExistentCode),
+            () -> cardPrivilegeController.deleteCardPrivilegeAndIsActive(nonExistentCode, null, null),
             "Should throw ValidationException when trying to delete non-existent privilege");
     }
 
-    private void cleanupCreatedCardPrivilege(String code) {
-        cardPrivilegeQueryService.deleteByPrivilegeCode(code);
+    private void cleanupCreatedCardPrivilege(String code, AccountType accountType, CardType cardType) {
+        cardPrivilegeQueryService.deleteByPrivilegeCodeAndAccountTypeAndCardType(code, accountType, cardType);
     }
 
 }
