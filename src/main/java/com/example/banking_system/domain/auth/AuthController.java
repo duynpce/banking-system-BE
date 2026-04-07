@@ -22,8 +22,8 @@ public class AuthController {
     private final AuthService authService;
 
     @GetMapping("/callback")
-    public ResponseEntity<ResponseDto<GetTokenResponse>> oauth2Callback(@NotBlank(message = "code cannot be blank") @RequestParam("code") String code, HttpServletRequest request, HttpServletResponse response) {
-        GetTokenResponse getTokenResponse = authService.getToken(code, request);
+    public ResponseEntity<ResponseDto<GetTokenResponse>> oauth2Callback(@NotBlank(message = "code cannot be blank") @RequestParam("code") String code, HttpServletResponse response) {
+        GetTokenResponse getTokenResponse = authService.getToken(code);
         ResponseCookie cookie = ResponseCookie.from("refreshToken", getTokenResponse.getRefreshToken())
                 .httpOnly(true)
                 .secure(true) // Set to true in production (requires HTTPS)
@@ -42,9 +42,10 @@ public class AuthController {
     }
 
     @PostMapping("/refresh-token")
-    public ResponseEntity<ResponseDto<String>> refreshToken(@CookieValue("refreshToken") String refreshToken
-            , HttpServletResponse response, HttpSession session, HttpServletRequest request) {
-        GetTokenResponse getTokenResponse = authService.refreshToken(refreshToken, session, request);
+    public ResponseEntity<ResponseDto<GetTokenResponse>> refreshToken(@CookieValue("refreshToken") String refreshToken
+            , HttpServletResponse response) {
+        GetTokenResponse getTokenResponse = authService.refreshToken(refreshToken);
+
 
         ResponseCookie cookie = ResponseCookie.from("refreshToken", getTokenResponse.getRefreshToken())
                 .httpOnly(true)
@@ -54,9 +55,9 @@ public class AuthController {
                 .sameSite(Cookie.SameSite.NONE.toString())
                 .build();
 
+        getTokenResponse.setRefreshToken(null);
         response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-
-        return ResponseEntity.ok(ResponseDto.success(getTokenResponse.getAccessToken(), "token refreshed successfully"));
+        return ResponseEntity.ok(ResponseDto.success(getTokenResponse, "token refreshed successfully"));
     }
 
     @PostMapping("/logout")

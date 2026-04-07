@@ -25,9 +25,8 @@ import java.util.List;
 @Configuration
 @Slf4j
 @RequiredArgsConstructor
-public class OAuth2ResourceServerConfig {
+public class  OAuth2ResourceServerConfig {
         private final CorsConfigurationSource corsConfigurationSource;
-        private final OAuthProperties  oAuthProperties;
 
         // Resource Server Security Filter Chain
         @Bean

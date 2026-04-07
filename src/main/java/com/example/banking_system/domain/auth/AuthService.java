@@ -26,18 +26,16 @@ public class AuthService {
     private final JwtUtil jwtUtil;
     private final WebClient webClient;
 
-    public GetTokenResponse getToken(String code, HttpServletRequest request) {
+    public GetTokenResponse getToken(String code) {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("code", code);
         formData.add("grant_type", "authorization_code");
         formData.add("redirect_uri", oAuthProperties.getRedirectUri());
 
-        String sessionId = request.getHeader(HttpHeaders.COOKIE);
 
         GetTokenResponse response = webClient.post()
                 .uri(oAuthProperties.getAuthServerUri() + oAuthProperties.getTokenUri())
                 .header(HttpHeaders.AUTHORIZATION,"Basic " + oAuthProperties.getPostBasicSecret())
-                .header(HttpHeaders.COOKIE, sessionId)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData(formData))
                 .retrieve()
@@ -51,23 +49,10 @@ public class AuthService {
         return response;
     }
 
-    public GetTokenResponse refreshToken(String refreshToken, HttpSession session, HttpServletRequest request) {
-        String sessionId = request.getHeader(HttpHeaders.COOKIE);
-        final String username = (String) session.getAttribute("username");
+    public GetTokenResponse refreshToken(String refreshToken) {
 
         if(refreshToken == null || refreshToken.isEmpty()){
             throw new UnauthorizedException("no token provided, please login");
-        }
-
-
-        if(username == null){
-            session.invalidate();
-            throw new UnauthorizedException("User not authenticated");
-        }
-
-        if(!jwtUtil.getUsername().equals(username)){
-            session.invalidate();
-            throw new UnauthorizedException("invalid refresh token");
         }
 
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
@@ -78,7 +63,6 @@ public class AuthService {
         GetTokenResponse getTokenResponse = webClient.post()
                 .uri(oAuthProperties.getAuthServerUri() + oAuthProperties.getTokenUri())
                 .header(HttpHeaders.AUTHORIZATION,"Basic " + oAuthProperties.getPostBasicSecret())
-                .header(HttpHeaders.COOKIE, sessionId)
                 .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                 .body(BodyInserters.fromFormData(formData))
                 .retrieve()
