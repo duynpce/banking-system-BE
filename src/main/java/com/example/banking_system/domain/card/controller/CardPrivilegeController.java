@@ -1,5 +1,7 @@
 package com.example.banking_system.domain.card.controller;
 
+import com.example.banking_system.domain.account.constant.AccountType;
+import com.example.banking_system.domain.card.constant.CardType;
 import com.example.banking_system.domain.card.dto.CreateCardPrivilegeRequest;
 import com.example.banking_system.domain.card.dto.GetCardPrivilegeResponse;
 import com.example.banking_system.domain.card.dto.UpdateCardPrivilegeRequest;
@@ -47,9 +49,13 @@ public class CardPrivilegeController {
         return ResponseEntity.ok(ResponseDto.success(response, "Card privilege retrieved successfully"));
     }
 
-    @GetMapping("/code/{code}")
-    public ResponseEntity<ResponseDto<GetCardPrivilegeResponse>> getByCodeAndIsActive(@PathVariable String code) {
-        GetCardPrivilegeResponse response = cardPrivilegeService.getByCodeAndIsActive(code);
+    @GetMapping(params = {"code", "accountType", "cardType"})
+    public ResponseEntity<ResponseDto<GetCardPrivilegeResponse>> getByCodeAndAccountTypeAndCardTypeAndIsActive(
+            @RequestParam String code,
+            @RequestParam AccountType accountType,
+            @RequestParam CardType cardType
+    ) {
+        GetCardPrivilegeResponse response = cardPrivilegeService.getByCodeAndAccountTypeAndCardTypeAndIsActive(code, accountType, cardType);
         return ResponseEntity.ok(ResponseDto.success(response, "Card privilege retrieved successfully"));
     }
 
@@ -59,9 +65,13 @@ public class CardPrivilegeController {
         return ResponseEntity.ok(ResponseDto.success(null, "Card privilege updated successfully"));
     }
 
-    @DeleteMapping("/{code}")
-    public ResponseEntity<ResponseDto<String>> deleteCardPrivilegeAndIsActive(@PathVariable String code) {
-        cardPrivilegeQueryService.deleteByPrivilegeCode(code);
+    @DeleteMapping(params = {"code", "accountType", "cardType"})
+    public ResponseEntity<ResponseDto<String>> deleteCardPrivilegeAndIsActive(
+            @RequestParam String code,
+            @RequestParam AccountType accountType,
+            @RequestParam CardType cardType
+    ) {
+        cardPrivilegeQueryService.deleteByPrivilegeCodeAndAccountTypeAndCardType(code, accountType, cardType);
         return ResponseEntity.ok(ResponseDto.success(null, "Card privilege deleted by code"));
     }
 

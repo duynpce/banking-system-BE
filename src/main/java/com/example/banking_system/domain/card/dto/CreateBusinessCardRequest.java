@@ -1,5 +1,6 @@
 package com.example.banking_system.domain.card.dto;
 
+import com.example.banking_system.domain.account.constant.AccountType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -14,6 +15,6 @@ public class CreateBusinessCardRequest extends  CreateCardRequest{
     private String holder;
 
     public  CreateBusinessCardRequest() {
-
+        super(AccountType.BUSINESS);
     }
 }

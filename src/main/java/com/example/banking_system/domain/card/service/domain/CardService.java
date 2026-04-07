@@ -35,7 +35,11 @@ public class CardService {
 
     public void updateExpirationDateOnCreate(Card card) {
 
-        int baseExpirationYears = cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(card.getPrivilege().getPrivilegeCode()).getExpirationYears();
+        int baseExpirationYears = cardPrivilegeQueryService.findByCodeAndAccountTypeAndCardTypeAndIsActive(
+                card.getPrivilege().getPrivilegeCode(),
+                card.getPrivilege().getAccountType(),
+                card.getType()
+        ).getExpirationYears();
         LocalDate expirationDate = LocalDate.now().plusYears(baseExpirationYears);
         card.setExpirationDate(expirationDate);
 
@@ -56,7 +60,7 @@ public class CardService {
     }
 
     @Transactional(readOnly = true)
-    public List<? extends GetCardResponse> getAllCardByJwtWithPagination(int page, int limit) {
+    public List<? extends GetCardResponse> getCardsByJwtWithPagination(int page, int limit) {
         final String username = jwtUtil.getUsername();
         Page<Card> cardPage = cardQueryService.findByUsernameWithPagination(username, page, limit);
 
@@ -76,7 +80,8 @@ public class CardService {
             return null;
         }
 
-        return  cardMapper.toDto(account.getCardDetailsList().getFirst());
+        CardDetails firstCard = account.getCardDetailsList().getFirst();
+        return  cardMapper.toDto(firstCard);
     }
 
     @Transactional(readOnly = true)

@@ -10,53 +10,33 @@ import java.util.Optional;
 
 public interface CardPrivilegeRepository extends JpaRepository<CardPrivilege,Long> {
 
-    Optional<CardPrivilege> findByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+
+    Optional<CardPrivilege> findByCodeAndAccountTypeAndCardTypeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
             String code,
+            AccountType accountType,
+            CardType cardType,
             LocalDate from,
             LocalDate to
     );
 
-    default Optional<CardPrivilege> findByPrivilegeCodeAndDate(String privilegeCode, LocalDate date) {
-        return findByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
-                privilegeCode, date, date
+    default Optional<CardPrivilege> findByCodeAndAccountTypeAndCardTypeAndDate(String privilegeCode, AccountType accountType, CardType cardType, LocalDate date) {
+        return findByCodeAndAccountTypeAndCardTypeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+                privilegeCode, accountType, cardType, date, date
         );
     }
 
-    boolean existsByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+
+    boolean existsByCodeAndAccountTypeAndCardTypeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
             String code,
-            LocalDate effectiveTo,
-            LocalDate effectiveFrom
-    );
-
-    boolean existsByCodeAndIdNotAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
-            String code,
-            Long excludeId,
-            LocalDate effectiveTo,
-            LocalDate effectiveFrom
-    );
-
-    default boolean hasCodeOverlap(String code, LocalDate effectiveFrom, LocalDate effectiveTo) {
-        return existsByCodeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
-                code, effectiveTo, effectiveFrom
-        );
-    }
-
-    default boolean hasCodeOverlapExcludingId(String code, LocalDate effectiveFrom, LocalDate effectiveTo, Long excludeId) {
-        return existsByCodeAndIdNotAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
-                code, excludeId, effectiveTo, effectiveFrom
-        );
-    }
-
-    boolean existsByAccountTypeAndCardTypeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
             AccountType accountType,
             CardType cardType,
             LocalDate effectiveTo,
             LocalDate effectiveFrom
     );
 
-    default boolean hasOverlap(AccountType accountType, CardType cardType, LocalDate effectiveFrom, LocalDate effectiveTo) {
-        return existsByAccountTypeAndCardTypeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
-                accountType, cardType, effectiveTo, effectiveFrom
+    default boolean hasOverlap(String code, AccountType accountType, CardType cardType, LocalDate effectiveFrom, LocalDate effectiveTo) {
+        return existsByCodeAndAccountTypeAndCardTypeAndEffectiveFromLessThanEqualAndEffectiveToGreaterThanEqual(
+                code, accountType, cardType, effectiveTo, effectiveFrom
         );
     }
 }

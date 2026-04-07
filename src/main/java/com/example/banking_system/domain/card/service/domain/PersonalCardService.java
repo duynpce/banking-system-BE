@@ -32,16 +32,18 @@ public class PersonalCardService {
         String username = jwtUtil.getUsername();
         PersonalAccount personalAccount = personalAccountQueryService.findByUsername(username);
         Account account = personalAccount.getAccount();
-        System.out.println(request.getPinCode());
 
         personalCardValidator.validateCreate(account);
 
-        CardPrivilege privilege = cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getPrivilegeCode().toUpperCase());
+        CardPrivilege privilege = cardPrivilegeQueryService.findByCodeAndAccountTypeAndCardTypeAndIsActive(
+                request.getPrivilegeCode().toUpperCase(),
+                request.getAccountType(),
+                request.getType()
+        );
         String cardNumber = cardService.generateCardNumber();
         PersonalCard personalCard = new PersonalCard(request.getPinCode(),cardNumber, personalAccount.getFullName(), request.getType(),privilege);
         personalCard.getCard().setAccount(account);
         cardService.updateExpirationDateOnCreate(personalCard.getCard());
-
         return personalCardRepository.save(personalCard);
     }
 }

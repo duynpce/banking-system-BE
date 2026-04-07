@@ -28,7 +28,7 @@ public class CardController {
             @RequestParam int page,
             @RequestParam int limit
     ){
-        List<? extends GetCardResponse> response = cardService.getAllCardByJwtWithPagination(page, limit);
+        List<? extends GetCardResponse> response = cardService.getCardsByJwtWithPagination(page, limit);
         return ResponseEntity.ok(ResponseDto.success(response, "Cards retrieved successfully"));
     }
 

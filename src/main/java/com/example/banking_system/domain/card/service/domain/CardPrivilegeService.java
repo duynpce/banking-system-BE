@@ -1,5 +1,7 @@
 package com.example.banking_system.domain.card.service.domain;
 
+import com.example.banking_system.domain.account.constant.AccountType;
+import com.example.banking_system.domain.card.constant.CardType;
 import com.example.banking_system.domain.card.dto.CreateCardPrivilegeRequest;
 import com.example.banking_system.domain.card.dto.GetCardPrivilegeResponse;
 import com.example.banking_system.domain.card.dto.UpdateCardPrivilegeRequest;
@@ -24,6 +26,7 @@ public class CardPrivilegeService {
 
     @Transactional
     public CardPrivilege create(CreateCardPrivilegeRequest request) {
+        request.setCode(request.getCode().toUpperCase(Locale.ROOT));
         CardPrivilege cardPrivilege = cardPrivilegeMapper.toEntity(request);
         cardPrivilegeValidator.validateCreate(cardPrivilege);
         return cardPrivilegeQueryService.save(cardPrivilege);
@@ -31,8 +34,7 @@ public class CardPrivilegeService {
 
     @Transactional
     public CardPrivilege update(UpdateCardPrivilegeRequest request) {
-        String normalizedCode = request.getCode().toUpperCase(Locale.ROOT);
-        CardPrivilege cardPrivilege = cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(normalizedCode);
+        CardPrivilege cardPrivilege = cardPrivilegeQueryService.findById(request.getId());
         cardPrivilegeValidator.validateUpdate(request, cardPrivilege);
         return cardPrivilegeQueryService.save(cardPrivilege);
     }
@@ -44,9 +46,9 @@ public class CardPrivilegeService {
     }
 
     @Transactional(readOnly = true)
-    public GetCardPrivilegeResponse getByCodeAndIsActive(String code) {
+    public GetCardPrivilegeResponse getByCodeAndAccountTypeAndCardTypeAndIsActive(String code, AccountType accountType, CardType cardType) {
         String normalizedCode = code.toUpperCase(Locale.ROOT);
-        CardPrivilege cardPrivilege = cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(normalizedCode);
+        CardPrivilege cardPrivilege = cardPrivilegeQueryService.findByCodeAndAccountTypeAndCardTypeAndIsActive(normalizedCode, accountType, cardType);
         return cardPrivilegeMapper.toDto(cardPrivilege);
     }
 

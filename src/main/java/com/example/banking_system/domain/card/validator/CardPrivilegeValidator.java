@@ -23,21 +23,21 @@ public class CardPrivilegeValidator {
                 "An active card privilege already exists for this account type and card type"
         );
 
-        util.assertUnique(
-                cardPrivilegeQueryService.hasCodeOverlap(
-                        cardPrivilege.getCode(),
-                        cardPrivilege.getEffectiveFrom(),
-                        cardPrivilege.getEffectiveTo()
-                ),
-                "An overlapping card privilege code already exists"
-        );
     }
+
 
     public void validateUpdate(UpdateCardPrivilegeRequest request, CardPrivilege existingCardPrivilege) {
         if (isAllFieldsNull(request)) {
             throw new ValidationException("At least one field must be provided for update");
         }
 
+        boolean updateActivePrivilege = !existingCardPrivilege.getEffectiveFrom().isAfter(LocalDate.now());
+
+        if(updateActivePrivilege) {
+            if(request.getEffectiveFrom() != null ) {
+                throw new ValidationException("Effective from date cannot be updated for future card privilege");
+            }
+        }
         LocalDate nextEffectiveFrom = request.getEffectiveFrom() != null
                 ? request.getEffectiveFrom()
                 : existingCardPrivilege.getEffectiveFrom();
@@ -47,18 +47,15 @@ public class CardPrivilegeValidator {
 
         validateEffectiveDateRange(nextEffectiveFrom, nextEffectiveTo);
 
-        util.assertUnique(
-                cardPrivilegeQueryService.hasCodeOverlapExcludingId(
-                        existingCardPrivilege.getCode(),
-                        nextEffectiveFrom,
-                        nextEffectiveTo,
-                        existingCardPrivilege.getId()
-                ),
-                "An overlapping card privilege code already exists"
-        );
-
         // Set non-null fields to existing card privilege
         setNonNullFieldsToUpdateCardPrivilege(request, existingCardPrivilege);
+
+        if(!updateActivePrivilege) {
+            if(cardPrivilegeQueryService.hasOverlap(existingCardPrivilege)) {
+                throw new ValidationException("An active card privilege already exists for this account type and card type with the given effective date range");
+            }
+        }
+
     }
 
     private boolean isAllFieldsNull(UpdateCardPrivilegeRequest request) {
@@ -100,6 +97,10 @@ public class CardPrivilegeValidator {
 
         if (!effectiveTo.isAfter(effectiveFrom)) {
             throw new ValidationException("effective to date must be after effective from date");
+        }
+
+        if(effectiveFrom.isBefore(LocalDate.now())) {
+            throw new ValidationException("effective from date must be today or in the future");
         }
     }
 }

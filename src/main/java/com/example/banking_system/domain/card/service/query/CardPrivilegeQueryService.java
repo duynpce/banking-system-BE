@@ -1,5 +1,7 @@
 package com.example.banking_system.domain.card.service.query;
 
+import com.example.banking_system.domain.account.constant.AccountType;
+import com.example.banking_system.domain.card.constant.CardType;
 import com.example.banking_system.domain.card.entity.CardPrivilege;
 import com.example.banking_system.domain.card.repository.CardPrivilegeRepository;
 import com.example.banking_system.common.exception.NotFoundException;
@@ -22,9 +24,15 @@ public class CardPrivilegeQueryService {
         return cardPrivilegeRepository.save(cardPrivilege);
     }
 
-    public CardPrivilege findByPrivilegeCodeAndIsActive(String privilegeCode) {
-        return cardPrivilegeRepository.findByPrivilegeCodeAndDate(privilegeCode, LocalDate.now(ZoneOffset.UTC)).orElseThrow(
-                () -> new NotFoundException(("Card privilege not found with code: " + privilegeCode))
+    public CardPrivilege findByCodeAndAccountTypeAndCardTypeAndIsActive(String privilegeCode, AccountType accountType, CardType cardType) {
+        return cardPrivilegeRepository.findByCodeAndAccountTypeAndCardTypeAndDate(privilegeCode, accountType, cardType, LocalDate.now(ZoneOffset.UTC)).orElseThrow(
+                () -> new NotFoundException(("no active Card privilege found with code: " + privilegeCode + " and account type: " + accountType + " and card type: " + cardType))
+        );
+    }
+
+    public CardPrivilege findByCodeAndAccountTypeAndCardTypeAndDate(String privilegeCode, AccountType accountType, CardType cardType, LocalDate date) {
+        return cardPrivilegeRepository.findByCodeAndAccountTypeAndCardTypeAndDate(privilegeCode, accountType, cardType, date).orElseThrow(
+                () -> new NotFoundException(("Card privilege not found with code: " + privilegeCode + " and account type: " + accountType + " and card type: " + cardType + " and date: " + date))
         );
     }
 
@@ -46,9 +54,8 @@ public class CardPrivilegeQueryService {
         cardPrivilegeRepository.delete(cardPrivilege);
     }
 
-    //temporary for test
-    public void deleteByPrivilegeCode(String privilegeCode) {
-        CardPrivilege cardPrivilege = findByPrivilegeCodeAndIsActive(privilegeCode);
+    public void deleteByPrivilegeCodeAndAccountTypeAndCardType(String privilegeCode, AccountType accountType, CardType cardType) {
+        CardPrivilege cardPrivilege = findByCodeAndAccountTypeAndCardTypeAndIsActive(privilegeCode, accountType, cardType);
         delete(cardPrivilege);
     }
 
@@ -59,19 +66,11 @@ public class CardPrivilegeQueryService {
 
     public boolean hasOverlap(CardPrivilege cardPrivilege) {
         return cardPrivilegeRepository.hasOverlap
-                (cardPrivilege.getAccountType(), cardPrivilege.getCardType(), cardPrivilege.getEffectiveFrom(), cardPrivilege.getEffectiveTo());
+                (cardPrivilege.getCode(),
+                        cardPrivilege.getAccountType(),
+                        cardPrivilege.getCardType(),
+                        cardPrivilege.getEffectiveFrom(),
+                        cardPrivilege.getEffectiveTo()
+                );
     }
-
-    public boolean hasCodeOverlap(String code, LocalDate effectiveFrom, LocalDate effectiveTo) {
-        return cardPrivilegeRepository.hasCodeOverlap(code, effectiveFrom, effectiveTo);
-    }
-
-    public boolean hasCodeOverlapExcludingId(String code, LocalDate effectiveFrom, LocalDate effectiveTo, Long excludeId) {
-        return cardPrivilegeRepository.hasCodeOverlapExcludingId(code, effectiveFrom, effectiveTo, excludeId);
-    }
-
-    public boolean existsByCode(String code) {
-        return cardPrivilegeRepository.findByPrivilegeCodeAndDate(code, LocalDate.now(ZoneOffset.UTC)).isPresent();
-    }
-
 }

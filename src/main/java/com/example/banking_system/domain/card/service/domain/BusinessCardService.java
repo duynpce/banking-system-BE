@@ -30,7 +30,11 @@ public class BusinessCardService {
 
         businessCardValidator.validateCreate(account);
 
-        CardPrivilege privilege = cardPrivilegeQueryService.findByPrivilegeCodeAndIsActive(request.getPrivilegeCode().toUpperCase());
+        CardPrivilege privilege = cardPrivilegeQueryService.findByCodeAndAccountTypeAndCardTypeAndIsActive(
+                request.getPrivilegeCode().toUpperCase(),
+                request.getAccountType(),
+                request.getType()
+        );
         String cardNumber = cardService.generateCardNumber();
         BusinessCard businessCard = new BusinessCard(request.getPinCode(), cardNumber, request.getHolder(), request.getType(), privilege);
         businessCard.getCard().setAccount(account);

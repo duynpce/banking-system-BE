@@ -169,7 +169,7 @@ Feature-based folder structure. Each feature follows this pattern:
       @Transactional
       public CardPrivilegeCode update(UpdateCardPrivilegeCodeRequest request) {
           String normalizedCode = request.getCode().toUpperCase(Locale.ROOT);
-          CardPrivilegeCode existingCardPrivilegeCode = cardPrivilegeCodeQueryService.findByCodeAndIsActive(normalizedCode);
+          CardPrivilegeCode existingCardPrivilegeCode = cardPrivilegeCodeQueryService.findByAccountTypeAndIsActive(normalizedCode);
 
           cardPrivilegeCodeValidator.validateUpdate(request, existingCardPrivilegeCode);
 
