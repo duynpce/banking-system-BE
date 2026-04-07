@@ -37,17 +37,16 @@ public class AuthControllerIntegrationTest extends IntegrationTest {
         String accessToken = "access_token_123";
         String refreshToken = "refresh_token_456";
 
-        MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
         GetTokenResponse mockResponse = new GetTokenResponse();
         mockResponse.setAccessToken(accessToken);
         mockResponse.setRefreshToken(refreshToken);
 
-        when(authService.getToken(anyString(), any())).thenReturn(mockResponse);
+        when(authService.getToken(anyString())).thenReturn(mockResponse);
 
         // Act
-        ResponseEntity<ResponseDto<GetTokenResponse>> result = authController.oauth2Callback(code, request, response);
+        ResponseEntity<ResponseDto<GetTokenResponse>> result = authController.oauth2Callback(code, response);
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode(), "Response status should be OK");
@@ -59,17 +58,15 @@ public class AuthControllerIntegrationTest extends IntegrationTest {
 
     @Test
     public void testOauth2Callback_NoCode_Failure() {
-        MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
-
 
         // in production, the validation of @NotBlank will handle and throw MethodArgumentNotValidException
         // mock throw UnauthorizedException because create MethodArgumentNotValidException is hard
-        when(authService.getToken(anyString(), any()))
+        when(authService.getToken(anyString()))
             .thenThrow(new UnauthorizedException("code cannot be blank"));
 
         UnauthorizedException exception = Assertions.assertThrows(UnauthorizedException.class,
-            () -> authController.oauth2Callback("", request, response),
+            () -> authController.oauth2Callback("", response),
             "Should throw UnauthorizedException when code is blank");
         assertEquals("code cannot be blank", exception.getMessage(), "Exception message should match");
     }
@@ -89,15 +86,15 @@ public class AuthControllerIntegrationTest extends IntegrationTest {
         mockResponse.setAccessToken(newAccessToken);
         mockResponse.setRefreshToken(newRefreshToken);
 
-        when(authService.refreshToken(anyString(), any(), any())).thenReturn(mockResponse);
+        when(authService.refreshToken(anyString())).thenReturn(mockResponse);
 
         // Act
-        ResponseEntity<ResponseDto<String>> result = authController.refreshToken(refreshToken, response, request.getSession(), request);
+        ResponseEntity<ResponseDto<GetTokenResponse>> result = authController.refreshToken(refreshToken, response);
 
         // Assert
         assertEquals(HttpStatus.OK, result.getStatusCode(), "Response status should be OK");
         assertNotNull(result.getBody(), "Response body should not be null");
-        assertEquals(newAccessToken, result.getBody().getData(), "New access token should match");
+        assertEquals(newAccessToken, result.getBody().getData().getAccessToken(), "New access token should match");
         assertNotNull(response.getHeader("Set-Cookie"), "Cookie should be set");
         assertTrue(Objects.requireNonNull(response.getHeader("Set-Cookie")).contains("refreshToken"), "Cookie should contain refresh token");
     }
@@ -109,12 +106,12 @@ public class AuthControllerIntegrationTest extends IntegrationTest {
         MockHttpServletRequest request = new MockHttpServletRequest();
         MockHttpServletResponse response = new MockHttpServletResponse();
 
-        when(authService.refreshToken(anyString(), any(), any()))
+        when(authService.refreshToken(anyString()))
             .thenThrow(new UnauthorizedException("Invalid refresh token"));
 
         // Act & Assert
         Assertions.assertThrows(UnauthorizedException.class,
-            () -> authController.refreshToken(refreshToken, response, request.getSession(), request),
+            () -> authController.refreshToken(refreshToken, response),
             "Should throw UnauthorizedException when refresh token is invalid");
     }
 }

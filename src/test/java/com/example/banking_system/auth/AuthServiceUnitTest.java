@@ -6,8 +6,6 @@ import com.example.banking_system.common.OAuthProperties;
 import com.example.banking_system.common.UnitTest;
 import com.example.banking_system.common.exception.UnauthorizedException;
 import com.example.banking_system.common.utility.JwtUtil;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import org.junit.jupiter.api.Test;
 import org.mockito.Answers;
 import org.mockito.InjectMocks;
@@ -54,9 +52,6 @@ public class AuthServiceUnitTest extends UnitTest {
     public void getTokenSuccess() {
         // Given
         String code = "validCode";
-        String sessionId = "sessionId";
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        request.setAttribute(HttpHeaders.COOKIE, "SESSION=" + sessionId);
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
         String idToken = "idToken";
@@ -76,7 +71,7 @@ public class AuthServiceUnitTest extends UnitTest {
         when(requestHeadersSpec.retrieve()).thenReturn(responseSpec);
         when(responseSpec.bodyToMono(GetTokenResponse.class)).thenReturn(Mono.just(new GetTokenResponse(accessToken, refreshToken, idToken)));
 
-        GetTokenResponse response = authService.getToken(code, request);
+        GetTokenResponse response = authService.getToken(code);
 
         assertEquals(accessToken, response.getAccessToken(), "Access token should match the expected value");
         assertEquals(refreshToken, response.getRefreshToken(), "Refresh token should match the expected value");
@@ -85,9 +80,7 @@ public class AuthServiceUnitTest extends UnitTest {
     @Test
     public void getTokenFailsWhenResponseIsNull() {
         String code = "validCode";
-        String sessionId = "sessionId";
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getHeader(HttpHeaders.COOKIE)).thenReturn("SESSION=" + sessionId);
+
 
         when(oAuthProperties.getRedirectUri()).thenReturn("http://localhost:8080/v1/auth/callback");
         when(oAuthProperties.getAuthServerUri()).thenReturn("http://auth-server.com");
@@ -104,7 +97,7 @@ public class AuthServiceUnitTest extends UnitTest {
 
         UnauthorizedException ex = org.junit.jupiter.api.Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> authService.getToken(code, request)
+                () -> authService.getToken(code)
         );
         assertEquals("Failed to retrieve access token", ex.getMessage());
     }
@@ -112,13 +105,6 @@ public class AuthServiceUnitTest extends UnitTest {
     @Test
     public void refreshTokenSuccess() {
         String refreshToken = "refresh";
-        String username = "user";
-        String sessionId = "sessionId";
-        HttpSession session = mock(HttpSession.class);
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getHeader(HttpHeaders.COOKIE)).thenReturn("SESSION=" + sessionId);
-        when(session.getAttribute("username")).thenReturn(username);
-        when(jwtUtil.getUsername()).thenReturn(username);
 
         when(oAuthProperties.getRedirectUri()).thenReturn("http://localhost:8080/v1/auth/callback");
         when(oAuthProperties.getAuthServerUri()).thenReturn("http://auth-server.com");
@@ -134,7 +120,7 @@ public class AuthServiceUnitTest extends UnitTest {
         when(responseSpec.bodyToMono(GetTokenResponse.class))
                 .thenReturn(Mono.just(new GetTokenResponse("access", "refresh", "idToken")));
 
-        GetTokenResponse result = authService.refreshToken(refreshToken, session, request);
+        GetTokenResponse result = authService.refreshToken(refreshToken);
 
         assertEquals("access", result.getAccessToken());
         assertEquals("refresh", result.getRefreshToken());
@@ -144,12 +130,6 @@ public class AuthServiceUnitTest extends UnitTest {
     public void refreshTokenFailsWhenResponseIsNull() {
         String refreshToken = "refresh";
         String username = "user";
-        String sessionId = "sessionId";
-        HttpSession session = mock(HttpSession.class);
-        HttpServletRequest request = mock(HttpServletRequest.class);
-        when(request.getHeader(HttpHeaders.COOKIE)).thenReturn("SESSION=" + sessionId);
-        when(session.getAttribute("username")).thenReturn(username);
-        when(jwtUtil.getUsername()).thenReturn(username);
 
         when(oAuthProperties.getRedirectUri()).thenReturn("http://localhost:8080/v1/auth/callback");
         when(oAuthProperties.getAuthServerUri()).thenReturn("http://auth-server.com");
@@ -166,7 +146,7 @@ public class AuthServiceUnitTest extends UnitTest {
 
         UnauthorizedException ex = org.junit.jupiter.api.Assertions.assertThrows(
                 UnauthorizedException.class,
-                () -> authService.refreshToken(refreshToken, session, request)
+                () -> authService.refreshToken(refreshToken)
         );
         assertEquals("Invalid refresh token", ex.getMessage());
     }
