@@ -28,18 +28,15 @@ public class CardPrivilegeController {
         return ResponseEntity.ok(ResponseDto.success(null, "Card privilege created successfully"));
     }
 
-    @GetMapping(params = {"!page", "!limit"})
-    public ResponseEntity<ResponseDto<List<GetCardPrivilegeResponse>>> getAll() {
-        List<GetCardPrivilegeResponse> response = cardPrivilegeService.getAll();
-        return ResponseEntity.ok(ResponseDto.success(response, "Card privileges retrieved successfully"));
+    @PutMapping
+    public ResponseEntity<ResponseDto<String>> update(@Valid @RequestBody UpdateCardPrivilegeRequest request) {
+        cardPrivilegeService.update(request);
+        return ResponseEntity.ok(ResponseDto.success(null, "Card privilege updated successfully"));
     }
 
-    @GetMapping(params = {"page", "limit"})
-    public ResponseEntity<ResponseDto<List<GetCardPrivilegeResponse>>> getByPage(
-            @RequestParam int page,
-            @RequestParam int limit
-    ) {
-        List<GetCardPrivilegeResponse> response = cardPrivilegeService.getByPage(page, limit);
+    @GetMapping("/all")
+    public ResponseEntity<ResponseDto<List<GetCardPrivilegeResponse>>> getAll() {
+        List<GetCardPrivilegeResponse> response = cardPrivilegeService.getAll();
         return ResponseEntity.ok(ResponseDto.success(response, "Card privileges retrieved successfully"));
     }
 
@@ -47,6 +44,25 @@ public class CardPrivilegeController {
     public ResponseEntity<ResponseDto<GetCardPrivilegeResponse>> getById(@PathVariable long id) {
         GetCardPrivilegeResponse response = cardPrivilegeService.getById(id);
         return ResponseEntity.ok(ResponseDto.success(response, "Card privilege retrieved successfully"));
+    }
+
+    // temp add meta data later
+    @GetMapping(params = {"page", "limit"})
+    public ResponseEntity<ResponseDto<List<GetCardPrivilegeResponse>>> getByPage(
+            @RequestParam int page,
+            @RequestParam int limit
+    ) {
+        List<GetCardPrivilegeResponse> response = cardPrivilegeService.getByPage(page, limit);
+        return ResponseEntity.ok(ResponseDto.success(response, "Card privileges retrieved successfully"));  
+    }
+
+    @GetMapping(params = {"accountType" , "cardType"})
+    public ResponseEntity<ResponseDto<List<GetCardPrivilegeResponse>>> getByAccountTypeAndCardTypeAndIsActive(
+            @RequestParam AccountType accountType,
+            @RequestParam CardType cardType
+    ) {
+        List<GetCardPrivilegeResponse> response = cardPrivilegeService.getByAccountTypeAndCardTypeAndIsActive(accountType, cardType);
+        return ResponseEntity.ok(ResponseDto.success(response, "Card privileges retrieved successfully"));
     }
 
     @GetMapping(params = {"code", "accountType", "cardType"})
@@ -57,12 +73,6 @@ public class CardPrivilegeController {
     ) {
         GetCardPrivilegeResponse response = cardPrivilegeService.getByCodeAndAccountTypeAndCardTypeAndIsActive(code, accountType, cardType);
         return ResponseEntity.ok(ResponseDto.success(response, "Card privilege retrieved successfully"));
-    }
-
-    @PutMapping
-    public ResponseEntity<ResponseDto<String>> update(@Valid @RequestBody UpdateCardPrivilegeRequest request) {
-        cardPrivilegeService.update(request);
-        return ResponseEntity.ok(ResponseDto.success(null, "Card privilege updated successfully"));
     }
 
     @DeleteMapping(params = {"code", "accountType", "cardType"})

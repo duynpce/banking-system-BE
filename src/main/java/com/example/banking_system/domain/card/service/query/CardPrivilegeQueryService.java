@@ -50,6 +50,10 @@ public class CardPrivilegeQueryService {
         return cardPrivilegeRepository.findAll(PageRequest.of(page, limit));
     }
 
+    public List<CardPrivilege> findByAccountTypeAndCardTypeAndIsActive(AccountType accountType, CardType cardType) {
+        return cardPrivilegeRepository.findByAccountTypeAndCardTypeAndDate(accountType, cardType, LocalDate.now(ZoneOffset.UTC));
+    }
+
     public void delete(CardPrivilege cardPrivilege) {
         cardPrivilegeRepository.delete(cardPrivilege);
     }

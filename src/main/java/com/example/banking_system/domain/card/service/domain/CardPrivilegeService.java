@@ -64,5 +64,11 @@ public class CardPrivilegeService {
         return cardPrivilegeMapper.toDtoList(cardPrivilegePage.getContent());
     }
 
+    @Transactional(readOnly = true)
+    public List<GetCardPrivilegeResponse> getByAccountTypeAndCardTypeAndIsActive(AccountType accountType, CardType cardType) {
+        List<CardPrivilege> cardPrivilegeList = cardPrivilegeQueryService.findByAccountTypeAndCardTypeAndIsActive(accountType, cardType);
+        return cardPrivilegeMapper.toDtoList(cardPrivilegeList);
+     }
+
 
 }
