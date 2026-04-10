@@ -143,7 +143,7 @@ public class OAuth2AuthorizationServerConfig {
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenTimeToLive(Duration.ofMinutes(15))
                         .refreshTokenTimeToLive(Duration.ofDays(1))
-                        .reuseRefreshTokens(false)
+                        .reuseRefreshTokens(true)
                         .build())
                 .build();
 
