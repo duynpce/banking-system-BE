@@ -56,6 +56,7 @@ Feature-based folder structure. Each feature follows this pattern:
     - always validate your changes with the existing patterns in the codebase before finalizing
     - base on sample code to implement the feature, and make sure your code is consistent with the existing codebase
     - read docs in docs folder before implement to understand the business rules and requirements
+    - when write test make sure to use the testcases in testcases file , and assure the tests pass if you try 3 times but still fail, stop and tell me I will tell you why it's wrong 
 
 # commit
     - Use Conventional Commits (feat:, fix:, chore:, refactor:).

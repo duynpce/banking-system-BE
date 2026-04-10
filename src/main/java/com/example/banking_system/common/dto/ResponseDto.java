@@ -16,7 +16,7 @@ public class ResponseDto<T> {
     boolean isSuccess;
     private String message;
     private T data;
-    private MetaDto meta;
+    private MetaDto metaData;
 
     //no message and meta date
     public static <T> ResponseDto<T> success(T data) {
@@ -40,7 +40,7 @@ public class ResponseDto<T> {
         return ResponseDto.<T>builder()
                 .isSuccess(true)
                 .data(data)
-                .meta(meta)
+                .metaData(meta)
                 .message(message)
                 .build();
     }
