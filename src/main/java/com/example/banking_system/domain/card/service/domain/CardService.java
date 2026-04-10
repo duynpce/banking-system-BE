@@ -1,5 +1,6 @@
 package com.example.banking_system.domain.card.service.domain;
 
+import com.example.banking_system.common.dto.MetaDto;
 import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.example.banking_system.domain.card.dto.GetCardResponse;
 import com.example.banking_system.domain.account.entity.Account;
@@ -116,37 +117,17 @@ public class CardService {
         String sequence = String.valueOf(cardQueryService.getCardNumberSequence()).formatted("%012d");
         return BIN + sequence;
     }
-    //later reimplement
-    // public BigDecimal getAnnualFee(Card card) {
-//        String multiplierKind = "ANNUAL_FEE";
-//        BigDecimal pricingMultiplier = pricingMultiplierService
-//                .findByAccountTypeAndMultiplierKind(card.getAccount().getType(), multiplierKind)
-//                .getMultiplierValue();
-//        BigDecimal annualFee = cardPrivilegeQueryService.findByPrivilegeCode(card.getPrivilege().getPrivilegeCode()).getAnnualFee();
-//
-//        return annualFee.multiply(pricingMultiplier);
-//    }
-//
-//    public BigDecimal getCashbackRateById(long id) {
-//        final String username = jwtUtil.getUsername();
-//        Account account = accountQueryService.findByUsername(username);
-//        Card card = cardQueryService.findById(id);
-//
-//        if(card.getAccount().getId() != account.getId()) {
-//            throw new ForbiddenException("You are not allowed to access this card");
-//        }
-//
-//        return getCashBackRate(card);
-//    }
-//
-//    public BigDecimal getCashBackRate(Card card) {
-//        String multiplierKind = "CASHBACK_RATE_" + card.getType().name();
-//        BigDecimal pricingMultiplier = pricingMultiplierService
-//                .findByAccountTypeAndMultiplierKind(card.getAccount().getType(), multiplierKind)
-//                .getMultiplierValue();
-//        BigDecimal baseCashbackRate = cardPrivilegeQueryService.findByPrivilegeCode(card.getPrivilege().getPrivilegeCode()).getCashbackRate();
-//
-//        return baseCashbackRate.multiply(pricingMultiplier);
-//    }
 
+    public MetaDto getCardMetaDataByJwt(int currentPage, int limit) {
+        final String username = jwtUtil.getUsername();
+        int totalCards = cardQueryService.countByUsername(username);
+        int totalPages = (int) Math.ceil((double) totalCards / limit);
+
+        return MetaDto.builder().totalItems(totalCards)
+                .totalPages(totalPages)
+                .currentPage(currentPage)
+                .pageSize(limit)
+                .build();
+
+    }
 }

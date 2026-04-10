@@ -23,6 +23,10 @@ public class CardQueryService {
         return cardRepository.findByAccount_Username(username, PageRequest.of(page, limit));
     }
 
+    public int countByUsername(String username) {
+        return cardRepository.countByAccount_Username(username);
+    }
+
     public void delete(Card card) {
         cardRepository.delete(card);
     }

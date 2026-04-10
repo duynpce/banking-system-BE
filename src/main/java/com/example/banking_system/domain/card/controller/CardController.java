@@ -1,5 +1,6 @@
 package com.example.banking_system.domain.card.controller;
 
+import com.example.banking_system.common.dto.MetaDto;
 import com.example.banking_system.domain.card.dto.GetCardResponse;
 import com.example.banking_system.domain.card.service.domain.CardService;
 import com.example.banking_system.common.dto.ResponseDto;
@@ -29,7 +30,8 @@ public class CardController {
             @RequestParam int limit
     ){
         List<? extends GetCardResponse> response = cardService.getCardsByJwtWithPagination(page, limit);
-        return ResponseEntity.ok(ResponseDto.success(response, "Cards retrieved successfully"));
+        MetaDto metaDto = cardService.getCardMetaDataByJwt(page, limit);
+        return ResponseEntity.ok(ResponseDto.success(response, "Cards retrieved successfully", metaDto));
     }
 
 

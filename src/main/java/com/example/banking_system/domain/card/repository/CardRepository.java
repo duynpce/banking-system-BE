@@ -11,10 +11,13 @@ import java.util.Optional;
 public interface CardRepository extends JpaRepository<Card, Long> {
     Optional<Card> findByNumber(String number);
 
+    Page<Card> findByAccount_Username(String username, Pageable pageable);
+
     boolean existsByNumber(String number);
 
     @Query(value = "select nextval('card_number_sequence')", nativeQuery = true)
     long getCardNumberSequence();
 
-    Page<Card> findByAccount_Username(String username, Pageable pageable);
+    int countByAccount_Username(String username);
+
 }
