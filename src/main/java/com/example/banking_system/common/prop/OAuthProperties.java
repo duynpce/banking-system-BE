@@ -1,13 +1,12 @@
-package com.example.banking_system.common;
+package com.example.banking_system.common.prop;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.validation.annotation.Validated;
 
-@ConfigurationProperties(prefix = "value")
+@ConfigurationProperties(prefix = "value.oauth2")
 @RequiredArgsConstructor
 @Getter
 @Validated
@@ -43,8 +42,8 @@ public class OAuthProperties {
     @NotBlank(message = "token revocation uri cannot be blank")
     private final String tokenRevocationUri;
 
-    @NotBlank(message = "oicd user info uri cannot be blank")
-    private final String oicdUserInfoUri;
+    @NotBlank(message = "oidc user info uri cannot be blank")
+    private final String oidcUserInfoUri;
 
     @NotBlank(message = "jwk set uri cannot be blank")
     private final String jwkSetUri;

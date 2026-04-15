@@ -1,6 +1,6 @@
 package com.example.banking_system.config.security;
 
-import com.example.banking_system.common.OAuthProperties;
+import com.example.banking_system.common.prop.OAuthProperties;
 import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.nimbusds.jose.jwk.JWKSet;
@@ -183,7 +183,7 @@ public class OAuth2AuthorizationServerConfig {
                 .tokenRevocationEndpoint(oAuthProperties.getTokenRevocationUri())
                 .jwkSetEndpoint(oAuthProperties.getJwkSetUri())
                 .oidcLogoutEndpoint(oAuthProperties.getLogoutUri())
-                .oidcUserInfoEndpoint(oAuthProperties.getOicdUserInfoUri())
+                .oidcUserInfoEndpoint(oAuthProperties.getOidcUserInfoUri())
                 .build();
     }
 
