@@ -7,6 +7,7 @@ import com.example.banking_system.domain.auth.constant.Role;
 import com.example.banking_system.domain.card.entity.CardDetails;
 import com.example.banking_system.domain.loan.entity.Loan;
 import com.example.banking_system.domain.card.entity.Card;
+import com.example.banking_system.domain.transaction.Transaction;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,7 +23,7 @@ import java.util.List;
 public class Account {
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "account_id_seq")
     @SequenceGenerator(name = "account_id_seq", sequenceName = "account_id_seq", allocationSize = 1)
     private long id;
 
@@ -83,6 +84,12 @@ public class Account {
 
     @OneToMany(fetch = FetchType.LAZY,mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Card> cards;
+
+    @OneToMany(mappedBy = "sender", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaction> sentTransactions;
+
+    @OneToMany(mappedBy = "receiver", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaction> receivedTransactions;
 
     public Account(String username, String password,String email, String phoneNumber, String address, AccountType type) {
         this.username = username;

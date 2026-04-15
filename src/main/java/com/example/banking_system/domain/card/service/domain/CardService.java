@@ -31,7 +31,7 @@ public class CardService {
     private final CardQueryService cardQueryService;
     private final CardMapper cardMapper;
 
-    @Value("${value.bin}")
+    @Value("${value.card.bin}")
     private String BIN;
 
     public void updateExpirationDateOnCreate(Card card) {

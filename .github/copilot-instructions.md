@@ -59,9 +59,25 @@ Feature-based folder structure. Each feature follows this pattern:
     - when write test make sure to use the testcases in testcases file , and assure the tests pass if you try 3 times but still fail, stop and tell me I will tell you why it's wrong 
 
 # commit
-    - Use Conventional Commits (feat:, fix:, chore:, refactor:).
+    - Use Conventional Commits (feat:, fix:, chore:, refactor: , docs: , ...).
     - Write simple, clear and concise commit messages that describe the changes made.
     - if there is conflict tell me before you resolve it, and explain the reason why you think your solution is the best one.
+
+# instructions 
+
+    - when write tests:
+        - 1 follow the principle of instruction file and read code sample
+        - 2 read other test and follow its pattern
+        - 3 create 2 case for each test (failure and success)
+
+        workflow when write tests:
+            - 1: write testcases (make sure testcases correct and pass the validation layer of dto)
+            - 2 : unit test for functions in service
+            - 3 : integration test using other controller + testcases to create a complete environment , call the api the need to test , 
+                after that assert the result(message if api return message, data if api return data) ,
+            - 4 :  with tests that do not use @Transaction or @Transactional not support clean up(delete all created data) after the assertion
+
+
 
 # sample code
 

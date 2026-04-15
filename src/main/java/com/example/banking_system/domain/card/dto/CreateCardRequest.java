@@ -18,7 +18,6 @@ public abstract class CreateCardRequest {
     @Setter(AccessLevel.NONE)
     private AccountType accountType;
 
-
     @NotBlank(message = "Privilege code is required")
     private String privilegeCode;
 

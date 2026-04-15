@@ -4,6 +4,8 @@ import com.example.banking_system.common.exception.UnauthorizedException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -20,6 +22,16 @@ public class JwtUtil {
         }
 
         return authentication.getName();
+    }
+
+    public Jwt getJwtClaims(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if(authentication == null || !authentication.isAuthenticated()){
+            throw new UnauthorizedException("haven't logged in");
+        }
+
+        return ((JwtAuthenticationToken) authentication).getToken();
     }
 
 

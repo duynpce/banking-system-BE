@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 
 @Data
 @NoArgsConstructor
@@ -21,31 +22,49 @@ public class Transaction {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "transaction_id_seq")
+    @SequenceGenerator(name = "transaction_id_seq", sequenceName = "transaction_id_seq", allocationSize = 1)
     private long id;
 
     @Column(name = "transferred_amount", nullable = false)
     private BigDecimal transferredAmount;
 
-    @Column(name = "posted_balance", nullable = false)
-    private BigDecimal postedBalance;
+    @Column(name = "receiver_posted_balance")
+    private BigDecimal receiverPostedBalance;
+
+    @Column(name = "sender_posted_balance")
+    private BigDecimal senderPostedBalance;
+
+    @Column(name = "description",  nullable = false, columnDefinition = "text")
+    private String description;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
+    @Column(name = "due_date")
+    private Instant dueDate;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private TransactionStatus status = TransactionStatus.PENDING;
+    private TransactionStatus status;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private TransactionType type;
 
-    @JoinColumn(name = "from_account_id", referencedColumnName = "id", nullable = false, updatable = false)
+    @JoinColumn(name = "sender_id", referencedColumnName = "id", updatable = false)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private Account fromAccount;
+    private Account sender;
 
-    @JoinColumn(name = "to_account_id", referencedColumnName = "id", nullable = false, updatable = false)
-    @ManyToOne
-    private Account toAccount;
+    @JoinColumn(name = "receiver_id", referencedColumnName = "id", updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    private Account receiver;
+
+
+    @PrePersist
+    public void onCreate() {
+        if(dueDate == null && type == TransactionType.PAYMENT) {
+            dueDate = createdAt.plus(1, ChronoUnit.DAYS);
+        }
+    }
 }

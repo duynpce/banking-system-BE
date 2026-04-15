@@ -1,6 +1,7 @@
 package com.example.banking_system.domain.transaction;
 
 import com.example.banking_system.common.dto.ResponseDto;
+import com.example.banking_system.domain.transaction.dto.CreateTransactionRequest;
 import com.example.banking_system.domain.transaction.dto.GetTransactionResponse;
 import com.example.banking_system.domain.transaction.service.TransactionService;
 import lombok.RequiredArgsConstructor;
@@ -17,6 +18,13 @@ import java.util.List;
 public class TransactionController {
 
     private final TransactionService transactionService;
+
+    @PostMapping
+    public ResponseEntity<ResponseDto<String>> create(@RequestBody CreateTransactionRequest request) {
+        transactionService.create(request);
+
+        return ResponseEntity.ok(ResponseDto.success(null,"Transaction created successfully"));
+    }
 
     @GetMapping(params = {"page", "limit"})
     public ResponseEntity<ResponseDto<List<GetTransactionResponse>>> getByPage(
