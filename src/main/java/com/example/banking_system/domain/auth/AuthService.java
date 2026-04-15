@@ -2,11 +2,9 @@ package com.example.banking_system.domain.auth;
 
 import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.domain.auth.dto.GetTokenResponse;
-import com.example.banking_system.common.OAuthProperties;
+import com.example.banking_system.common.prop.OAuthProperties;
 import com.example.banking_system.common.exception.UnauthorizedException;
-import com.example.banking_system.common.utility.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
@@ -23,7 +21,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 @RequiredArgsConstructor
 public class AuthService {
     private final OAuthProperties oAuthProperties;
-    private final JwtUtil jwtUtil;
     private final WebClient webClient;
 
     public GetTokenResponse getToken(String code) {

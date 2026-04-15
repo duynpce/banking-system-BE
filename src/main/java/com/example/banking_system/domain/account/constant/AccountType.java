@@ -53,7 +53,24 @@ public enum AccountType {
         public boolean canOpenPersonalCard() {
             return false;
         }
-    };
+    },
+    INTERNAL{
+        @Override
+        public boolean canRequestUtilityOrTaxPayments() {
+            return false;
+        }
+
+        @Override
+        public boolean canOpenBusinessCard() {
+            return false;
+        }
+
+        @Override
+        public boolean canOpenPersonalCard() {
+            return false;
+        }
+    }
+    ;
 
 
     public abstract boolean canRequestUtilityOrTaxPayments();
