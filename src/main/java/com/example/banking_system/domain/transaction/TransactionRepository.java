@@ -4,38 +4,38 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
-public interface TransactionRepository extends JpaRepository<Transaction, Integer> {
+public interface TransactionRepository extends JpaRepository<Transaction, Long> {
 
-    List<Transaction> findTop1000ByFromAccount_UsernameAndCreatedAtBetweenOrToAccount_UsernameAndCreatedAtBetween(
+    List<Transaction> findBySender_UsernameAndCreatedAtBetweenOrReceiver_UsernameAndCreatedAtBetween(
             String fromUsername,
-            LocalDateTime fromStartDateTime,
-            LocalDateTime fromEndDateTime,
+            Instant fromStartDateTime,
+            Instant fromEndDateTime,
             String toUsername,
-            LocalDateTime toStartDateTime,
-            LocalDateTime toEndDateTime
+            Instant toStartDateTime,
+            Instant  toEndDateTime
     );
 
-    default List<Transaction> findByFromAccount_UsernameAndCreatedAtBetween(
+    default List<Transaction> findByUsernameAndCreatedAtBetween(
             String username,
-            LocalDateTime startDateTime,
-            LocalDateTime endDateTime
+            Instant startDateTime,
+            Instant endDateTime
     ) {
-        return findTop1000ByFromAccount_UsernameAndCreatedAtBetweenOrToAccount_UsernameAndCreatedAtBetween(
+        return findBySender_UsernameAndCreatedAtBetweenOrReceiver_UsernameAndCreatedAtBetween(
                 username, startDateTime, endDateTime,
                 username, startDateTime, endDateTime
         );
     }
 
-    Page<Transaction> findByFromAccount_UsernameOrToAccount_Username(
+    Page<Transaction> findBySender_UsernameOrReceiver_Username(
             String fromUsername,
             String toUsername,
             Pageable pageable
     );
 
-    default Page<Transaction> findByFromAccount_Username(String username, Pageable pageable) {
-        return findByFromAccount_UsernameOrToAccount_Username(username, username, pageable);
+    default Page<Transaction> findByUsername(String username, Pageable pageable) {
+        return findBySender_UsernameOrReceiver_Username(username, username, pageable);
     }
 }

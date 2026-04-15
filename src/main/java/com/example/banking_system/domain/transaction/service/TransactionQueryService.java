@@ -11,8 +11,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 
 @Service
@@ -22,22 +23,22 @@ public class TransactionQueryService {
 
     private final TransactionRepository transactionRepository;
 
-    public List<Transaction> findByFromAccountAndDateRange(String username, LocalDate startDate, LocalDate endDate) {
+    public List<Transaction> findByUsernameAndDateRange(String username, LocalDate startDate, LocalDate endDate) {
         if (startDate.isAfter(endDate)) {
             throw new ValidationException("startDate must be before or equal to endDate");
         }
 
-        LocalDateTime startDateTime = startDate.atStartOfDay();
-        LocalDateTime endDateTime = endDate.plusDays(1).atStartOfDay().minusNanos(1);
+        Instant startDateTime = startDate.atStartOfDay().toInstant(ZoneOffset.UTC);
+        Instant endDateTime = endDate.plusDays(1).atStartOfDay().minusNanos(1).toInstant(ZoneOffset.UTC);
 
-        return transactionRepository.findByFromAccount_UsernameAndCreatedAtBetween(
+        return transactionRepository.findByUsernameAndCreatedAtBetween(
                 username,
                 startDateTime,
                 endDateTime
         );
     }
 
-    public Page<Transaction> findByFromAccount(String username, Integer page, Integer limit) {
+    public Page<Transaction> findByUsernameWithPagination(String username, int page, int limit) {
         if (page < 0) {
             throw new ValidationException("page must be greater than or equal to 0");
         }
@@ -46,6 +47,10 @@ public class TransactionQueryService {
         }
 
         Pageable pageable = PageRequest.of(page, limit, Sort.by(Sort.Direction.DESC, "createdAt"));
-        return transactionRepository.findByFromAccount_Username(username, pageable);
+        return transactionRepository.findByUsername(username, pageable);
+    }
+
+    public void delete(Transaction transaction) {
+        transactionRepository.delete(transaction);
     }
 }
