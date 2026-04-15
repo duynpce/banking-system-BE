@@ -17,9 +17,13 @@ public class AccountTestCases {
     private  GovernmentAccount governmentAccountTestCase = new GovernmentAccount("username3", "Password123@", "email3@gmail.com", "2345678901", "address", "governmentDepartment");
 
     {
-        businessAccountTestCase.setAccountId(1L);
-        personalAccountTestCase.setAccountId(2L);
-        governmentAccountTestCase.setAccountId(3L);
+        businessAccountTestCase.getAccount().setId(1L);
+        personalAccountTestCase.getAccount().setId(2L);
+        governmentAccountTestCase.getAccount().setId(3L);
+
+        businessAccountTestCase.getAccount().setNumber("012345678901");
+        personalAccountTestCase.getAccount().setNumber("012345678902");
+        governmentAccountTestCase.getAccount().setNumber("012345678903");
     }
 
 
@@ -35,7 +39,11 @@ public class AccountTestCases {
 
     public CreateBusinessAccountRequest getCreateBusinessAccountRequestTestCase() {
         CreateBusinessAccountRequest request = new CreateBusinessAccountRequest();
-        fillCreateAccountRequest(request);
+        request.setUsername("username2");
+        request.setPassword("password");
+        request.setEmail("email2@gmail.com");
+        request.setPhoneNumber("2123456789");
+        request.setAddress("address");
         request.setOrganizationName("OrganizationName");
         request.setTaxIdNumber("0123456789");
         return request;
@@ -43,29 +51,28 @@ public class AccountTestCases {
 
     public CreateGovernmentAccountRequest getCreateGovernmentAccountRequestTestCase() {
         CreateGovernmentAccountRequest request = new CreateGovernmentAccountRequest();
-        fillCreateAccountRequest(request);
+        request.setUsername("username3");
+        request.setPassword("password");
+        request.setEmail("email3@gmail.com");
+        request.setPhoneNumber("3123456789");
+        request.setAddress("address");
         request.setGovernmentDepartment("governmentDepartment");
         return request;
     }
 
     public CreatePersonalAccountRequest getCreatePersonalAccountRequestTestCase() {
         CreatePersonalAccountRequest request = new CreatePersonalAccountRequest();
-        fillCreateAccountRequest(request);
+        request.setUsername("username1");
+        request.setPassword("password");
+        request.setEmail("email1@gmail.com");
+        request.setPhoneNumber("1123456789");
+        request.setAddress("address");
         request.setFullName("fullName");
         request.setDateOfBirth(LocalDate.now().minusYears(20));
         request.setIdCardNumber("0123456789");
         request.setGender(Gender.UNKNOWN);
         return request;
     }
-
-    private void fillCreateAccountRequest(CreateAccountRequest request) {
-        request.setUsername("username");
-        request.setPassword("password");
-        request.setEmail("email@gmail.com");
-        request.setPhoneNumber("0123456789");
-        request.setAddress("address");
-    }
-
 
     public UpdateBusinessAccountRequest getUpdateBusinessAccountRequestTestCase() {
         UpdateBusinessAccountRequest request = new UpdateBusinessAccountRequest();
