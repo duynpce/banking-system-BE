@@ -5,7 +5,5 @@ public enum TransactionType {
     WITHDRAWAL,
     TRANSFER,
     PAYMENT,
-    UTILITY_PAYMENT,
-    TAX_PAYMENT,
-    REFUND;
+    CASHBACK
 }
