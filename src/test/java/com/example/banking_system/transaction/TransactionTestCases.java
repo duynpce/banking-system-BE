@@ -1,9 +1,12 @@
 package com.example.banking_system.transaction;
 
+import com.example.banking_system.common.dto.PaginationDto;
 import com.example.banking_system.domain.transaction.Transaction;
+import com.example.banking_system.domain.transaction.constant.TransactionGroup;
 import com.example.banking_system.domain.transaction.constant.TransactionStatus;
 import com.example.banking_system.domain.transaction.constant.TransactionType;
 import com.example.banking_system.domain.transaction.dto.CreateTransactionRequest;
+import com.example.banking_system.domain.transaction.dto.TransactionFilter;
 import lombok.Getter;
 
 import java.math.BigDecimal;
@@ -60,6 +63,30 @@ public class TransactionTestCases {
 		request.setTransferredAmount(new BigDecimal("100.00"));
 		request.setType(type);
 		return request;
+	}
+
+	public TransactionFilter getTransactionFilterTransactionGroupAll(){
+		return buildTransactionFilter(TransactionGroup.ALL);
+	}
+
+	public TransactionFilter getTransactionFilterTransactionGroupIncome(){
+		return buildTransactionFilter(TransactionGroup.INCOME);
+	}
+
+	public TransactionFilter getTransactionFilterTransactionGroupOutcome(){
+		return buildTransactionFilter(TransactionGroup.OUTCOME);
+	}
+
+	private TransactionFilter buildTransactionFilter(TransactionGroup transactionGroup){
+
+		TransactionFilter filter = new TransactionFilter();
+		PaginationDto paginationDto = new PaginationDto();
+		paginationDto.setPage(0);
+		paginationDto.setLimit(5);
+		filter.setPaginationDto(paginationDto);
+		filter.setTransactionGroup(transactionGroup);
+		filter.setTransactionGroup(transactionGroup);
+		return filter;
 	}
 
 }
