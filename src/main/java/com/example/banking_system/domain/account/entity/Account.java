@@ -59,6 +59,9 @@ public class Account {
     @Column(name ="created_at", nullable = false, updatable = false)
     private Instant createdAt = Instant.now();
 
+    @Column(name = "updated_at")
+    private Instant updatedAt;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private AccountStatus status = AccountStatus.ACTIVE;
