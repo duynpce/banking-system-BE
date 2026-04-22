@@ -16,7 +16,7 @@ public class BusinessAccountValidator {
     private final Util util;
 
     public void validateCreate(BusinessAccount businessAccount) {
-        accountValidator.validateUpdate(businessAccount.getAccount());
+        accountValidator.validateCreate(businessAccount.getAccount());
         validateUniqueAccountBusinessDetails(businessAccount);
     }
 
@@ -30,6 +30,7 @@ public class BusinessAccountValidator {
         }
 
         // check if the fields to be updated are unique, if they are unique, set them to existingAccount
+        accountValidator.validateUpdate(request, existingAccount.getAccount());
         accountValidator.setNonNullFieldsToUpdateAccount(request, existingAccount.getAccount());
         setNonNullFieldsToUpdateBusinessAccount(request, existingAccount);
     }
@@ -44,7 +45,7 @@ public class BusinessAccountValidator {
             existingAccount.setOrganizationName(request.getOrganizationName());
         }
 
-        if (request.getTaxIdNumber() != null) {
+        if (request.getTaxIdNumber() != null && !request.getTaxIdNumber().equals(existingAccount.getTaxIdNumber())) {
             util.assertUnique(businessAccountQueryService.existsByTaxIdNumber(request.getTaxIdNumber()), "Tax id number already exists");
             existingAccount.setTaxIdNumber(request.getTaxIdNumber());
         }

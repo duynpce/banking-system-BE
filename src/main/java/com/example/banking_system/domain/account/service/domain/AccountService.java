@@ -85,6 +85,11 @@ public class AccountService {
             throw new ValidationException("password is incorrect");
         }
 
+
+        if(passwordEncoder.matches(request.getNewPassword(), account.getPassword())) {
+            throw new ValidationException("new password must be different from the current password");
+        }
+
         Instant now = Instant.now();
         account.setPassword(passwordEncoder.encode(request.getNewPassword()));
         account.setUpdatedPasswordAt(now);

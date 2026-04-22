@@ -19,7 +19,7 @@ public class PersonalAccountValidator {
     private final Util util;
 
     public void validateCreate(PersonalAccount personalAccount) {
-        accountValidator.validateUpdate(personalAccount.getAccount());
+        accountValidator.validateCreate(personalAccount.getAccount());
         validateUniqueAccountPersonalDetails(personalAccount);
         validateAdult(personalAccount.getDateOfBirth());
     }
@@ -32,8 +32,8 @@ public class PersonalAccountValidator {
         if (isAllFieldsNull(request)) {
             throw new ValidationException("At least one field must be provided for update");
         }
-
         // check if the fields to be updated are unique, if they are unique, set them to existingAccount
+        accountValidator.validateUpdate(request, existingAccount.getAccount());
         accountValidator.setNonNullFieldsToUpdateAccount(request, existingAccount.getAccount());
         setNonNullFieldsToUpdatePersonalAccount(request, existingAccount);
     }
@@ -53,12 +53,12 @@ public class PersonalAccountValidator {
             existingAccount.setDateOfBirth(request.getDateOfBirth());
         }
 
-        if (request.getIdCardNumber() != null) {
+        if (request.getIdCardNumber() != null && !request.getPhoneNumber().equals(existingAccount.getIdCardNumber())) {
             util.assertUnique(personalAccountQueryService.existsByIdCardNumber(request.getIdCardNumber()), "ID card number already exists");
             existingAccount.setIdCardNumber(request.getIdCardNumber());
         }
 
-        if (request.getGender() != null) {
+        if (request.getGender() != null &&  request.getGender().equals(existingAccount.getGender())) {
             existingAccount.setGender(request.getGender());
         }
     }
