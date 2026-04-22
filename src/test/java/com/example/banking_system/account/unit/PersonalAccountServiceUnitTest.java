@@ -18,6 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -85,7 +87,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
     @Test
     public void updateAccountSuccess() {
         PersonalAccount existingAccount = accountTestCases.getPersonalAccountTestCase();
-        String username = "username";
+        String username = existingAccount.getAccount().getUsername();
 
         UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();
         request.setFullName("NewFullName");
@@ -106,7 +108,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
     @Test
     public void updateAccountFailure_InvalidInput() {
         PersonalAccount existingAccount = accountTestCases.getPersonalAccountTestCase();
-        String username = "username";
+        String username = existingAccount.getAccount().getUsername();
 
         UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();
 
@@ -118,6 +120,26 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
         RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> personalAccountService.update(request));
 
         assertEquals("At least one field must be provided for update", exception.getMessage());
+        verify(personalAccountQueryService, never()).save(any());
+    }
+
+    @Test
+    public void updateAccountFailure_UpdatedWithin48Hours() {
+        PersonalAccount existingAccount = accountTestCases.getPersonalAccountTestCase();
+        existingAccount.getAccount().setUpdatedAt(Instant.now());
+        String username = existingAccount.getAccount().getUsername();
+
+        UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();
+        request.setFullName("NewFullName");
+
+        when(jwtUtil.getUsername()).thenReturn(username);
+        when(personalAccountQueryService.findByUsername(username)).thenReturn(existingAccount);
+        doThrow(new ValidationException("account can only be updated once every 48 hours"))
+                .when(personalAccountValidator).validateUpdate(request, existingAccount);
+
+        RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> personalAccountService.update(request));
+
+        assertEquals("account can only be updated once every 48 hours", exception.getMessage());
         verify(personalAccountQueryService, never()).save(any());
     }
 }

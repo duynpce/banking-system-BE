@@ -18,6 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -85,7 +87,7 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
     @Test
     public void updateAccountSuccess() {
         GovernmentAccount existingAccount = accountTestCases.getGovernmentAccountTestCase();
-        String username = "username";
+        String username = existingAccount.getAccount().getUsername();
         String newEmail =  "newEmail@example.com";
         String newDepartment = "NewDepartment";
 
@@ -112,7 +114,7 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
     @Test
     public void updateAccountFailure_InvalidInput() {
         GovernmentAccount existingAccount = accountTestCases.getGovernmentAccountTestCase();
-        String username = "username";
+        String username = existingAccount.getAccount().getUsername();
 
         UpdateGovernmentAccountRequest request = new UpdateGovernmentAccountRequest();
 
@@ -124,6 +126,27 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
         RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> governmentAccountService.update(request));
 
         assertEquals("At least one field must be provided for update", exception.getMessage());
+        verify(governmentAccountQueryService, never()).save(any());
+    }
+
+    @Test
+    public void updateAccountFailure_UpdatedWithin48Hours() {
+        GovernmentAccount existingAccount = accountTestCases.getGovernmentAccountTestCase();
+        existingAccount.getAccount().setUpdatedAt(Instant.now());
+        String username = existingAccount.getAccount().getUsername();
+
+
+        UpdateGovernmentAccountRequest request = new UpdateGovernmentAccountRequest();
+        request.setGovernmentDepartment("NewDepartment");
+
+        when(jwtUtil.getUsername()).thenReturn(username);
+        when(governmentAccountQueryService.findByUsername(username)).thenReturn(existingAccount);
+        doThrow(new ValidationException("account can only be updated once every 48 hours"))
+                .when(governmentAccountValidator).validateUpdate(request, existingAccount);
+
+        RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> governmentAccountService.update(request));
+
+        assertEquals("account can only be updated once every 48 hours", exception.getMessage());
         verify(governmentAccountQueryService, never()).save(any());
     }
 }

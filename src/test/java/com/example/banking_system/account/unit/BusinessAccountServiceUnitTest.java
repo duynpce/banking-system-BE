@@ -18,6 +18,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 
@@ -86,7 +88,7 @@ public class BusinessAccountServiceUnitTest extends UnitTest {
     @Test
     public void updateAccountSuccess() {
         BusinessAccount existingAccount = accountTestCases.getBusinessAccountTestCase();
-        String username = "username";
+        String username = existingAccount.getAccount().getUsername();
 
         UpdateBusinessAccountRequest request = new UpdateBusinessAccountRequest();
         request.setOrganizationName("NewOrganizationName");
@@ -107,7 +109,7 @@ public class BusinessAccountServiceUnitTest extends UnitTest {
     @Test
     public void updateAccountFailure_InvalidInput() {
         BusinessAccount existingAccount = accountTestCases.getBusinessAccountTestCase();
-        String username = "username";
+        String username = existingAccount.getAccount().getUsername();
 
         UpdateBusinessAccountRequest request = new UpdateBusinessAccountRequest();
 
@@ -119,6 +121,26 @@ public class BusinessAccountServiceUnitTest extends UnitTest {
         RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> businessAccountService.update(request));
 
         assertEquals("At least one field must be provided for update", exception.getMessage());
+        verify(businessAccountQueryService, never()).save(any());
+    }
+
+    @Test
+    public void updateAccountFailure_UpdatedWithin48Hours() {
+        BusinessAccount existingAccount = accountTestCases.getBusinessAccountTestCase();
+        existingAccount.getAccount().setUpdatedAt(Instant.now());
+        String username = existingAccount.getAccount().getUsername();
+
+        UpdateBusinessAccountRequest request = new UpdateBusinessAccountRequest();
+        request.setOrganizationName("NewOrganizationName");
+
+        when(jwtUtil.getUsername()).thenReturn(username);
+        when(businessAccountQueryService.findByUsername(username)).thenReturn(existingAccount);
+        doThrow(new ValidationException("account can only be updated once every 48 hours"))
+                .when(businessAccountValidator).validateUpdate(request, existingAccount);
+
+        RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> businessAccountService.update(request));
+
+        assertEquals("account can only be updated once every 48 hours", exception.getMessage());
         verify(businessAccountQueryService, never()).save(any());
     }
 }
