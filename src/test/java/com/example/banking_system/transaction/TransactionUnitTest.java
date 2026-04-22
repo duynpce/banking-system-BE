@@ -1,6 +1,8 @@
 package com.example.banking_system.transaction;
 
 import com.example.banking_system.account.AccountTestCases;
+import com.example.banking_system.common.dto.PaginationDto;
+import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.UnitTest;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
@@ -10,10 +12,12 @@ import com.example.banking_system.domain.transaction.Transaction;
 import com.example.banking_system.domain.transaction.TransactionMapper;
 import com.example.banking_system.domain.transaction.TransactionRepository;
 import com.example.banking_system.domain.transaction.TransactionValidator;
+import com.example.banking_system.domain.transaction.constant.TransactionGroup;
 import com.example.banking_system.domain.transaction.constant.TransactionStatus;
 import com.example.banking_system.domain.transaction.constant.TransactionType;
 import com.example.banking_system.domain.transaction.dto.CreateTransactionRequest;
 import com.example.banking_system.domain.transaction.dto.GetTransactionResponse;
+import com.example.banking_system.domain.transaction.dto.TransactionFilter;
 import com.example.banking_system.domain.transaction.service.TransactionQueryService;
 import com.example.banking_system.domain.transaction.service.TransactionService;
 import org.junit.jupiter.api.Assertions;
@@ -180,9 +184,10 @@ public class TransactionUnitTest extends UnitTest {
 
 		Jwt jwt = mock(Jwt.class);
 		when(jwtUtil.getJwtClaims()).thenReturn(jwt);
-		when(jwt.getClaimAsString("account_number")).thenReturn("999999999999");
+		when(jwt.getClaimAsString("account_number")).thenReturn(internalDepositAccount.getNumber());
 		when(transactionMapper.toEntity(request)).thenReturn(transaction);
 		when(accountQueryService.findByAccountNumber(account.getNumber())).thenReturn(account);
+		when(accountQueryService.getINTERNAL_DEPOSIT_ACCOUNT_NUMBER()).thenReturn(internalDepositAccount.getNumber());
 		when(accountQueryService.getInternalDePositAccount()).thenReturn(internalDepositAccount);
 		when(transactionRepository.save(transaction)).thenReturn(transaction);
 
@@ -272,10 +277,9 @@ public class TransactionUnitTest extends UnitTest {
 	}
 
 	@Test
-	public void getByPageSuccess() {
+	public void getByFilterAllSuccess() {
 		String username = "test_user";
-		int pageNumber = 0;
-		int limit = 10;
+		TransactionFilter transactionFilter = createFilter(TransactionGroup.ALL, 0, 10);
 
 		Transaction transaction = transactionTestCases.getTransactionTestCase();
 		List<Transaction> transactions = List.of(transaction);
@@ -286,77 +290,94 @@ public class TransactionUnitTest extends UnitTest {
 		List<GetTransactionResponse> responses = List.of(response);
 
 		when(jwtUtil.getUsername()).thenReturn(username);
-		when(transactionQueryService.findByUsernameWithPagination(username, pageNumber, limit)).thenReturn(transactionPage);
+		when(transactionQueryService.findByFilter(username, transactionFilter)).thenReturn(transactionPage);
 		when(transactionMapper.toDtoList(transactions, username)).thenReturn(responses);
 
-		List<GetTransactionResponse> result = transactionService.getByPage(pageNumber, limit);
+		ResponseDto<List<GetTransactionResponse>> result = transactionService.getByFilter(transactionFilter);
 
-		assertEquals(1, result.size());
-		assertEquals(10L, result.getFirst().getId());
-		verify(transactionQueryService).findByUsernameWithPagination(username, pageNumber, limit);
+		assertEquals(1, result.getData().size());
+		assertEquals(10L, result.getData().getFirst().getId());
+		assertEquals(1, result.getMetaData().getTotalItems());
+		assertEquals(1, result.getMetaData().getTotalPages());
+		assertEquals(0, result.getMetaData().getCurrentPage());
+		assertEquals(10, result.getMetaData().getPageSize());
+		verify(transactionQueryService).findByFilter(username, transactionFilter);
 		verify(transactionMapper).toDtoList(transactions, username);
 	}
 
 	@Test
-	public void getByPageFailureValidationError() {
+	public void getByFilterIncomeSuccess() {
 		String username = "test_user";
-		when(jwtUtil.getUsername()).thenReturn(username);
-		when(transactionQueryService.findByUsernameWithPagination(username, -1, 10))
-				.thenThrow(new ValidationException("page must be greater than or equal to 0"));
-
-		ValidationException exception = Assertions.assertThrows(
-				ValidationException.class,
-				() -> transactionService.getByPage(-1, 10)
-		);
-
-		assertEquals("page must be greater than or equal to 0", exception.getMessage());
-		verify(transactionQueryService).findByUsernameWithPagination(username, -1, 10);
-		verify(transactionMapper, never()).toDtoList(anyList(), anyString());
-	}
-
-	@Test
-	public void getByDateRangeSuccess() {
-		String username = "test_user";
-		LocalDate startDate = LocalDate.of(2026, 4, 14);
-		LocalDate endDate = LocalDate.of(2026, 4, 15);
+		TransactionFilter transactionFilter = createFilter(TransactionGroup.INCOME, 0, 10);
 
 		Transaction transaction = transactionTestCases.getTransactionTestCase();
 		List<Transaction> transactions = List.of(transaction);
+		Page<Transaction> transactionPage = new PageImpl<>(transactions);
 
 		GetTransactionResponse response = new GetTransactionResponse();
 		response.setId(20L);
 		List<GetTransactionResponse> responses = List.of(response);
 
 		when(jwtUtil.getUsername()).thenReturn(username);
-		when(transactionQueryService.findByUsernameAndDateRange(username, startDate, endDate))
-				.thenReturn(transactions);
+		when(transactionQueryService.findByFilter(username, transactionFilter)).thenReturn(transactionPage);
 		when(transactionMapper.toDtoList(transactions, username)).thenReturn(responses);
 
-		List<GetTransactionResponse> result = transactionService.getByDateRange(startDate, endDate);
+		ResponseDto<List<GetTransactionResponse>> result = transactionService.getByFilter(transactionFilter);
 
-		assertEquals(1, result.size());
-		assertEquals(20L, result.getFirst().getId());
-		verify(transactionQueryService).findByUsernameAndDateRange(username, startDate, endDate);
+		assertEquals(1, result.getData().size());
+		assertEquals(20L, result.getData().getFirst().getId());
+		verify(transactionQueryService).findByFilter(username, transactionFilter);
 		verify(transactionMapper).toDtoList(transactions, username);
 	}
 
 	@Test
-	public void getByDateRangeFailureValidationError() {
+	public void getByFilterFailureValidationErrorTransactionGroupRequired() {
 		String username = "test_user";
-		LocalDate startDate = LocalDate.now();
-		LocalDate endDate = LocalDate.now().minusDays(1);
+		TransactionFilter transactionFilter = createFilter(null, 0, 10);
 
 		when(jwtUtil.getUsername()).thenReturn(username);
-		when(transactionQueryService.findByUsernameAndDateRange(username, startDate, endDate))
+		when(transactionQueryService.findByFilter(username, transactionFilter))
+				.thenThrow(new ValidationException("transaction group is required"));
+
+		ValidationException exception = Assertions.assertThrows(
+				ValidationException.class,
+				() -> transactionService.getByFilter(transactionFilter)
+		);
+
+		assertEquals("transaction group is required", exception.getMessage());
+		verify(transactionQueryService).findByFilter(username, transactionFilter);
+		verify(transactionMapper, never()).toDtoList(anyList(), anyString());
+	}
+
+	@Test
+	public void getByFilterFailureValidationErrorDateRange() {
+		String username = "test_user";
+		TransactionFilter transactionFilter = createFilter(TransactionGroup.ALL, 0, 10);
+		transactionFilter.setStartDate(LocalDate.now());
+		transactionFilter.setEndDate(LocalDate.now().minusDays(1));
+
+		when(jwtUtil.getUsername()).thenReturn(username);
+		when(transactionQueryService.findByFilter(username, transactionFilter))
 				.thenThrow(new ValidationException("startDate must be before or equal to endDate"));
 
 		ValidationException exception = Assertions.assertThrows(
 				ValidationException.class,
-				() -> transactionService.getByDateRange(startDate, endDate)
+				() -> transactionService.getByFilter(transactionFilter)
 		);
 
 		assertEquals("startDate must be before or equal to endDate", exception.getMessage());
-		verify(transactionQueryService).findByUsernameAndDateRange(username, startDate, endDate);
+		verify(transactionQueryService).findByFilter(username, transactionFilter);
 		verify(transactionMapper, never()).toDtoList(anyList(), anyString());
+	}
+
+	private TransactionFilter createFilter(TransactionGroup transactionGroup, int page, int limit) {
+		PaginationDto paginationDto = new PaginationDto();
+		paginationDto.setPage(page);
+		paginationDto.setLimit(limit);
+
+		TransactionFilter transactionFilter = new TransactionFilter();
+		transactionFilter.setPaginationDto(paginationDto);
+		transactionFilter.setTransactionGroup(transactionGroup);
+		return transactionFilter;
 	}
 }

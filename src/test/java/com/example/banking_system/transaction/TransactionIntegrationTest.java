@@ -14,6 +14,7 @@ import com.example.banking_system.domain.account.service.query.AccountQueryServi
 import com.example.banking_system.domain.transaction.TransactionController;
 import com.example.banking_system.domain.transaction.dto.CreateTransactionRequest;
 import com.example.banking_system.domain.transaction.dto.GetTransactionResponse;
+import com.example.banking_system.domain.transaction.dto.TransactionFilter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -90,6 +91,7 @@ public class TransactionIntegrationTest extends IntegrationTest {
 	public void createPaymentTransactionSuccess() {
 		TransferScenario transferScenario = setupTransferScenario();
 		CreateTransactionRequest request = transactionTestCases.getCreatePaymentRequest(transferScenario.receiver().getNumber());
+		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupAll();
 
 		ResponseEntity<ResponseDto<String>> response = transactionController.create(request);
 
@@ -98,7 +100,9 @@ public class TransactionIntegrationTest extends IntegrationTest {
 		assertTrue(response.getBody().isSuccess());
 
 		when(jwtUtil.getUsername()).thenReturn(transferScenario.sender().getUsername());
-		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> getResponse = transactionController.getByPage(0, 10);
+		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> getResponse = transactionController.getByFilter(
+				transactionFilter
+		);
 		assertNotNull(getResponse.getBody());
 		GetTransactionResponse result = getResponse.getBody().getData().getFirst();
 
@@ -132,6 +136,19 @@ public class TransactionIntegrationTest extends IntegrationTest {
 		BigDecimal initialAccountBalance = account.getBalance();
 		BigDecimal initialInternalBalance = internalDepositAccount.getBalance();
 		CreateTransactionRequest request = transactionTestCases.getCreateDepositRequest(account.getNumber());
+
+		//mock internal account logged in
+		Jwt jwt = new Jwt(
+				"test-token",
+				Instant.now(),
+				Instant.now().plusSeconds(3600),
+				Map.of("alg", "none"),
+				Map.of(
+						"account_id", internalDepositAccount.getId(),
+						"account_number", internalDepositAccount.getNumber()
+				)
+		);
+		when(jwtUtil.getJwtClaims()).thenReturn(jwt);
 
 		ResponseEntity<ResponseDto<String>> response = transactionController.create(request);
 
@@ -191,13 +208,16 @@ public class TransactionIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void getByPageSuccess() {
+	public void getByFilterAllSuccess() {
 		TransferScenario transferScenario = setupTransferScenario();
 		CreateTransactionRequest request = transferScenario.request();
 		transactionController.create(request);
+		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupAll();
 
 		when(jwtUtil.getUsername()).thenReturn(transferScenario.sender().getUsername());
-		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> response = transactionController.getByPage(0, 10);
+		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> response = transactionController.getByFilter(
+				transactionFilter
+		);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
 		assertNotNull(response.getBody(), "Response body should not be null");
@@ -215,27 +235,29 @@ public class TransactionIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void getByPageFailureValidationError() {
+	public void getByFilterFailureValidationError() {
 		when(jwtUtil.getUsername()).thenReturn("test_user");
+		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupAll();
+		transactionFilter.setTransactionGroup(null);
 
 		ValidationException exception = Assertions.assertThrows(
 				ValidationException.class,
-				() -> transactionController.getByPage(-1, 10)
+				() -> transactionController.getByFilter(transactionFilter)
 		);
 
-		assertEquals("page must be greater than or equal to 0", exception.getMessage());
+		assertEquals("transaction group is required", exception.getMessage());
 	}
 
 	@Test
-	public void getByDateRangeSuccess() {
+	public void getByFilterIncomeSuccess() {
 		TransferScenario transferScenario = setupTransferScenario();
 		CreateTransactionRequest request = transferScenario.request();
+		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupIncome();
 		transactionController.create(request);
 
-		when(jwtUtil.getUsername()).thenReturn(transferScenario.sender().getUsername());
-		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> response = transactionController.getByDateRange(
-				LocalDate.now().minusDays(1),
-				LocalDate.now().plusDays(1)
+		when(jwtUtil.getUsername()).thenReturn(transferScenario.receiver().getUsername());
+		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> response = transactionController.getByFilter(
+				transactionFilter
 		);
 
 		assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
@@ -249,16 +271,43 @@ public class TransactionIntegrationTest extends IntegrationTest {
 		assertEquals(request.getDescription(), result.getDescription(), "Description should match");
 		assertEquals(transferScenario.sender().getNumber(), result.getSenderAccountNumber(), "Sender account number should match");
 		assertEquals(transferScenario.receiver().getNumber(), result.getReceiverAccountNumber(), "Receiver account number should match");
+		assertEquals(transferScenario.initialBalance().add(request.getTransferredAmount()), result.getPostedBalance(), "Posted balance should match receiver balance after transfer");
+	}
+
+	@Test
+	public void getByFilterOutcomeSuccess() {
+		TransferScenario transferScenario = setupTransferScenario();
+		CreateTransactionRequest request = transferScenario.request();
+		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupOutcome();
+		transactionController.create(request);
+
+		when(jwtUtil.getUsername()).thenReturn(transferScenario.sender().getUsername());
+		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> response = transactionController.getByFilter(
+				transactionFilter
+		);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
+		assertNotNull(response.getBody(), "Response body should not be null");
+		assertTrue(response.getBody().isSuccess(), "Response success flag should be true");
+		assertNotNull(response.getBody().getData(), "Response data should not be null");
+		assertFalse(response.getBody().getData().isEmpty(), "Response data should not be empty");
+
+		GetTransactionResponse result = response.getBody().getData().getFirst();
+		assertEquals(transferScenario.sender().getNumber(), result.getSenderAccountNumber(), "Sender account number should match");
+		assertEquals(transferScenario.receiver().getNumber(), result.getReceiverAccountNumber(), "Receiver account number should match");
 		assertEquals(transferScenario.initialBalance().subtract(request.getTransferredAmount()), result.getPostedBalance(), "Posted balance should match sender balance after transfer");
 	}
 
 	@Test
-	public void getByDateRangeFailureValidationError() {
+	public void getByFilterDateRangeFailureValidationError() {
 		when(jwtUtil.getUsername()).thenReturn("test_user");
+		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupAll();
+		transactionFilter.setStartDate(LocalDate.now());
+		transactionFilter.setEndDate(LocalDate.now().minusDays(1));
 
 		ValidationException exception = Assertions.assertThrows(
 				ValidationException.class,
-				() -> transactionController.getByDateRange(LocalDate.now(), LocalDate.now().minusDays(1))
+				() -> transactionController.getByFilter(transactionFilter)
 		);
 
 		assertEquals("startDate must be before or equal to endDate", exception.getMessage());

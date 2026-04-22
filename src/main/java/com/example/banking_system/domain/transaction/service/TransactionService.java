@@ -1,5 +1,7 @@
 package com.example.banking_system.domain.transaction.service;
 
+import com.example.banking_system.common.dto.MetaDto;
+import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
 import com.example.banking_system.domain.account.entity.Account;
@@ -11,13 +13,14 @@ import com.example.banking_system.domain.transaction.TransactionValidator;
 import com.example.banking_system.domain.transaction.constant.TransactionStatus;
 import com.example.banking_system.domain.transaction.dto.CreateTransactionRequest;
 import com.example.banking_system.domain.transaction.dto.GetTransactionResponse;
+import com.example.banking_system.domain.transaction.dto.TransactionFilter;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -55,6 +58,11 @@ public class TransactionService {
         Account account = accountQueryService.findByAccountNumber(transaction.getReceiver().getNumber());
         Account internalDepositAccount = accountQueryService.getInternalDePositAccount();
 
+        // if logged in account not internal deposit account --> failed , can convert to role == admin or internal
+        if(!accountNumber.equals(accountQueryService.getINTERNAL_DEPOSIT_ACCOUNT_NUMBER())) {
+            throw new ValidationException("Only admin can perform this transaction");
+        }
+
         internalDepositAccount.setBalance(internalDepositAccount.getBalance().subtract(transaction.getTransferredAmount()));
         account.setBalance(account.getBalance().add(transaction.getTransferredAmount()));
         accountQueryService.save(account);
@@ -85,7 +93,6 @@ public class TransactionService {
         transaction.setReceiver(null);
         transaction.setSenderPostedBalance(account.getBalance());
     }
-
 
     private void handleCreateTransferTransaction(Transaction transaction) {
         long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
@@ -129,23 +136,15 @@ public class TransactionService {
     }
 
 
-
-
     @Transactional(readOnly = true)
-    public List<GetTransactionResponse> getByDateRange(LocalDate startDate, LocalDate endDate) {
+    public ResponseDto<List<GetTransactionResponse>> getByFilter(TransactionFilter transactionFilter) {
         String username = jwtUtil.getUsername();
+        Page<Transaction> transactionPage = transactionQueryService.findByFilter(username, transactionFilter);
+        MetaDto metaDto = MetaDto.builder().
+                totalItems(transactionPage.getTotalElements()).
+                totalPages(transactionPage.getTotalPages()).paginationDto(transactionFilter.getPaginationDto()).build();
 
-        return transactionMapper.toDtoList(
-                transactionQueryService.findByUsernameAndDateRange(username, startDate, endDate), username
-        );
-    }
 
-    @Transactional(readOnly = true)
-    public List<GetTransactionResponse> getByPage(int page, int limit) {
-        String username = jwtUtil.getUsername();
-
-        return transactionMapper.toDtoList(
-                transactionQueryService.findByUsernameWithPagination(username, page, limit).getContent(), username
-        );
+        return ResponseDto.success(transactionMapper.toDtoList(transactionPage.getContent(),username), "get transaction successfully", metaDto);
     }
 }

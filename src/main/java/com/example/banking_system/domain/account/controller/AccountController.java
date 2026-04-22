@@ -22,6 +22,12 @@ public class AccountController {
         return ResponseEntity.ok(ResponseDto.success(Response, "Account retrieved successfully"));
     }
 
+    @GetMapping("/account-number/{accountNumber}")
+    public ResponseEntity<ResponseDto<String>> getNameByAccountNumber(@PathVariable String accountNumber) {
+        String name = accountService.getNameByAccountNumber(accountNumber);
+        return ResponseEntity.ok(ResponseDto.success(name, "Account name retrieved successfully"));
+    }
+
     @DeleteMapping
     public ResponseEntity<ResponseDto<String>> delete() {
         accountService.delete();
