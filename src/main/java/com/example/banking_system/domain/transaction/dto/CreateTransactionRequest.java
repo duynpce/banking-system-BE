@@ -20,7 +20,7 @@ public class CreateTransactionRequest {
     private String receiverAccountNumber;
 
     @NotBlank(message = "description must not be blank")
-    @Length(min = 10, message = "description must be at least 10 characters long")
+    @Length(min = 10, max=1000 ,message = "description must be at least 10 and at most 1000 characters long")
     private String description;
 
     @NotNull
