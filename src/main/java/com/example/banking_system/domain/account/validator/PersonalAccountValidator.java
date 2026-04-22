@@ -19,7 +19,7 @@ public class PersonalAccountValidator {
     private final Util util;
 
     public void validateCreate(PersonalAccount personalAccount) {
-        accountValidator.validateUniqueAccountDetails(personalAccount.getAccount());
+        accountValidator.validateUpdate(personalAccount.getAccount());
         validateUniqueAccountPersonalDetails(personalAccount);
         validateAdult(personalAccount.getDateOfBirth());
     }

@@ -12,7 +12,7 @@ public class GovernmentAccountValidator {
     private final AccountValidator accountValidator;
 
     public void validateCreate(GovernmentAccount governmentAccount) {
-        accountValidator.validateUniqueAccountDetails(governmentAccount.getAccount());
+        accountValidator.validateUpdate(governmentAccount.getAccount());
     }
 
     public void validateUpdate(UpdateGovernmentAccountRequest request, GovernmentAccount existingAccount) {

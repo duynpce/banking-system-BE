@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+
 @Service
 @RequiredArgsConstructor
 public class BusinessAccountService {
@@ -42,6 +44,7 @@ public class BusinessAccountService {
         String username = jwtUtil.getUsername();
         BusinessAccount existingAccount = businessAccountQueryService.findByUsername(username);
         businessAccountValidator.validateUpdate(request, existingAccount);
+        existingAccount.getAccount().setUpdatedAt(Instant.now());
 
         return businessAccountQueryService.save(existingAccount);
     }

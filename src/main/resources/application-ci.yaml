@@ -58,3 +58,4 @@ value :
     deposit-account-number: "123456789012"
     withdrawal-account-number: "123456789013"
 
+  environment: "ci"

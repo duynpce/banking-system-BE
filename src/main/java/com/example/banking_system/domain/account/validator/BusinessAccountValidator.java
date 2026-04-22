@@ -16,7 +16,7 @@ public class BusinessAccountValidator {
     private final Util util;
 
     public void validateCreate(BusinessAccount businessAccount) {
-        accountValidator.validateUniqueAccountDetails(businessAccount.getAccount());
+        accountValidator.validateUpdate(businessAccount.getAccount());
         validateUniqueAccountBusinessDetails(businessAccount);
     }
 
