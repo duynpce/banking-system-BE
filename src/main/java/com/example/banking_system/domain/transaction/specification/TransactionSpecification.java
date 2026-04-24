@@ -3,6 +3,8 @@ package com.example.banking_system.domain.transaction.specification;
 import com.example.banking_system.domain.transaction.Transaction;
 import com.example.banking_system.domain.transaction.constant.TransactionStatus;
 import com.example.banking_system.domain.transaction.constant.TransactionType;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.Instant;
@@ -15,18 +17,29 @@ public final class TransactionSpecification {
     }
 
     public static Specification<Transaction> hasUsername(String username) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.or(
-                criteriaBuilder.equal(root.get("sender").get("username"), username),
-                criteriaBuilder.equal(root.get("receiver").get("username"), username)
-        );
+        return (root, query, criteriaBuilder) -> {
+            Join<Object, Object> senderJoin = root.join("sender", JoinType.LEFT);
+            Join<Object, Object> receiverJoin = root.join("receiver", JoinType.LEFT);
+
+            return criteriaBuilder.or(
+                    criteriaBuilder.equal(senderJoin.get("username"), username),
+                    criteriaBuilder.equal(receiverJoin.get("username"), username)
+            );
+        };
     }
 
     public static Specification<Transaction> hasSenderUsername(String username) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("sender").get("username"), username);
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(
+                root.join("sender", JoinType.LEFT).get("username"),
+                username
+        );
     }
 
     public static Specification<Transaction> hasReceiverUsername(String username) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("receiver").get("username"), username);
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(
+                root.join("receiver", JoinType.LEFT).get("username"),
+                username
+        );
     }
 
     public static Specification<Transaction> hasType(TransactionType type) {
