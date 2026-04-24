@@ -12,9 +12,13 @@ import com.example.banking_system.domain.account.dto.CreatePersonalAccountReques
 import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.example.banking_system.domain.transaction.TransactionController;
+import com.example.banking_system.domain.transaction.constant.TransactionReportType;
 import com.example.banking_system.domain.transaction.dto.CreateTransactionRequest;
+import com.example.banking_system.domain.transaction.dto.GetTransactionReport;
 import com.example.banking_system.domain.transaction.dto.GetTransactionResponse;
 import com.example.banking_system.domain.transaction.dto.TransactionFilter;
+import com.example.banking_system.domain.transaction.dto.TransactionReportFilter;
+import com.example.banking_system.domain.transaction.constant.TransactionType;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -235,20 +239,6 @@ public class TransactionIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void getByFilterFailureValidationError() {
-		when(jwtUtil.getUsername()).thenReturn("test_user");
-		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupAll();
-		transactionFilter.setTransactionGroup(null);
-
-		ValidationException exception = Assertions.assertThrows(
-				ValidationException.class,
-				() -> transactionController.getByFilter(transactionFilter)
-		);
-
-		assertEquals("transaction group is required", exception.getMessage());
-	}
-
-	@Test
 	public void getByFilterIncomeSuccess() {
 		TransferScenario transferScenario = setupTransferScenario();
 		CreateTransactionRequest request = transferScenario.request();
@@ -299,18 +289,87 @@ public class TransactionIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void getByFilterDateRangeFailureValidationError() {
-		when(jwtUtil.getUsername()).thenReturn("test_user");
+	public void getByFilterAllIncludeWithdrawalWhenReceiverIsNull() {
+		TransferScenario transferScenario = setupTransferScenario();
+		CreateTransactionRequest withdrawalRequest = transactionTestCases.getCreateWithdrawalRequest(transferScenario.receiver().getNumber());
 		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupAll();
-		transactionFilter.setStartDate(LocalDate.now());
-		transactionFilter.setEndDate(LocalDate.now().minusDays(1));
+
+		transactionController.create(withdrawalRequest);
+
+		when(jwtUtil.getUsername()).thenReturn(transferScenario.sender().getUsername());
+		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> response = transactionController.getByFilter(transactionFilter);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertNotNull(response.getBody().getData());
+		assertTrue(
+				response.getBody().getData().stream().anyMatch(item -> item.getType() == TransactionType.WITHDRAWAL),
+				"ALL filter should include withdrawal transactions"
+		);
+	}
+
+	@Test
+	public void getByFilterAllIncludeDepositWhenSenderIsNull() {
+		TransferScenario transferScenario = setupTransferScenario();
+		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupAll();
+		Account receiver = transferScenario.receiver();
+		Account internalDepositAccount = accountQueryService.getInternalDePositAccount();
+
+		Jwt internalJwt = new Jwt(
+				"test-token",
+				Instant.now(),
+				Instant.now().plusSeconds(3600),
+				Map.of("alg", "none"),
+				Map.of(
+						"account_id", internalDepositAccount.getId(),
+						"account_number", internalDepositAccount.getNumber()
+				)
+		);
+		when(jwtUtil.getJwtClaims()).thenReturn(internalJwt);
+
+		CreateTransactionRequest depositRequest = transactionTestCases.getCreateDepositRequest(receiver.getNumber());
+		transactionController.create(depositRequest);
+
+		when(jwtUtil.getUsername()).thenReturn(receiver.getUsername());
+		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> response = transactionController.getByFilter(transactionFilter);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertNotNull(response.getBody().getData());
+		assertTrue(
+				response.getBody().getData().stream().anyMatch(item -> item.getType() == TransactionType.DEPOSIT),
+				"ALL filter should include deposit transactions"
+		);
+	}
+
+	@Test
+	public void getReportsYearSuccess() {
+		TransferScenario transferScenario = setupTransferScenario();
+		transactionController.create(transferScenario.request());
+
+		TransactionReportFilter filter = new TransactionReportFilter();
+		filter.setReportType(TransactionReportType.YEAR);
+		filter.setYear(LocalDate.now().getYear());
+
+		ResponseEntity<ResponseDto<List<GetTransactionReport>>> response = transactionController.getReports(filter);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertNotNull(response.getBody().getData());
+		assertEquals(12, response.getBody().getData().size());
+	}
+
+	@Test
+	public void getReportsYearFailureValidationError() {
+		TransactionReportFilter filter = new TransactionReportFilter();
+		filter.setReportType(TransactionReportType.YEAR);
 
 		ValidationException exception = Assertions.assertThrows(
 				ValidationException.class,
-				() -> transactionController.getByFilter(transactionFilter)
+				() -> transactionController.getReports(filter)
 		);
 
-		assertEquals("startDate must be before or equal to endDate", exception.getMessage());
+		assertEquals("year is required for year report", exception.getMessage());
 	}
 
 	private TransferScenario setupTransferScenario() {

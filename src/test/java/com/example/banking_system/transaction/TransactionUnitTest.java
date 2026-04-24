@@ -6,6 +6,7 @@ import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.UnitTest;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
+import com.example.banking_system.common.utility.TimeUtil;
 import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.example.banking_system.domain.transaction.Transaction;
@@ -13,11 +14,14 @@ import com.example.banking_system.domain.transaction.TransactionMapper;
 import com.example.banking_system.domain.transaction.TransactionRepository;
 import com.example.banking_system.domain.transaction.TransactionValidator;
 import com.example.banking_system.domain.transaction.constant.TransactionGroup;
+import com.example.banking_system.domain.transaction.constant.TransactionReportType;
 import com.example.banking_system.domain.transaction.constant.TransactionStatus;
 import com.example.banking_system.domain.transaction.constant.TransactionType;
 import com.example.banking_system.domain.transaction.dto.CreateTransactionRequest;
+import com.example.banking_system.domain.transaction.dto.GetTransactionReport;
 import com.example.banking_system.domain.transaction.dto.GetTransactionResponse;
 import com.example.banking_system.domain.transaction.dto.TransactionFilter;
+import com.example.banking_system.domain.transaction.dto.TransactionReportFilter;
 import com.example.banking_system.domain.transaction.service.TransactionQueryService;
 import com.example.banking_system.domain.transaction.service.TransactionService;
 import org.junit.jupiter.api.Assertions;
@@ -57,6 +61,9 @@ public class TransactionUnitTest extends UnitTest {
 
 	@Mock
 	private JwtUtil jwtUtil;
+
+	@Mock
+	private TimeUtil timeUtil;
 
 	@InjectMocks
 	private TransactionService transactionService;
@@ -379,5 +386,57 @@ public class TransactionUnitTest extends UnitTest {
 		transactionFilter.setPaginationDto(paginationDto);
 		transactionFilter.setTransactionGroup(transactionGroup);
 		return transactionFilter;
+	}
+
+	@Test
+	public void getReportsYearSuccess() {
+		TransactionReportFilter filter = transactionTestCases.getYearTransactionReportFilter();
+		Jwt jwt = mock(Jwt.class);
+		LocalDate startDate = LocalDate.of(2026, 1, 1);
+		LocalDate endDate = LocalDate.of(2026, 12, 31);
+
+		GetTransactionReport report = new GetTransactionReport();
+		report.setReportType(TransactionReportType.MONTH);
+		report.setStartDate(LocalDate.of(2026, 1, 1));
+		report.setEndDate(LocalDate.of(2026, 1, 31));
+
+		when(jwtUtil.getJwtClaims()).thenReturn(jwt);
+		when(jwt.getClaim("account_id")).thenReturn(1L);
+		when(timeUtil.getYearStartDate(filter.getYear())).thenReturn(startDate);
+		when(timeUtil.getYearEndDate(filter.getYear())).thenReturn(endDate);
+		when(transactionQueryService.getTransactionReportByAccountAndDateRange(
+				1L,
+				startDate,
+				endDate,
+				"month",
+				TransactionReportType.MONTH
+		)).thenReturn(List.of(report));
+
+		ResponseDto<List<GetTransactionReport>> response = transactionService.getReports(filter);
+
+		assertEquals(1, response.getData().size());
+		assertEquals(TransactionReportType.MONTH, response.getData().getFirst().getReportType());
+		verify(transactionQueryService).getTransactionReportByAccountAndDateRange(
+				1L,
+				startDate,
+				endDate,
+				"month",
+				TransactionReportType.MONTH
+		);
+	}
+
+	@Test
+	public void getReportsYearFailureValidationError() {
+		TransactionReportFilter filter = transactionTestCases.getInvalidYearTransactionReportFilter();
+
+		ValidationException exception = Assertions.assertThrows(
+				ValidationException.class,
+				() -> transactionService.getReports(filter)
+		);
+
+		assertEquals("year is required for year report", exception.getMessage());
+		verify(transactionQueryService, never()).getTransactionReportByAccountAndDateRange(
+				anyLong(), any(), any(), anyString(), any()
+		);
 	}
 }
