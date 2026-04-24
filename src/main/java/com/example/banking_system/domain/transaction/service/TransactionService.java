@@ -4,23 +4,27 @@ import com.example.banking_system.common.dto.MetaDto;
 import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
+import com.example.banking_system.common.utility.TimeUtil;
 import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.example.banking_system.domain.transaction.Transaction;
 import com.example.banking_system.domain.transaction.TransactionMapper;
 import com.example.banking_system.domain.transaction.TransactionRepository;
 import com.example.banking_system.domain.transaction.TransactionValidator;
+import com.example.banking_system.domain.transaction.constant.TransactionReportType;
 import com.example.banking_system.domain.transaction.constant.TransactionStatus;
 import com.example.banking_system.domain.transaction.dto.CreateTransactionRequest;
+import com.example.banking_system.domain.transaction.dto.GetTransactionReport;
 import com.example.banking_system.domain.transaction.dto.GetTransactionResponse;
 import com.example.banking_system.domain.transaction.dto.TransactionFilter;
+import com.example.banking_system.domain.transaction.dto.TransactionReportFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -33,6 +37,7 @@ public class TransactionService {
     private final TransactionValidator transactionValidator;
     private final AccountQueryService accountQueryService;
     private final JwtUtil jwtUtil;
+    private final TimeUtil timeUtil;
 
 
     @Transactional
@@ -70,6 +75,7 @@ public class TransactionService {
 
         transaction.setSender(null);
         transaction.setReceiver(account);
+        transaction.setStatus(TransactionStatus.COMPLETED);
         transaction.setReceiverPostedBalance(account.getBalance());
     }
 
@@ -91,6 +97,7 @@ public class TransactionService {
 
         transaction.setSender(account);
         transaction.setReceiver(null);
+        transaction.setStatus(TransactionStatus.COMPLETED);
         transaction.setSenderPostedBalance(account.getBalance());
     }
 
@@ -147,4 +154,117 @@ public class TransactionService {
 
         return ResponseDto.success(transactionMapper.toDtoList(transactionPage.getContent(),username), "get transaction successfully", metaDto);
     }
+
+    @Transactional(readOnly = true)
+    public ResponseDto<List<GetTransactionReport>> getReports(TransactionReportFilter transactionReportFilter) {
+        List<GetTransactionReport> response = switch (transactionReportFilter.getReportType()) {
+            case DAY -> getDayReport(transactionReportFilter);
+            case WEEK -> getWeekReport(transactionReportFilter);
+            case MONTH -> getMonthReport(transactionReportFilter);
+            case YEAR -> getYearReport(transactionReportFilter);
+        };
+
+        return ResponseDto.success(response, "Transaction report retrieved successfully");
+    }
+
+    private List<GetTransactionReport> getDayReport(TransactionReportFilter filter) {
+
+        if(filter.getDay() == null) {
+            throw new ValidationException("day is required for daily report");
+        }
+
+        if(filter.getMonth() == null) {
+            throw new ValidationException("month is required for daily report");
+        }
+
+        if(filter.getYear() == null) {
+            throw new ValidationException("year is required for daily report");
+        }
+
+        long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
+
+        LocalDate startDate = timeUtil.getDayStartDate(filter.getYear(), filter.getMonth(), filter.getDay());
+        LocalDate endDate = timeUtil.getDayEndDate(filter.getYear(), filter.getMonth(), filter.getDay());
+
+        return transactionQueryService.getTransactionReportByAccountAndDateRange(
+                accountId,
+                startDate,
+                endDate,
+                "day",
+                TransactionReportType.DAY
+        );
+    }
+
+    private List<GetTransactionReport> getWeekReport(TransactionReportFilter filter) {
+
+        if(filter.getWeek() == null) {
+            throw new ValidationException("week is required for weekly report");
+        }
+
+        if(filter.getMonth() == null) {
+            throw new ValidationException("month is required for weekly report");
+        }
+
+        if(filter.getYear() == null) {
+            throw new ValidationException("year is required for weekly report");
+        }
+
+        long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
+
+        LocalDate startDate = timeUtil.getWeekStartDate(filter.getYear(), filter.getMonth(), filter.getWeek());
+        LocalDate endDate = timeUtil.getWeekEndDate(filter.getYear(), filter.getMonth(), filter.getWeek());
+
+        return transactionQueryService.getTransactionReportByAccountAndDateRange(
+                accountId,
+                startDate,
+                endDate,
+                "day",
+                TransactionReportType.DAY
+        );
+    }
+
+    private List<GetTransactionReport> getMonthReport(TransactionReportFilter filter) {
+
+        if(filter.getMonth() == null) {
+            throw new ValidationException("month is required for monthly report");
+        }
+
+        if(filter.getYear() == null) {
+            throw new ValidationException("year is required for monthly report");
+        }
+
+        long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
+
+        LocalDate startDate = timeUtil.getMonthStartDate(filter.getYear(), filter.getMonth());
+        LocalDate endDate = timeUtil.getMonthEndDate(filter.getYear(), filter.getMonth());
+
+        return transactionQueryService.getTransactionReportByAccountAndDateRange(
+                accountId,
+                startDate,
+                endDate,
+                "week",
+                TransactionReportType.WEEK
+        );
+    }
+
+    private List<GetTransactionReport> getYearReport(TransactionReportFilter filter) {
+
+        if(filter.getYear() == null){
+            throw new ValidationException("year is required for year report");
+        }
+
+        long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
+
+        LocalDate startDate = timeUtil.getYearStartDate(filter.getYear());
+        LocalDate endDate = timeUtil.getYearEndDate(filter.getYear());
+
+        return transactionQueryService.getTransactionReportByAccountAndDateRange(
+                accountId,
+                startDate,
+                endDate,
+                "month",
+                TransactionReportType.MONTH
+        );
+    }
+
 }
