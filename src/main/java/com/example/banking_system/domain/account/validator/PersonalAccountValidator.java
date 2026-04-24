@@ -53,7 +53,8 @@ public class PersonalAccountValidator {
             existingAccount.setDateOfBirth(request.getDateOfBirth());
         }
 
-        if (request.getIdCardNumber() != null && !request.getPhoneNumber().equals(existingAccount.getIdCardNumber())) {
+        if (request.getIdCardNumber() != null && !request.getPhoneNumber().equals(existingAccount.getIdCardNumber()) &&
+        !request.getIdCardNumber().equals(existingAccount.getIdCardNumber())) {
             util.assertUnique(personalAccountQueryService.existsByIdCardNumber(request.getIdCardNumber()), "ID card number already exists");
             existingAccount.setIdCardNumber(request.getIdCardNumber());
         }
