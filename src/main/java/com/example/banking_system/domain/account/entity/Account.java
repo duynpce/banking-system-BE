@@ -62,6 +62,9 @@ public class Account {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
+    @Column(name = "updated_password_at")
+    private Instant updatedPasswordAt;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
     private AccountStatus status = AccountStatus.ACTIVE;

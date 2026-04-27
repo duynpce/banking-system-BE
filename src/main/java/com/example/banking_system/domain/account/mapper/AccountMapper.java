@@ -19,6 +19,7 @@ public interface AccountMapper {
     @Mapping(target = "type",        source = "account.type")
     @Mapping(target = "status",      source = "account.status")
     @Mapping(target = "number",      source = "account.number")
+    @Mapping(target = "balance",      source = "account.balance")
     GetAccountResponse toDto(AccountDetails details);
 
     // Dispatcher that returns a subclass instance (typed as parent)

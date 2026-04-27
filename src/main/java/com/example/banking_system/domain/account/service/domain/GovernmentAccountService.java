@@ -12,6 +12,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+
 @Service
 @RequiredArgsConstructor
 public class GovernmentAccountService {
@@ -41,6 +43,7 @@ public class GovernmentAccountService {
         String username = jwtUtil.getUsername();
         GovernmentAccount existingAccount = governmentAccountQueryService.findByUsername(username);
         governmentAccountValidator.validateUpdate(request, existingAccount);
+        existingAccount.getAccount().setUpdatedAt(Instant.now());
 
         return governmentAccountQueryService.save(existingAccount);
     }

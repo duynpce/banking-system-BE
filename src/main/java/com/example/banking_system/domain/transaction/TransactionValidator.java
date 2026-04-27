@@ -16,8 +16,10 @@ public class TransactionValidator {
 
     public void validateCreate(CreateTransactionRequest request)  {
 
-        if(request.getReceiverAccountNumber().equals(accountQueryService.getINTERNAL_DEPOSIT_ACCOUNT_NUMBER()) ||
-        request.getReceiverAccountNumber().equals(accountQueryService.getINTERNAL_WITHDRAWAL_ACCOUNT_NUMBER())) {
+        boolean receiverAccountNumberIsInternalAccount = request.getReceiverAccountNumber() != null && (request.getReceiverAccountNumber().equals(accountQueryService.getINTERNAL_DEPOSIT_ACCOUNT_NUMBER()) ||
+                request.getReceiverAccountNumber().equals(accountQueryService.getINTERNAL_WITHDRAWAL_ACCOUNT_NUMBER()));
+
+        if(receiverAccountNumberIsInternalAccount) {
             throw new ValidationException("Invalid receiver account number");
         }
 

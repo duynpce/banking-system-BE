@@ -1,8 +1,10 @@
 package com.example.banking_system.domain.transaction.service;
 
-import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.domain.transaction.Transaction;
 import com.example.banking_system.domain.transaction.TransactionRepository;
+import com.example.banking_system.domain.transaction.constant.TransactionReportType;
+import com.example.banking_system.domain.transaction.dto.GetTransactionReport;
+import com.example.banking_system.domain.transaction.dto.GetTransactionReportProjection;
 import com.example.banking_system.domain.transaction.dto.TransactionFilter;
 import com.example.banking_system.domain.transaction.specification.TransactionSpecification;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,12 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.util.List;
+import java.util.Objects;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -22,30 +30,6 @@ public class TransactionQueryService {
     private final TransactionRepository transactionRepository;
 
     public Page<Transaction> findByFilter(String username, TransactionFilter transactionFilter) {
-        if (transactionFilter.getPaginationDto() == null) {
-            throw new ValidationException("pagination dto is required");
-        }
-
-        if (transactionFilter.getPaginationDto().getPage() == null || transactionFilter.getPaginationDto().getPage() < 0) {
-            throw new ValidationException("page cannot be negative");
-        }
-
-        if (transactionFilter.getPaginationDto().getLimit() == null || transactionFilter.getPaginationDto().getLimit() <= 0) {
-            throw new ValidationException("limit must be greater than 0");
-        }
-
-        if (transactionFilter.getTransactionGroup() == null) {
-            throw new ValidationException("transaction group is required");
-        }
-
-        if (transactionFilter.getStartDate() != null && transactionFilter.getEndDate() == null) {
-            throw new ValidationException("endDate is required when startDate is provided");
-        }
-
-        if (transactionFilter.getStartDate() != null && transactionFilter.getStartDate().isAfter(transactionFilter.getEndDate())) {
-            throw new ValidationException("startDate must be before or equal to endDate");
-        }
-
         Pageable pageable = PageRequest.of(
                 transactionFilter.getPaginationDto().getPage(),
                 transactionFilter.getPaginationDto().getLimit(),
@@ -69,6 +53,51 @@ public class TransactionQueryService {
         }
 
         return transactionRepository.findAll(specification, pageable);
+    }
+
+    public List<GetTransactionReport> getTransactionReportByAccountAndDateRange(
+            long accountId,
+            LocalDate startDate,
+            LocalDate endDate,
+            String bucket,
+            TransactionReportType reportType
+    ) {
+        Instant startDateTime = startDate.atStartOfDay().toInstant(ZoneOffset.UTC);
+        Instant endDateTime = endDate.plusDays(1).atStartOfDay().minusNanos(1).toInstant(ZoneOffset.UTC);
+        List<GetTransactionReportProjection> reportProjections = transactionRepository.findTransactionReportByAccountIdAndCreatedAtBetween(
+                accountId,
+                startDateTime,
+                endDateTime,
+                bucket
+        );
+
+        List<GetTransactionReport> reports = reportProjections.stream()
+                .map(this::mapToGetTransactionReport)
+                .toList();
+
+        //set type
+        reports.stream()
+                .filter(Objects::nonNull)
+                .forEach(report -> report.setReportType(reportType));
+
+        return reports;
+
+    }
+
+    // because spring data cannot map java.sql.date to java.time.LocalDate Directly
+    private GetTransactionReport mapToGetTransactionReport(GetTransactionReportProjection projection) {
+        return new GetTransactionReport(
+                projection.getStartDate(),
+                projection.getEndDate(),
+                projection.getIncomeAmount(),
+                projection.getOutcomeAmount(),
+                projection.getIncomeTransferAmount(),
+                projection.getOutcomeTransferAmount(),
+                projection.getCashbackAmount(),
+                projection.getPaymentAmount(),
+                projection.getDepositAmount(),
+                projection.getWithdrawalAmount()
+        );
     }
 
     public void delete(Transaction transaction) {

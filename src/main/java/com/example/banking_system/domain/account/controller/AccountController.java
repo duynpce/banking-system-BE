@@ -1,9 +1,11 @@
 package com.example.banking_system.domain.account.controller;
 
 import com.example.banking_system.domain.account.dto.GetAccountResponse;
+import com.example.banking_system.domain.account.dto.EditPasswordRequest;
 import com.example.banking_system.domain.account.service.domain.AccountService;
 import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.example.banking_system.common.dto.ResponseDto;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +34,12 @@ public class AccountController {
     public ResponseEntity<ResponseDto<String>> delete() {
         accountService.delete();
         return ResponseEntity.ok(ResponseDto.success(null, "Account deleted successfully"));
+    }
+
+    @PutMapping("/password")
+    public ResponseEntity<ResponseDto<String>> editPassword(@Valid @RequestBody EditPasswordRequest request) {
+        accountService.editPassword(request);
+        return ResponseEntity.ok(ResponseDto.success(null, "Password updated successfully"));
     }
 
     @GetMapping("/exists/username/{username}")
