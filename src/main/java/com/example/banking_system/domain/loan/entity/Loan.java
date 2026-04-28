@@ -18,17 +18,15 @@ public class Loan {
 
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "loan_seq_id")
+    @SequenceGenerator(name = "loan_seq_id", sequenceName = "loan_seq_id", allocationSize = 1)
     private long id;
 
-    @Column(name = "loan_amount", nullable = false, updatable = false)
-    private BigDecimal loanAmount;
+    @Column(name = "total_amount", nullable = false, updatable = false)
+    private BigDecimal totalAmount;;
 
     @Column(name ="left_amount", nullable = false)
-    private BigDecimal leftAmount;  
-
-    @Column(name = "interest_rate", nullable = false)
-    private BigDecimal interestRate;
+    private BigDecimal leftAmount;
 
     @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
@@ -44,8 +42,20 @@ public class Loan {
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDate createdAt = LocalDate.now();
 
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false, updatable = false)
     private Account account;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "loan_policy_id", referencedColumnName = "id", nullable = false, updatable = false)
+    private  LoanPolicy policy;
+
+    @PrePersist
+    public void prePersist() {
+        // set leftAmount to totalAmount when creating a new loan
+        this.leftAmount = this.totalAmount;;
+    }
+
 
 }

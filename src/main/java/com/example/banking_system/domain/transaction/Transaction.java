@@ -52,12 +52,12 @@ public class Transaction {
     @Column(name = "type", nullable = false)
     private TransactionType type;
 
-    @JoinColumn(name = "sender_id", referencedColumnName = "id", updatable = false, nullable = true)
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "sender_id", referencedColumnName = "id", updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Account sender;
 
-    @JoinColumn(name = "receiver_id", referencedColumnName = "id", updatable = false, nullable = true)
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "receiver_id", referencedColumnName = "id", updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
     private Account receiver;
 
 

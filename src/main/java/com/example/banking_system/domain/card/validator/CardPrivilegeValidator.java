@@ -1,5 +1,6 @@
 package com.example.banking_system.domain.card.validator;
 
+import com.example.banking_system.common.utility.ValidationUtil;
 import com.example.banking_system.domain.card.dto.UpdateCardPrivilegeRequest;
 import com.example.banking_system.domain.card.entity.CardPrivilege;
 import com.example.banking_system.domain.card.service.query.CardPrivilegeQueryService;
@@ -14,9 +15,10 @@ import java.time.LocalDate;
 public class CardPrivilegeValidator {
     private final CardPrivilegeQueryService cardPrivilegeQueryService;
     private final Util util;
+    private final ValidationUtil validationUtil;
 
     public void validateCreate(CardPrivilege cardPrivilege){
-        validateEffectiveDateRange(cardPrivilege.getEffectiveFrom(), cardPrivilege.getEffectiveTo());
+        validationUtil.validateEffectiveDateRange(cardPrivilege.getEffectiveFrom(), cardPrivilege.getEffectiveTo());
 
         util.assertUnique(
                 cardPrivilegeQueryService.hasOverlap(cardPrivilege),
@@ -37,7 +39,12 @@ public class CardPrivilegeValidator {
             if(request.getEffectiveFrom() != null ) {
                 throw new ValidationException("Effective from date cannot be updated for future card privilege");
             }
+        }else{
+            if(cardPrivilegeQueryService.hasOverlap(existingCardPrivilege)) {
+                throw new ValidationException("An active card privilege already exists for this account type and card type with the given effective date range");
+            }
         }
+
         LocalDate nextEffectiveFrom = request.getEffectiveFrom() != null
                 ? request.getEffectiveFrom()
                 : existingCardPrivilege.getEffectiveFrom();
@@ -45,17 +52,10 @@ public class CardPrivilegeValidator {
                 ? request.getEffectiveTo()
                 : existingCardPrivilege.getEffectiveTo();
 
-        validateEffectiveDateRange(nextEffectiveFrom, nextEffectiveTo);
+        validationUtil.validateEffectiveDateRange(nextEffectiveFrom, nextEffectiveTo);
 
         // Set non-null fields to existing card privilege
-        setNonNullFieldsToUpdateCardPrivilege(request, existingCardPrivilege);
-
-        if(!updateActivePrivilege) {
-            if(cardPrivilegeQueryService.hasOverlap(existingCardPrivilege)) {
-                throw new ValidationException("An active card privilege already exists for this account type and card type with the given effective date range");
-            }
-        }
-
+        setNonNullFieldsToUpdateCardPrivilege(request, existingCardPrivilege, updateActivePrivilege);
     }
 
     private boolean isAllFieldsNull(UpdateCardPrivilegeRequest request) {
@@ -67,7 +67,7 @@ public class CardPrivilegeValidator {
                 && request.getEffectiveTo() == null;
     }
 
-    private void setNonNullFieldsToUpdateCardPrivilege(UpdateCardPrivilegeRequest request, CardPrivilege existingCardPrivilege) {
+    private void setNonNullFieldsToUpdateCardPrivilege(UpdateCardPrivilegeRequest request, CardPrivilege existingCardPrivilege, boolean updateActivePrivilege) {
         if (request.getAnnualFee() != null) {
             existingCardPrivilege.setAnnualFee(request.getAnnualFee());
         }
@@ -84,7 +84,8 @@ public class CardPrivilegeValidator {
             existingCardPrivilege.setSpendingLimitDaily(request.getSpendingLimitDaily());
         }
 
-        if (request.getEffectiveFrom() != null) {
+        //if updating an active privilege --> not update effective from
+        if (request.getEffectiveFrom() != null && updateActivePrivilege) {
             existingCardPrivilege.setEffectiveFrom(request.getEffectiveFrom());
         }
 
@@ -93,14 +94,4 @@ public class CardPrivilegeValidator {
         }
     }
 
-    private void validateEffectiveDateRange(LocalDate effectiveFrom, LocalDate effectiveTo) {
-
-        if (!effectiveTo.isAfter(effectiveFrom)) {
-            throw new ValidationException("effective to date must be after effective from date");
-        }
-
-        if(effectiveFrom.isBefore(LocalDate.now())) {
-            throw new ValidationException("effective from date must be today or in the future");
-        }
-    }
 }
