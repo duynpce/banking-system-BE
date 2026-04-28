@@ -17,6 +17,7 @@ import com.example.banking_system.domain.loan.dto.CreateLoanPolicyRequest;
 import com.example.banking_system.domain.loan.dto.CreateLoanRequest;
 import com.example.banking_system.domain.loan.dto.GetLoanPolicyResponse;
 import com.example.banking_system.domain.loan.dto.GetLoanResponse;
+import com.example.banking_system.domain.loan.entity.Loan;
 import com.example.banking_system.loan.LoanTestCases;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -96,8 +97,11 @@ public class LoanIntegrationTest extends IntegrationTest {
         request.setPolicyId(loanPolicyResponse.getId());
         loanController.create(request);
 
-        long id = 1L; // Assuming this is the first loan created and will have ID 1
-        ResponseEntity<ResponseDto<GetLoanResponse>> responseEntity = loanController.getById(id);
+        //find by page first to get the id
+        GetLoanResponse getLoanResponse = Objects.requireNonNull(loanController.getByPage(new PaginationDto(0, 5)).getBody()).getData().getFirst();
+
+        ResponseEntity<ResponseDto<GetLoanResponse>> responseEntity = loanController.getById(getLoanResponse.getId());
+
 
         assertNotNull(responseEntity.getBody());
         GetLoanResponse response = responseEntity.getBody().getData();
