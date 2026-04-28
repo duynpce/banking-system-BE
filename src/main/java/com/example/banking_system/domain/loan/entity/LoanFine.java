@@ -1,5 +1,6 @@
 package com.example.banking_system.domain.loan.entity;
 
+import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.loan.constant.LoanFineType;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -19,10 +20,6 @@ public class LoanFine {
     @Column(name = "id")
     private long id;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable = false, updatable = false)
-    private Loan loan;
-
     @Column(name = "amount", nullable = false)
     private BigDecimal amount;
 
@@ -32,4 +29,16 @@ public class LoanFine {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private LoanFineType type;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable = false, updatable = false)
+    private Loan loan;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "account_id", referencedColumnName = "id", nullable = false, updatable = false)
+    private Account account;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "loan_fine_policy_id", referencedColumnName = "id", nullable = false, updatable = false)
+    private LoanFinePolicy loanFinePolicy;
 }
