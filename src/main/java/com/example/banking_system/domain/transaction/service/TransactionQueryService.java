@@ -29,6 +29,10 @@ public class TransactionQueryService {
 
     private final TransactionRepository transactionRepository;
 
+    public Transaction save(Transaction transaction) {
+        return transactionRepository.save(transaction);
+    }
+
     public Page<Transaction> findByFilter(String username, TransactionFilter transactionFilter) {
         Pageable pageable = PageRequest.of(
                 transactionFilter.getPaginationDto().getPage(),
@@ -100,7 +104,6 @@ public class TransactionQueryService {
         );
     }
 
-    public void delete(Transaction transaction) {
-        transactionRepository.delete(transaction);
+    public void delete(Transaction transaction) {transactionRepository.delete(transaction);
     }
 }
