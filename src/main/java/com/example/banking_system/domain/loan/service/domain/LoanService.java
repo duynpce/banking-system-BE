@@ -6,7 +6,9 @@ import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.example.banking_system.domain.loan.constant.LoanStatus;
 import com.example.banking_system.domain.loan.dto.CreateLoanRequest;
+import com.example.banking_system.domain.loan.dto.GetLoanReportResponse;
 import com.example.banking_system.domain.loan.dto.GetLoanResponse;
+import com.example.banking_system.domain.loan.dto.LoanFilter;
 import com.example.banking_system.domain.loan.dto.RepayLoanRequest;
 import com.example.banking_system.domain.loan.entity.Loan;
 import com.example.banking_system.domain.loan.entity.LoanPolicy;
@@ -76,6 +78,19 @@ public class LoanService {
 
         Page<Loan> loanPage = loanQueryService.findByAccountIdWithPagination(AccountId, paginationDto);
         return loanMapper.toDtoList(loanPage.getContent());
+    }
+
+    @Transactional(readOnly = true)
+    public List<GetLoanResponse> getByFilter(LoanFilter loanFilter) {
+        long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
+        Page<Loan> loanPage = loanQueryService.findByFilter(accountId, loanFilter);
+        return loanMapper.toDtoList(loanPage.getContent());
+    }
+
+    @Transactional(readOnly = true)
+    public GetLoanReportResponse getByReports(LoanStatus loanStatus) {
+        long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
+        return loanQueryService.findReportByAccountIdAndStatus(accountId, loanStatus);
     }
 
     @Transactional

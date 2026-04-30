@@ -40,4 +40,12 @@ public class LoanController {
         return ResponseEntity.ok(ResponseDto.success(response, "Loans retrieved successfully"));
     }
 
+    @GetMapping("/reports")
+    public ResponseEntity<ResponseDto<GetLoanReportResponse>> getByReports(
+            //null status mean query all kind of status
+            @RequestParam(required = false) LoanStatus loanStatus) {
+        GetLoanReportResponse response = loanService.getByReports(loanStatus);
+        return ResponseEntity.ok(ResponseDto.success(response, "Loan report retrieved successfully"));
+
+    }
 }
