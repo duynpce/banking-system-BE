@@ -18,5 +18,7 @@ public class GetLoanResponse {
     private LoanStatus status;
     private LoanType type;
     private LocalDate createdAt;
+    private int durationMonths;
+    private BigDecimal interestRate;
 }
 
