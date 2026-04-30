@@ -11,12 +11,15 @@ import com.example.banking_system.domain.account.controller.PersonalAccountContr
 import com.example.banking_system.domain.account.dto.CreatePersonalAccountRequest;
 import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.account.service.query.AccountQueryService;
+import com.example.banking_system.domain.loan.constant.LoanStatus;
 import com.example.banking_system.domain.loan.controller.LoanController;
 import com.example.banking_system.domain.loan.controller.LoanPolicyController;
 import com.example.banking_system.domain.loan.dto.CreateLoanPolicyRequest;
 import com.example.banking_system.domain.loan.dto.CreateLoanRequest;
 import com.example.banking_system.domain.loan.dto.GetLoanPolicyResponse;
+import com.example.banking_system.domain.loan.dto.GetLoanReportResponse;
 import com.example.banking_system.domain.loan.dto.GetLoanResponse;
+import com.example.banking_system.domain.loan.dto.LoanFilter;
 import com.example.banking_system.domain.loan.entity.Loan;
 import com.example.banking_system.loan.LoanTestCases;
 import org.junit.jupiter.api.Assertions;
@@ -97,11 +100,10 @@ public class LoanIntegrationTest extends IntegrationTest {
         request.setPolicyId(loanPolicyResponse.getId());
         loanController.create(request);
 
-        //find by page first to get the id
-        GetLoanResponse getLoanResponse = Objects.requireNonNull(loanController.getByPage(new PaginationDto(0, 5)).getBody()).getData().getFirst();
+        LoanFilter filter = loanTestCases.getLoanFilterTestCase();
+        GetLoanResponse getLoanResponse = Objects.requireNonNull(loanController.getByFilter(filter).getBody()).getData().getFirst();
 
         ResponseEntity<ResponseDto<GetLoanResponse>> responseEntity = loanController.getById(getLoanResponse.getId());
-
 
         assertNotNull(responseEntity.getBody());
         GetLoanResponse response = responseEntity.getBody().getData();
@@ -122,7 +124,7 @@ public class LoanIntegrationTest extends IntegrationTest {
     }
 
     @Test
-    public void testGetLoanByPageSuccess() {
+    public void testGetLoanByFilterSuccess() {
         setupLoanScenario();
 
         CreateLoanRequest request = loanTestCases.getCreateLoanRequestTestCase();
@@ -131,7 +133,8 @@ public class LoanIntegrationTest extends IntegrationTest {
 
         loanController.create(request);
 
-        ResponseEntity<ResponseDto<List<GetLoanResponse>>> responseEntity = loanController.getByPage(new PaginationDto(0, 5));
+        LoanFilter loanFilter = loanTestCases.getLoanFilterTestCase();
+        ResponseEntity<ResponseDto<List<GetLoanResponse>>> responseEntity = loanController.getByFilter(loanFilter);
         assertNotNull(responseEntity.getBody());
         List<GetLoanResponse> response = responseEntity.getBody().getData();
 
@@ -142,8 +145,68 @@ public class LoanIntegrationTest extends IntegrationTest {
         assertFalse(response.isEmpty(), "Response data should not be empty");
         assertEquals(request.getAmount(), response.getFirst().getTotalAmount(), "Loan amount should match the request");
         assertEquals(request.getType(), response.getFirst().getType(), "Loan type should match the request");
+    }
 
+    @Test
+    public void testGetLoanByFilterNoMatchingStatus() {
+        setupLoanScenario();
 
+        CreateLoanRequest request = loanTestCases.getCreateLoanRequestTestCase();
+        GetLoanPolicyResponse loanPolicyResponse = Objects.requireNonNull(loanPolicyController.getByPage(new PaginationDto(0, 5)).getBody()).getData().getFirst();
+        request.setPolicyId(loanPolicyResponse.getId());
+        loanController.create(request);
+
+        LoanFilter loanFilter = loanTestCases.getLoanFilterTestCase();
+        loanFilter.setStatus(LoanStatus.DONE_PAYMENT);
+        ResponseEntity<ResponseDto<List<GetLoanResponse>>> responseEntity = loanController.getByFilter(loanFilter);
+
+        assertNotNull(responseEntity.getBody());
+        List<GetLoanResponse> response = responseEntity.getBody().getData();
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode(), "Response status should be OK");
+        assertTrue(responseEntity.getBody().isSuccess(), "Response success flag should be true");
+        assertTrue(response.isEmpty(), "Response data should be empty when no loans match the filter");
+    }
+
+    @Test
+    public void testGetLoanByReportsSuccess() {
+        setupLoanScenario();
+
+        CreateLoanRequest request = loanTestCases.getCreateLoanRequestTestCase();
+        GetLoanPolicyResponse loanPolicyResponse = Objects.requireNonNull(loanPolicyController.getByPage(new PaginationDto(0, 5)).getBody()).getData().getFirst();
+        request.setPolicyId(loanPolicyResponse.getId());
+        loanController.create(request);
+
+        ResponseEntity<ResponseDto<GetLoanReportResponse>> responseEntity = loanController.getByReports(LoanStatus.CURRENT_PAYMENT);
+
+        assertNotNull(responseEntity.getBody());
+        GetLoanReportResponse response = responseEntity.getBody().getData();
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode(), "Response status should be OK");
+        assertTrue(responseEntity.getBody().isSuccess(), "Response success flag should be true");
+        assertNotNull(response, "Response data should not be null");
+        assertEquals(LoanStatus.CURRENT_PAYMENT, response.getLoanStatus(), "Report status should match requested status");
+        assertEquals(0, response.getTotalAmount().compareTo(request.getAmount()), "Total amount should match the loan amount");
+        assertEquals(0, response.getLeftAmount().compareTo(request.getAmount()), "Left amount should match the loan amount");
+        assertNotNull(response.getMonthlyInstallment(), "Monthly installment should not be null");
+    }
+
+    @Test
+    public void testGetLoanByReportsNoLoans() {
+        setupLoanScenario();
+
+        ResponseEntity<ResponseDto<GetLoanReportResponse>> responseEntity = loanController.getByReports(LoanStatus.DONE_PAYMENT);
+
+        assertNotNull(responseEntity.getBody());
+        GetLoanReportResponse response = responseEntity.getBody().getData();
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode(), "Response status should be OK");
+        assertTrue(responseEntity.getBody().isSuccess(), "Response success flag should be true");
+        assertNotNull(response, "Response data should not be null");
+        assertEquals(LoanStatus.DONE_PAYMENT, response.getLoanStatus(), "Report status should match requested status");
+        assertEquals(0, response.getTotalAmount().compareTo(BigDecimal.ZERO), "Total amount should be 0 when no loans");
+        assertEquals(0, response.getLeftAmount().compareTo(BigDecimal.ZERO), "Left amount should be 0 when no loans");
+        assertEquals(0, response.getMonthlyInstallment().compareTo(BigDecimal.ZERO), "Monthly installment should be 0 when no loans");
     }
 
 

@@ -5,7 +5,10 @@ import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.loan.constant.LoanFineType;
 import com.example.banking_system.domain.loan.constant.LoanStatus;
 import com.example.banking_system.domain.loan.constant.LoanType;
+import com.example.banking_system.domain.loan.dto.GetLoanReportResponse;
+import com.example.banking_system.domain.loan.dto.LoanFilter;
 import com.example.banking_system.domain.loan.dto.*;
+import com.example.banking_system.common.dto.PaginationDto;
 import com.example.banking_system.domain.loan.entity.Loan;
 import com.example.banking_system.domain.loan.entity.LoanFine;
 import com.example.banking_system.domain.loan.entity.LoanFinePolicy;
@@ -13,6 +16,7 @@ import com.example.banking_system.domain.loan.entity.LoanPolicy;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
 
@@ -173,6 +177,7 @@ public class LoanTestCases {
         response.setStatus(loan.getStatus());
         response.setType(loan.getType());
         response.setCreatedAt(loan.getCreatedAt());
+        response.setDurationMonths(loan.getPolicy().getDurationMonths());
         return response;
     }
 
@@ -213,6 +218,35 @@ public class LoanTestCases {
         response.setAmount(loanFine.getAmount());
         response.setCreatedAt(loanFine.getCreatedAt());
         response.setType(loanFine.getType());
+        return response;
+    }
+
+    public LoanFilter getLoanFilterTestCase() {
+        LoanFilter filter = new LoanFilter();
+        filter.setPaginationDto(new PaginationDto(0, 10));
+        filter.setStatus(LoanStatus.CURRENT_PAYMENT);
+        return filter;
+    }
+
+    public LoanFilter getLoanFilterWithDateRangeTestCase() {
+        LoanFilter filter = new LoanFilter();
+        filter.setPaginationDto(new PaginationDto(0, 10));
+        filter.setStartDate(LocalDate.now().minusMonths(1));
+        filter.setEndDate(LocalDate.now());
+        return filter;
+    }
+
+    public GetLoanReportResponse getLoanReportTestCase() {
+        GetLoanReportResponse response = new GetLoanReportResponse();
+        Loan loan = getLoanTestCase();
+        response.setLoanStatus(loan.getStatus());
+        response.setTotalAmount(loan.getTotalAmount());
+        response.setLeftAmount(loan.getLeftAmount());
+
+        BigDecimal monthlyBaseInstallment = loan.getTotalAmount().divide(new BigDecimal(loan.getPolicy().getDurationMonths()),4, RoundingMode.HALF_EVEN);
+        BigDecimal monthlyInterestInstallment = monthlyBaseInstallment.multiply(new BigDecimal(loan.getPolicy().getInterestRate()));
+
+        response.setMonthlyInstallment(monthlyBaseInstallment.add(monthlyInterestInstallment));
         return response;
     }
 }

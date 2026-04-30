@@ -9,9 +9,10 @@ import com.example.banking_system.common.utility.JwtUtil;
 import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.example.banking_system.domain.loan.constant.LoanStatus;
-import com.example.banking_system.domain.loan.constant.LoanType;
 import com.example.banking_system.domain.loan.dto.CreateLoanRequest;
+import com.example.banking_system.domain.loan.dto.GetLoanReportResponse;
 import com.example.banking_system.domain.loan.dto.GetLoanResponse;
+import com.example.banking_system.domain.loan.dto.LoanFilter;
 import com.example.banking_system.domain.loan.dto.RepayLoanRequest;
 import com.example.banking_system.domain.loan.entity.Loan;
 import com.example.banking_system.domain.loan.entity.LoanPolicy;
@@ -170,6 +171,74 @@ public class LoanUnitTest extends UnitTest {
         assertEquals(response, result.getFirst());
         verify(loanQueryService).findByAccountIdWithPagination(anyLong(), eq(paginationDto));
         verify(loanMapper).toDtoList(List.of(loan));
+    }
+
+    @Test
+    public void getByFilterSuccess() {
+        Loan loan = loanTestCases.getLoanTestCase();
+        GetLoanResponse response = loanTestCases.getLoanResponseTestCase();
+        LoanFilter loanFilter = loanTestCases.getLoanFilterTestCase();
+        Page<Loan> page = new PageImpl<>(List.of(loan));
+
+        setupJwt();
+        when(loanQueryService.findByFilter(anyLong(), eq(loanFilter))).thenReturn(page);
+        when(loanMapper.toDtoList(List.of(loan))).thenReturn(List.of(response));
+
+        List<GetLoanResponse> result = loanService.getByFilter(loanFilter);
+
+        assertEquals(1, result.size());
+        assertEquals(response, result.getFirst());
+        verify(loanQueryService).findByFilter(anyLong(), eq(loanFilter));
+        verify(loanMapper).toDtoList(List.of(loan));
+    }
+
+    @Test
+    public void getByFilterEmptyResult() {
+        LoanFilter loanFilter = loanTestCases.getLoanFilterTestCase();
+        loanFilter.setStatus(LoanStatus.DONE_PAYMENT);
+        Page<Loan> emptyPage = new PageImpl<>(List.of());
+
+        setupJwt();
+        when(loanQueryService.findByFilter(anyLong(), eq(loanFilter))).thenReturn(emptyPage);
+        when(loanMapper.toDtoList(List.of())).thenReturn(List.of());
+
+        List<GetLoanResponse> result = loanService.getByFilter(loanFilter);
+
+        assertTrue(result.isEmpty());
+        verify(loanQueryService).findByFilter(anyLong(), eq(loanFilter));
+    }
+
+    @Test
+    public void getByReportsSuccess() {
+        GetLoanReportResponse  response = loanTestCases.getLoanReportTestCase();
+        LoanStatus loanStatus = LoanStatus.CURRENT_PAYMENT;
+
+        setupJwt();
+        when(loanQueryService.findReportByAccountIdAndStatus(anyLong(), eq(loanStatus))).thenReturn(response);
+
+        GetLoanReportResponse result = loanService.getByReports(loanStatus);
+
+        assertEquals(loanStatus, result.getLoanStatus());
+        assertEquals(response.getTotalAmount(), result.getTotalAmount());
+        assertEquals(response.getLeftAmount(), result.getLeftAmount());
+        assertEquals(response.getMonthlyInstallment(), result.getMonthlyInstallment());
+        verify(loanQueryService).findReportByAccountIdAndStatus(anyLong(), eq(loanStatus));
+    }
+
+    @Test
+    public void getByReportsNoLoansReturnsZeroAmounts() {
+        LoanStatus loanStatus = LoanStatus.DONE_PAYMENT;
+        GetLoanReportResponse zeroResponse = new GetLoanReportResponse(loanStatus, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+
+        setupJwt();
+        when(loanQueryService.findReportByAccountIdAndStatus(anyLong(), eq(loanStatus))).thenReturn(zeroResponse);
+
+        GetLoanReportResponse result = loanService.getByReports(loanStatus);
+
+        assertEquals(loanStatus, result.getLoanStatus());
+        assertEquals(0, result.getTotalAmount().compareTo(java.math.BigDecimal.ZERO));
+        assertEquals(0, result.getLeftAmount().compareTo(java.math.BigDecimal.ZERO));
+        assertEquals(0, result.getMonthlyInstallment().compareTo(java.math.BigDecimal.ZERO));
     }
 
     @Test
