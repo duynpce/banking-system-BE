@@ -47,7 +47,7 @@ public class LoanService {
         Account account = accountQueryService.findById(accountId);
         LoanPolicy loanPolicy = loanPolicyQueryService.findById(request.getPolicyId());
 
-        loanValidator.validateCreate(loan, loanPolicy);
+        loanValidator.validateCreate(loan, loanPolicy, account);
 
         loan.setDueDate(LocalDate.now().plusMonths(loanPolicy.getDurationMonths()));
         loan.setAccount(account);

@@ -18,6 +18,10 @@ public class BusinessCardValidator {
         if (!account.getCreditRank().canOpenCard()) {
             throw new ForbiddenException("Account's credit rank does not permit opening a business card");
         }
+
+        if(!account.getCreditRank().canOpenCard()){
+            throw new ForbiddenException("Account's credit rank does not permit opening a business card");
+        }
     }
 }
 
