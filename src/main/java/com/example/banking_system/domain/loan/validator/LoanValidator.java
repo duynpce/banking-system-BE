@@ -17,7 +17,7 @@ public class LoanValidator {
             throw new ValidationException("loan type must match loan policy type");
         }
 
-        if (loan.getTotalAmount().compareTo(loanPolicy.getMaxAmount()) > 0) {
+        if (loan.getBaseAmount().compareTo(loanPolicy.getMaxAmount()) > 0) {
             throw new ValidationException("loan amount cannot be greater than maximum allowed by policy");
         }
 

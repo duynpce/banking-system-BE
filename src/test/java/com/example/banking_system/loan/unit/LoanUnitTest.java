@@ -3,6 +3,7 @@ package com.example.banking_system.loan.unit;
 import com.example.banking_system.account.AccountTestCases;
 import com.example.banking_system.common.UnitTest;
 import com.example.banking_system.common.dto.PaginationDto;
+import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.NotFoundException;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
@@ -76,7 +77,8 @@ public class LoanUnitTest extends UnitTest {
         LoanPolicy loanPolicy = loanTestCases.getLoanPolicyTestCase();
         CreateLoanRequest request = loanTestCases.getCreateLoanRequestTestCase(loanPolicy.getId(), loanPolicy.getLoanType());
         Loan loan = new Loan();
-        loan.setTotalAmount(request.getAmount());
+        loan.setBaseAmount(request.getAmount());
+        loan.setTotalAmount(request.getAmount().add(request.getAmount().multiply(loanPolicy.getInterestRate())));
         BigDecimal initialBalance = new BigDecimal("500.00");
         account.setBalance(initialBalance);
 
@@ -84,7 +86,7 @@ public class LoanUnitTest extends UnitTest {
         when(loanMapper.toEntity(request)).thenReturn(loan);
         when(accountQueryService.findById(account.getId())).thenReturn(account);
         when(loanPolicyQueryService.findById(request.getPolicyId())).thenReturn(loanPolicy);
-        doNothing().when(loanValidator).validateCreate(loan, loanPolicy);
+        doNothing().when(loanValidator).validateCreate(loan, loanPolicy, account);
         when(loanQueryService.save(loan)).thenReturn(loan);
 
         Loan result = loanService.create(request);
@@ -94,7 +96,7 @@ public class LoanUnitTest extends UnitTest {
         assertEquals(LocalDate.now().plusMonths(loanPolicy.getDurationMonths()), loan.getDueDate());
         assertEquals(loanPolicy, loan.getPolicy());
         assertEquals(account, loan.getAccount());
-        verify(loanValidator).validateCreate(loan, loanPolicy);
+        verify(loanValidator).validateCreate(loan, loanPolicy, account);
         verify(loanQueryService).save(loan);
     }
 
@@ -110,7 +112,7 @@ public class LoanUnitTest extends UnitTest {
         when(accountQueryService.findById(account.getId())).thenReturn(account);
         when(loanPolicyQueryService.findById(request.getPolicyId())).thenReturn(loanPolicy);
         doThrow(new ValidationException("loan amount cannot be greater than maximum allowed by policy"))
-                .when(loanValidator).validateCreate(loan, loanPolicy);
+                .when(loanValidator).validateCreate(loan, loanPolicy, account);
 
         RuntimeException exception = Assertions.assertThrows(
                 ValidationException.class,
@@ -118,7 +120,7 @@ public class LoanUnitTest extends UnitTest {
         );
 
         assertEquals("loan amount cannot be greater than maximum allowed by policy", exception.getMessage());
-        verify(loanValidator).validateCreate(loan, loanPolicy);
+        verify(loanValidator).validateCreate(loan, loanPolicy, account);
         verify(loanQueryService, never()).save(any());
     }
 
@@ -184,10 +186,10 @@ public class LoanUnitTest extends UnitTest {
         when(loanQueryService.findByFilter(anyLong(), eq(loanFilter))).thenReturn(page);
         when(loanMapper.toDtoList(List.of(loan))).thenReturn(List.of(response));
 
-        List<GetLoanResponse> result = loanService.getByFilter(loanFilter);
+        ResponseDto<List<GetLoanResponse>> result = loanService.getByFilter(loanFilter);
 
-        assertEquals(1, result.size());
-        assertEquals(response, result.getFirst());
+        assertEquals(1, result.getData().size());
+        assertEquals(response, result.getData().getFirst());
         verify(loanQueryService).findByFilter(anyLong(), eq(loanFilter));
         verify(loanMapper).toDtoList(List.of(loan));
     }
@@ -202,9 +204,9 @@ public class LoanUnitTest extends UnitTest {
         when(loanQueryService.findByFilter(anyLong(), eq(loanFilter))).thenReturn(emptyPage);
         when(loanMapper.toDtoList(List.of())).thenReturn(List.of());
 
-        List<GetLoanResponse> result = loanService.getByFilter(loanFilter);
+        ResponseDto<List<GetLoanResponse>> result = loanService.getByFilter(loanFilter);
 
-        assertTrue(result.isEmpty());
+        assertTrue(result.getData().isEmpty());
         verify(loanQueryService).findByFilter(anyLong(), eq(loanFilter));
     }
 

@@ -37,8 +37,8 @@ public class LoanTestCases {
     public CreateLoanPolicyRequest getCreateLoanPolicyRequestTestCase() {
         CreateLoanPolicyRequest request = new CreateLoanPolicyRequest();
         request.setDurationMonths(12);
-        request.setInterestRate(1.5);
-        request.setMaxAmount(10000.00);
+        request.setInterestRate(new BigDecimal("1.5"));
+        request.setMaxAmount(new BigDecimal("10000.00"));
         request.setLoanType(LoanType.CREDIT);
         request.setEffectiveFrom(LocalDate.now());
         request.setEffectiveTo(LocalDate.now().plusMonths(12));
@@ -49,7 +49,7 @@ public class LoanTestCases {
         UpdateLoanPolicyRequest request = new UpdateLoanPolicyRequest();
         request.setId(1L);
         request.setDurationMonths(24);
-        request.setInterestRate(2.0);
+        request.setInterestRate(new BigDecimal("2.0"));
         request.setLoanType(LoanType.CREDIT);
         request.setEffectiveFrom(LocalDate.now().plusDays(1));
         request.setEffectiveTo(LocalDate.now().plusMonths(18));
@@ -65,9 +65,9 @@ public class LoanTestCases {
         loanPolicy.setLoanType(request.getLoanType());
         loanPolicy.setEffectiveFrom(request.getEffectiveFrom());
         loanPolicy.setEffectiveTo(request.getEffectiveTo());
-        loanPolicy.setMaxAmount(BigDecimal.valueOf(request.getMaxAmount()));
+        loanPolicy.setMaxAmount(request.getMaxAmount());
         loanPolicy.setCreatedAt(Instant.now());
-        loanPolicy.setMaxAmount(BigDecimal.valueOf(request.getMaxAmount()));
+        loanPolicy.setMaxAmount(request.getMaxAmount());
         return loanPolicy;
     }
 
@@ -172,6 +172,7 @@ public class LoanTestCases {
         GetLoanResponse response = new GetLoanResponse();
         response.setId(loan.getId());
         response.setTotalAmount(loan.getTotalAmount());
+        response.setBaseAmount(loan.getBaseAmount());
         response.setLeftAmount(loan.getLeftAmount());
         response.setDueDate(loan.getDueDate());
         response.setStatus(loan.getStatus());
@@ -243,10 +244,9 @@ public class LoanTestCases {
         response.setTotalAmount(loan.getTotalAmount());
         response.setLeftAmount(loan.getLeftAmount());
 
-        BigDecimal monthlyBaseInstallment = loan.getTotalAmount().divide(new BigDecimal(loan.getPolicy().getDurationMonths()),4, RoundingMode.HALF_EVEN);
-        BigDecimal monthlyInterestInstallment = monthlyBaseInstallment.multiply(new BigDecimal(loan.getPolicy().getInterestRate()));
+        BigDecimal monthlyInstallment = loan.getTotalAmount().divide(new BigDecimal(loan.getPolicy().getDurationMonths()),4, RoundingMode.HALF_EVEN);
 
-        response.setMonthlyInstallment(monthlyBaseInstallment.add(monthlyInterestInstallment));
+        response.setMonthlyInstallment(monthlyInstallment);
         return response;
     }
 }

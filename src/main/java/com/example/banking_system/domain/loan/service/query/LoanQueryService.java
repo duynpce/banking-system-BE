@@ -41,7 +41,8 @@ public class LoanQueryService {
     }
 
     public GetLoanReportResponse findReportByAccountIdAndStatus(long accountId, LoanStatus loanStatus) {
-        GetLoanReportProjection projection = loanRepository.findReportByAccountIdAndStatus(accountId, loanStatus.name());
+        String loanStatusName = loanStatus == null ? null : loanStatus.name();
+        GetLoanReportProjection projection = loanRepository.findReportByAccountIdAndStatus(accountId, loanStatusName);
         GetLoanReportResponse response = new GetLoanReportResponse();
         response.setLoanStatus(loanStatus);
         response.setTotalAmount(projection.getTotalAmount());

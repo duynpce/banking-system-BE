@@ -2,10 +2,7 @@ package com.example.banking_system.domain.loan.controller;
 
 import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.domain.loan.constant.LoanStatus;
-import com.example.banking_system.domain.loan.dto.CreateLoanRequest;
-import com.example.banking_system.domain.loan.dto.GetLoanReportResponse;
-import com.example.banking_system.domain.loan.dto.GetLoanResponse;
-import com.example.banking_system.domain.loan.dto.LoanFilter;
+import com.example.banking_system.domain.loan.dto.*;
 import com.example.banking_system.domain.loan.service.domain.LoanService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +23,12 @@ public class LoanController {
         return ResponseEntity.ok(ResponseDto.success(null, "Loan created successfully"));
     }
 
+    @PostMapping("/repay")
+    public ResponseEntity<ResponseDto<String>> repay(@Valid @RequestBody RepayLoanRequest request) {
+        loanService.repayLoan(request);
+        return ResponseEntity.ok(ResponseDto.success(null, "Loan repayment successful"));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ResponseDto<GetLoanResponse>> getById(@PathVariable long id) {
         GetLoanResponse response = loanService.getById(id);
@@ -36,8 +39,8 @@ public class LoanController {
     public ResponseEntity<ResponseDto<List<GetLoanResponse>>> getByFilter(
             @Valid @ModelAttribute LoanFilter loanFilter
     ) {
-        List<GetLoanResponse> response = loanService.getByFilter(loanFilter);
-        return ResponseEntity.ok(ResponseDto.success(response, "Loans retrieved successfully"));
+        ResponseDto<List<GetLoanResponse>> response = loanService.getByFilter(loanFilter);;
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/reports")

@@ -20,7 +20,6 @@ import com.example.banking_system.domain.loan.dto.GetLoanPolicyResponse;
 import com.example.banking_system.domain.loan.dto.GetLoanReportResponse;
 import com.example.banking_system.domain.loan.dto.GetLoanResponse;
 import com.example.banking_system.domain.loan.dto.LoanFilter;
-import com.example.banking_system.domain.loan.entity.Loan;
 import com.example.banking_system.loan.LoanTestCases;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -112,7 +111,7 @@ public class LoanIntegrationTest extends IntegrationTest {
         assertNotNull(responseEntity.getBody(), "Response body should not be null");
         assertTrue(responseEntity.getBody().isSuccess(), "Response success flag should be true");
         assertNotNull(response, "Response data should not be null");
-        assertEquals(request.getAmount(), response.getTotalAmount(), "Loan amount should match the request");
+        assertEquals(request.getAmount(), response.getBaseAmount(), "Loan amount should match the request");
         assertEquals(request.getType(), response.getType(), "Loan type should match the request");
     }
 
@@ -143,7 +142,7 @@ public class LoanIntegrationTest extends IntegrationTest {
         assertTrue(responseEntity.getBody().isSuccess(), "Response success flag should be true");
         assertNotNull(response, "Response data should not be null");
         assertFalse(response.isEmpty(), "Response data should not be empty");
-        assertEquals(request.getAmount(), response.getFirst().getTotalAmount(), "Loan amount should match the request");
+        assertEquals(request.getAmount(), response.getFirst().getBaseAmount(), "Base amount should match the request amount");
         assertEquals(request.getType(), response.getFirst().getType(), "Loan type should match the request");
     }
 
@@ -186,8 +185,6 @@ public class LoanIntegrationTest extends IntegrationTest {
         assertTrue(responseEntity.getBody().isSuccess(), "Response success flag should be true");
         assertNotNull(response, "Response data should not be null");
         assertEquals(LoanStatus.CURRENT_PAYMENT, response.getLoanStatus(), "Report status should match requested status");
-        assertEquals(0, response.getTotalAmount().compareTo(request.getAmount()), "Total amount should match the loan amount");
-        assertEquals(0, response.getLeftAmount().compareTo(request.getAmount()), "Left amount should match the loan amount");
         assertNotNull(response.getMonthlyInstallment(), "Monthly installment should not be null");
     }
 

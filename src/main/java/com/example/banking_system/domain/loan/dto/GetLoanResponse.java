@@ -13,6 +13,7 @@ import java.time.LocalDate;
 public class GetLoanResponse {
     private long id;
     private BigDecimal totalAmount;
+    private BigDecimal baseAmount;
     private BigDecimal leftAmount;
     private LocalDate dueDate;
     private LoanStatus status;

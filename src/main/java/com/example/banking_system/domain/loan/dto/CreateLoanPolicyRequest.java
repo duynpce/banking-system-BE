@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Data
@@ -18,10 +19,10 @@ public class CreateLoanPolicyRequest {
 
     @NotNull(message = "interest rate is required")
     @DecimalMin(value = "0.01", message = "interest rate must be greater than 0")
-    private Double interestRate;
+    private BigDecimal interestRate;
 
     @DecimalMin(value = "0.01", message = "max amount must be greater than 0")
-    private Double maxAmount;
+    private BigDecimal maxAmount;
 
     @NotNull(message = "loan type is required")
     private LoanType loanType;

@@ -23,7 +23,7 @@ public class LoanPolicy {
     private Integer durationMonths;
 
     @Column(name = "interest_rate", nullable = false)
-    private Double interestRate;
+    private BigDecimal interestRate;
 
     @Column(name = "loan_type" , nullable = false)
     @Enumerated(EnumType.STRING)

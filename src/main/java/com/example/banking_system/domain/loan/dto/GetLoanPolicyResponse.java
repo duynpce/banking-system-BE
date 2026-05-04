@@ -13,7 +13,7 @@ import java.time.LocalDate;
 public class GetLoanPolicyResponse {
     private long id;
     private Integer durationMonths;
-    private Double interestRate;
+    private BigDecimal interestRate;
     private LoanType loanType;
     private LocalDate effectiveFrom;
     private LocalDate effectiveTo;
