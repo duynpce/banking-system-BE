@@ -56,7 +56,7 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource (){
         CorsConfiguration config = new CorsConfiguration();
-        String origin = oAuthProperties.getOriginUri();
+        String origin = oAuthProperties.getClientOriginUri();
         config.setAllowedOrigins(List.of(origin));
         config.setAllowCredentials(true);
         config.setAllowedHeaders(List.of("*"));

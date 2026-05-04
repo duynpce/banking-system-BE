@@ -47,7 +47,7 @@ value :
     oidc-user-info-uri: "/oauth2/user-info"
     jwk-set-uri: "/oauth2/jwks"
     logout-uri: "/oauth2/logout"
-    origin-uri: "http://localhost:5173"
+    client-origin-uri: "http://localhost:5173"
     post-basic-secret: "YmFua2luZy1zeXN0ZW0tY2xpZW50OmEtc2VjcmV0"
     auth-server-uri: "http://localhost:8080"
 

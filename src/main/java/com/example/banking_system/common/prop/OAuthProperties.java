@@ -52,7 +52,7 @@ public class OAuthProperties {
     private final String logoutUri;
 
     @NotBlank(message = "origin uri cannot be blank")
-    private final String originUri;
+    private final String clientOriginUri;
 
     @NotBlank(message = "post basic secret cannot be blank")
     private final String postBasicSecret;

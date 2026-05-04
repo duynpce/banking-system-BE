@@ -70,8 +70,8 @@ public class OAuth2AuthorizationServerConfig {
                                 .registeredClientRepository(registeredClientRepository())
                                 .oidc(oidc -> oidc.logoutEndpoint(
                                         logout -> logout.
-                                                logoutResponseHandler((request, response, authentication) -> response.sendRedirect(oAuthProperties.getOriginUri() + "/login?logout=success"))
-                                                .errorResponseHandler((request, response, exception) ->  response.sendRedirect(oAuthProperties.getOriginUri() + "/login?logout=error"))
+                                                logoutResponseHandler((request, response, authentication) -> response.sendRedirect(oAuthProperties.getClientOriginUri() + "/login?logout=success"))
+                                                .errorResponseHandler((request, response, exception) ->  response.sendRedirect(oAuthProperties.getClientOriginUri() + "/login?logout=error"))
 
                                         )
                                 )
@@ -98,7 +98,7 @@ public class OAuth2AuthorizationServerConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage(oAuthProperties.getOriginUri())
+                        .loginPage(oAuthProperties.getClientOriginUri() + "/login")
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl(oAuthProperties.getAuthorizationUri() + "?response_type=code&client_id="
                                 + oAuthProperties.getClientId() + "&scope=" + oAuthProperties.getScopeRead() + " " +
@@ -118,16 +118,16 @@ public class OAuth2AuthorizationServerConfig {
     private AuthenticationFailureHandler customLoginFailureHandler() {
         return (request, response, exception) -> {
             if(exception instanceof BadCredentialsException){
-                response.sendRedirect(oAuthProperties.getOriginUri() +  "/login?error=invalid-credentials");
+                response.sendRedirect(oAuthProperties.getClientOriginUri() +  "/login?error=invalid-credentials");
             }
             else {
-                response.sendRedirect(oAuthProperties.getOriginUri() + "/login?error=authentication-failed");
+                response.sendRedirect(oAuthProperties.getClientOriginUri() + "/login?error=authentication-failed");
             }
         };
     }
 
     AuthenticationEntryPoint authServerAuthenticationEntryPoint() {
-        return (request, response, authException) -> response.sendRedirect(oAuthProperties.getOriginUri() + "/login");
+        return (request, response, authException) -> response.sendRedirect(oAuthProperties.getClientOriginUri() + "/login");
     }
 
     @Bean
