@@ -31,7 +31,7 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: ${APP_ORIGIN_URL}/${OAUTH2_JWK_SET_URI}
+          jwk-set-uri: ${APP_ORIGIN_URL}${OAUTH2_JWK_SET_URI}
 
 server:
   servlet:
@@ -48,7 +48,7 @@ server:
 
 value :
   oauth2:
-    redirect-uri: ${OAUTH2_ORIGIN_URI}/${OAUTH2_REDIRECT_URI}
+    redirect-uri: ${OAUTH2_CLIENT_ORIGIN_URI}${OAUTH2_REDIRECT_URI}
     client-id: ${OAUTH2_CLIENT_ID}
     client-secret: ${OAUTH2_CLIENT_SECRET}
     scope-read: ${OAUTH2_SCOPE_READ}
