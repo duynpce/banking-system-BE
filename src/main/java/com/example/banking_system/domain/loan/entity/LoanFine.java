@@ -1,6 +1,7 @@
 package com.example.banking_system.domain.loan.entity;
 
 import com.example.banking_system.domain.account.entity.Account;
+import com.example.banking_system.domain.loan.constant.LoanFineStatus;
 import com.example.banking_system.domain.loan.constant.LoanFineType;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -29,6 +30,10 @@ public class LoanFine {
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
     private LoanFineType type;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private LoanFineStatus status = LoanFineStatus.UNPAID;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "loan_id", referencedColumnName = "id", nullable = false, updatable = false)
