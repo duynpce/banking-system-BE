@@ -1,19 +1,19 @@
 package com.example.banking_system.card.unit;
 
-import com.example.banking_system.account.entity.Account;
-import com.example.banking_system.account.service.query.AccountQueryService;
+import com.example.banking_system.domain.account.entity.Account;
+import com.example.banking_system.domain.account.entity.PersonalAccount;
+import com.example.banking_system.domain.account.service.query.PersonalAccountQueryService;
 import com.example.banking_system.card.CardTestCases;
-import com.example.banking_system.card.dto.CreatePersonalCardRequest;
-import com.example.banking_system.card.entity.CardPrivilege;
-import com.example.banking_system.card.entity.CardPrivilegeCode;
-import com.example.banking_system.card.entity.PersonalCard;
-import com.example.banking_system.card.repository.PersonalCardRepository;
-import com.example.banking_system.card.service.domain.CardService;
-import com.example.banking_system.card.service.domain.PersonalCardService;
-import com.example.banking_system.card.service.query.CardPrivilegeQueryService;
-import com.example.banking_system.card.validator.PersonalCardValidator;
+import com.example.banking_system.domain.card.dto.CreatePersonalCardRequest;
+import com.example.banking_system.domain.card.entity.CardPrivilege;
+import com.example.banking_system.domain.card.entity.PersonalCard;
+import com.example.banking_system.domain.card.repository.PersonalCardRepository;
+import com.example.banking_system.domain.card.service.domain.CardService;
+import com.example.banking_system.domain.card.service.domain.PersonalCardService;
+import com.example.banking_system.domain.card.service.query.CardPrivilegeQueryService;
+import com.example.banking_system.domain.card.validator.PersonalCardValidator;
 import com.example.banking_system.common.UnitTest;
-import com.example.banking_system.common.exception.ValidationException;
+import com.example.banking_system.common.exception.NotFoundException;
 import com.example.banking_system.common.utility.JwtUtil;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -36,7 +36,7 @@ public class PersonalCardServiceUnitTest extends UnitTest {
     CardService cardService;
 
     @Mock
-    AccountQueryService accountQueryService;
+    PersonalAccountQueryService personalAccountQueryService;
 
     @Mock
     CardPrivilegeQueryService cardPrivilegeQueryService;
@@ -55,21 +55,20 @@ public class PersonalCardServiceUnitTest extends UnitTest {
         Account account = new Account();
         account.setId(1L);
         account.setUsername(username);
+        PersonalAccount personalAccount = new PersonalAccount();
+        personalAccount.setAccount(account);
 
-        CardPrivilegeCode cardPrivilegeCode = new CardPrivilegeCode();
-        cardPrivilegeCode.setCode("STANDARD");
-        CardPrivilege privilege = new CardPrivilege();
-        privilege.setCardPrivilegeCode(cardPrivilegeCode);
 
+        CardPrivilege cardPrivilege = cardTestCases.getCardPrivilegeTestCase();
         CreatePersonalCardRequest request = cardTestCases.getCreatePersonalCardRequestTestCase();
 
         PersonalCard personalCard = new PersonalCard();
 
         when(jwtUtil.getUsername()).thenReturn(username);
-        when(accountQueryService.findByUsername(username)).thenReturn(account);
+        when(personalAccountQueryService.findByUsername(username)).thenReturn(personalAccount);
         doNothing().when(personalCardValidator).validateCreate(account);
         when(cardService.generateCardNumber()).thenReturn(cardNumber);
-        when(cardPrivilegeQueryService.findByPrivilegeCode(request.getPrivilegeCode())).thenReturn(privilege);
+        when(cardPrivilegeQueryService.findByCodeAndAccountTypeAndCardTypeAndIsActive(request.getPrivilegeCode(), request.getAccountType(), request.getType())).thenReturn(cardPrivilege);
         doNothing().when(cardService).updateExpirationDateOnCreate(any());
         when(personalCardRepository.save(any(PersonalCard.class))).thenReturn(personalCard);
 
@@ -78,28 +77,22 @@ public class PersonalCardServiceUnitTest extends UnitTest {
         Assertions.assertEquals(personalCard, createdCard);
         verify(personalCardValidator).validateCreate(account);
         verify(cardService).generateCardNumber();
-        verify(cardPrivilegeQueryService).findByPrivilegeCode(request.getPrivilegeCode());
+        verify(cardPrivilegeQueryService).findByCodeAndAccountTypeAndCardTypeAndIsActive(request.getPrivilegeCode(), request.getAccountType(), request.getType());
         verify(personalCardRepository, times(1)).save(any(PersonalCard.class));
     }
 
     @Test
-    public void createCardFailure_InvalidAccount() {
+    public void createCardFailure_NotFoundAccount() {
         final String username = "username";
-
-        Account account = new Account();
-        account.setId(1L);
-        account.setUsername(username);
 
         CreatePersonalCardRequest request = cardTestCases.getCreatePersonalCardRequestTestCase();
 
         when(jwtUtil.getUsername()).thenReturn(username);
-        when(accountQueryService.findByUsername(username)).thenReturn(account);
-        doThrow(new ValidationException("invalid account")).when(personalCardValidator).validateCreate(account);
+        when(personalAccountQueryService.findByUsername(username)).thenThrow(new NotFoundException("Personal account not found with username: " + username));
 
-        RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> personalCardService.create(request));
+        RuntimeException exception = Assertions.assertThrows(NotFoundException.class, () -> personalCardService.create(request));
 
-        Assertions.assertEquals("invalid account", exception.getMessage());
-        verify(personalCardValidator).validateCreate(account);
+        Assertions.assertEquals("Personal account not found with username: " + username, exception.getMessage());
         verify(cardService, never()).generateCardNumber();
         verify(personalCardRepository, never()).save(any());
     }

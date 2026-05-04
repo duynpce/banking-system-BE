@@ -1,0 +1,374 @@
+package com.example.banking_system.transaction;
+
+import com.example.banking_system.account.AccountTestCases;
+import com.example.banking_system.common.IntegrationTest;
+import com.example.banking_system.common.dto.ResponseDto;
+import com.example.banking_system.common.exception.ValidationException;
+import com.example.banking_system.common.utility.JwtUtil;
+import com.example.banking_system.domain.account.controller.BusinessAccountController;
+import com.example.banking_system.domain.account.controller.PersonalAccountController;
+import com.example.banking_system.domain.account.dto.CreateBusinessAccountRequest;
+import com.example.banking_system.domain.account.dto.CreatePersonalAccountRequest;
+import com.example.banking_system.domain.account.entity.Account;
+import com.example.banking_system.domain.account.service.query.AccountQueryService;
+import com.example.banking_system.domain.transaction.TransactionController;
+import com.example.banking_system.domain.transaction.constant.TransactionReportType;
+import com.example.banking_system.domain.transaction.dto.CreateTransactionRequest;
+import com.example.banking_system.domain.transaction.dto.GetTransactionReport;
+import com.example.banking_system.domain.transaction.dto.GetTransactionResponse;
+import com.example.banking_system.domain.transaction.dto.TransactionFilter;
+import com.example.banking_system.domain.transaction.dto.TransactionReportFilter;
+import com.example.banking_system.domain.transaction.constant.TransactionType;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.context.jdbc.Sql;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
+@Sql(scripts = "/insert-internal-account.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+public class TransactionIntegrationTest extends IntegrationTest {
+
+	private final TransactionTestCases transactionTestCases = TransactionTestCases.getInstance();
+	private final AccountTestCases accountTestCases = AccountTestCases.getInstance();
+
+	@Autowired
+	private TransactionController transactionController;
+
+	@Autowired
+	private PersonalAccountController personalAccountController;
+
+	@Autowired
+	private BusinessAccountController businessAccountController;
+
+	@Autowired
+	private AccountQueryService accountQueryService;
+
+	@MockitoBean
+	private JwtUtil jwtUtil;
+
+	@Test
+	public void createTransactionSuccess() {
+		TransferScenario transferScenario = setupTransferScenario();
+		CreateTransactionRequest request = transferScenario.request();
+		ResponseEntity<ResponseDto<String>> response = transactionController.create(request);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
+		assertNotNull(response.getBody(), "Response body should not be null");
+		assertTrue(response.getBody().isSuccess(), "Response success flag should be true");
+		assertEquals("Transaction created successfully", response.getBody().getMessage(), "Success message should match");
+
+		//because in transaction not commited yet , so this object updated by hibernate (it's like query updated object)
+		assertEquals(transferScenario.receiver().getBalance(), transferScenario.initialBalance().add(request.getTransferredAmount()), "Receiver balance should be increased by transferred amount");
+		assertEquals(transferScenario.sender().getBalance(), transferScenario.initialBalance().subtract(request.getTransferredAmount()), "Sender balance should be decreased by transferred amount");
+
+
+	}
+
+	@Test
+	public void createTransactionFailureValidationError() {
+		setupTransferScenario();
+
+		// create request with  internal account number(not allow to make transaction with)
+		CreateTransactionRequest request = transactionTestCases.getCreateTransferRequest(accountQueryService.getINTERNAL_DEPOSIT_ACCOUNT_NUMBER());
+
+		ValidationException exception = Assertions.assertThrows(
+				ValidationException.class,
+				() -> transactionController.create(request)
+		);
+
+		assertEquals("Invalid receiver account number", exception.getMessage());
+	}
+
+	@Test
+	public void createPaymentTransactionSuccess() {
+		TransferScenario transferScenario = setupTransferScenario();
+		CreateTransactionRequest request = transactionTestCases.getCreatePaymentRequest(transferScenario.receiver().getNumber());
+		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupAll();
+
+		ResponseEntity<ResponseDto<String>> response = transactionController.create(request);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertTrue(response.getBody().isSuccess());
+
+		when(jwtUtil.getUsername()).thenReturn(transferScenario.sender().getUsername());
+		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> getResponse = transactionController.getByFilter(
+				transactionFilter
+		);
+		assertNotNull(getResponse.getBody());
+		GetTransactionResponse result = getResponse.getBody().getData().getFirst();
+
+		assertEquals(request.getType(), result.getType());
+		assertEquals(request.getTransferredAmount(), result.getTransferredAmount());
+		assertEquals(transferScenario.sender().getNumber(), result.getSenderAccountNumber());
+		assertEquals(transferScenario.receiver().getNumber(), result.getReceiverAccountNumber());
+		assertNull(result.getPostedBalance());
+	}
+
+
+
+	@Test
+	public void createDepositTransactionSuccess() {
+		TransferScenario transferScenario = setupTransferScenario();
+		Account account = transferScenario.receiver();
+		Account internalDepositAccount = accountQueryService.getInternalDePositAccount();
+		BigDecimal initialAccountBalance = account.getBalance();
+		BigDecimal initialInternalBalance = internalDepositAccount.getBalance();
+		CreateTransactionRequest request = transactionTestCases.getCreateDepositRequest(account.getNumber());
+
+		//mock internal account logged in
+		Jwt jwt = new Jwt(
+				"test-token",
+				Instant.now(),
+				Instant.now().plusSeconds(3600),
+				Map.of("alg", "none"),
+				Map.of(
+						"account_id", internalDepositAccount.getId(),
+						"account_number", internalDepositAccount.getNumber()
+				)
+		);
+		when(jwtUtil.getJwtClaims()).thenReturn(jwt);
+
+		ResponseEntity<ResponseDto<String>> response = transactionController.create(request);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertTrue(response.getBody().isSuccess());
+		assertEquals(initialAccountBalance.add(request.getTransferredAmount()), account.getBalance());
+		assertEquals(initialInternalBalance.subtract(request.getTransferredAmount()), internalDepositAccount.getBalance());
+	}
+
+	@Test
+	public void createWithdrawalTransactionSuccess() {
+		TransferScenario transferScenario = setupTransferScenario();
+		Account account = transferScenario.sender();
+		Account internalWithdrawalAccount = accountQueryService.getInternalWithdrawalAccount();
+		BigDecimal initialAccountBalance = account.getBalance();
+		BigDecimal initialInternalBalance = internalWithdrawalAccount.getBalance();
+		CreateTransactionRequest request = transactionTestCases.getCreateWithdrawalRequest(transferScenario.receiver().getNumber());
+
+		ResponseEntity<ResponseDto<String>> response = transactionController.create(request);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertTrue(response.getBody().isSuccess());
+		assertEquals(initialAccountBalance.subtract(request.getTransferredAmount()), account.getBalance());
+		assertEquals(initialInternalBalance.add(request.getTransferredAmount()), internalWithdrawalAccount.getBalance());
+	}
+
+	@Test
+	public void getByFilterAllSuccess() {
+		TransferScenario transferScenario = setupTransferScenario();
+		CreateTransactionRequest request = transferScenario.request();
+		transactionController.create(request);
+		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupAll();
+
+		when(jwtUtil.getUsername()).thenReturn(transferScenario.sender().getUsername());
+		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> response = transactionController.getByFilter(
+				transactionFilter
+		);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
+		assertNotNull(response.getBody(), "Response body should not be null");
+		assertTrue(response.getBody().isSuccess(), "Response success flag should be true");
+		assertNotNull(response.getBody().getData(), "Response data should not be null");
+		assertEquals(1, response.getBody().getData().size(), "Response data size should be 1");
+
+		GetTransactionResponse result   = response.getBody().getData().getFirst();
+
+		assertEquals(request.getTransferredAmount(), result.getTransferredAmount(), "Transferred amount should match");
+		assertEquals(request.getDescription(), result.getDescription(), "Description should match");
+		assertEquals(transferScenario.sender().getNumber(), result.getSenderAccountNumber(), "Sender account number should match");
+		assertEquals(transferScenario.receiver().getNumber(), result.getReceiverAccountNumber(), "Receiver account number should match");
+		assertEquals(transferScenario.initialBalance().subtract(request.getTransferredAmount()), result.getPostedBalance(), "Posted balance should match sender balance after transfer");
+	}
+
+	@Test
+	public void getByFilterIncomeSuccess() {
+		TransferScenario transferScenario = setupTransferScenario();
+		CreateTransactionRequest request = transferScenario.request();
+		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupIncome();
+		transactionController.create(request);
+
+		when(jwtUtil.getUsername()).thenReturn(transferScenario.receiver().getUsername());
+		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> response = transactionController.getByFilter(
+				transactionFilter
+		);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
+		assertNotNull(response.getBody(), "Response body should not be null");
+		assertTrue(response.getBody().isSuccess(), "Response success flag should be true");
+		assertNotNull(response.getBody().getData(), "Response data should not be null");
+		assertFalse(response.getBody().getData().isEmpty(), "Response data should not be empty");
+
+		GetTransactionResponse result = response.getBody().getData().getFirst();
+		assertEquals(request.getTransferredAmount(), result.getTransferredAmount(), "Transferred amount should match");
+		assertEquals(request.getDescription(), result.getDescription(), "Description should match");
+		assertEquals(transferScenario.sender().getNumber(), result.getSenderAccountNumber(), "Sender account number should match");
+		assertEquals(transferScenario.receiver().getNumber(), result.getReceiverAccountNumber(), "Receiver account number should match");
+		assertEquals(transferScenario.initialBalance().add(request.getTransferredAmount()), result.getPostedBalance(), "Posted balance should match receiver balance after transfer");
+	}
+
+	@Test
+	public void getByFilterOutcomeSuccess() {
+		TransferScenario transferScenario = setupTransferScenario();
+		CreateTransactionRequest request = transferScenario.request();
+		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupOutcome();
+		transactionController.create(request);
+
+		when(jwtUtil.getUsername()).thenReturn(transferScenario.sender().getUsername());
+		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> response = transactionController.getByFilter(
+				transactionFilter
+		);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
+		assertNotNull(response.getBody(), "Response body should not be null");
+		assertTrue(response.getBody().isSuccess(), "Response success flag should be true");
+		assertNotNull(response.getBody().getData(), "Response data should not be null");
+		assertFalse(response.getBody().getData().isEmpty(), "Response data should not be empty");
+
+		GetTransactionResponse result = response.getBody().getData().getFirst();
+		assertEquals(transferScenario.sender().getNumber(), result.getSenderAccountNumber(), "Sender account number should match");
+		assertEquals(transferScenario.receiver().getNumber(), result.getReceiverAccountNumber(), "Receiver account number should match");
+		assertEquals(transferScenario.initialBalance().subtract(request.getTransferredAmount()), result.getPostedBalance(), "Posted balance should match sender balance after transfer");
+	}
+
+	@Test
+	public void getByFilterAllIncludeWithdrawalWhenReceiverIsNull() {
+		TransferScenario transferScenario = setupTransferScenario();
+		CreateTransactionRequest withdrawalRequest = transactionTestCases.getCreateWithdrawalRequest(transferScenario.receiver().getNumber());
+		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupAll();
+
+		transactionController.create(withdrawalRequest);
+
+		when(jwtUtil.getUsername()).thenReturn(transferScenario.sender().getUsername());
+		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> response = transactionController.getByFilter(transactionFilter);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertNotNull(response.getBody().getData());
+		assertTrue(
+				response.getBody().getData().stream().anyMatch(item -> item.getType() == TransactionType.WITHDRAWAL),
+				"ALL filter should include withdrawal transactions"
+		);
+	}
+
+	@Test
+	public void getByFilterAllIncludeDepositWhenSenderIsNull() {
+		TransferScenario transferScenario = setupTransferScenario();
+		TransactionFilter transactionFilter = transactionTestCases.getTransactionFilterTransactionGroupAll();
+		Account receiver = transferScenario.receiver();
+		Account internalDepositAccount = accountQueryService.getInternalDePositAccount();
+
+		Jwt internalJwt = new Jwt(
+				"test-token",
+				Instant.now(),
+				Instant.now().plusSeconds(3600),
+				Map.of("alg", "none"),
+				Map.of(
+						"account_id", internalDepositAccount.getId(),
+						"account_number", internalDepositAccount.getNumber()
+				)
+		);
+		when(jwtUtil.getJwtClaims()).thenReturn(internalJwt);
+
+		CreateTransactionRequest depositRequest = transactionTestCases.getCreateDepositRequest(receiver.getNumber());
+		transactionController.create(depositRequest);
+
+		when(jwtUtil.getUsername()).thenReturn(receiver.getUsername());
+		ResponseEntity<ResponseDto<List<GetTransactionResponse>>> response = transactionController.getByFilter(transactionFilter);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertNotNull(response.getBody().getData());
+		assertTrue(
+				response.getBody().getData().stream().anyMatch(item -> item.getType() == TransactionType.DEPOSIT),
+				"ALL filter should include deposit transactions"
+		);
+	}
+
+	@Test
+	public void getReportsYearSuccess() {
+		TransferScenario transferScenario = setupTransferScenario();
+		transactionController.create(transferScenario.request());
+
+		TransactionReportFilter filter = new TransactionReportFilter();
+		filter.setReportType(TransactionReportType.YEAR);
+		filter.setYear(LocalDate.now().getYear());
+
+		ResponseEntity<ResponseDto<List<GetTransactionReport>>> response = transactionController.getReports(filter);
+
+		assertEquals(HttpStatus.OK, response.getStatusCode());
+		assertNotNull(response.getBody());
+		assertNotNull(response.getBody().getData());
+		assertEquals(12, response.getBody().getData().size());
+	}
+
+	@Test
+	public void getReportsYearFailureValidationError() {
+		TransactionReportFilter filter = new TransactionReportFilter();
+		filter.setReportType(TransactionReportType.YEAR);
+
+		ValidationException exception = Assertions.assertThrows(
+				ValidationException.class,
+				() -> transactionController.getReports(filter)
+		);
+
+		assertEquals("year is required for year report", exception.getMessage());
+	}
+
+	private TransferScenario setupTransferScenario() {
+		CreatePersonalAccountRequest createPersonalAccountRequest = accountTestCases.getCreatePersonalAccountRequestTestCase();
+		CreateBusinessAccountRequest createBusinessAccountRequest = accountTestCases.getCreateBusinessAccountRequestTestCase();
+
+		personalAccountController.create(createPersonalAccountRequest);
+		businessAccountController.create(createBusinessAccountRequest);
+
+		Account sender = accountQueryService.findByUsername(createBusinessAccountRequest.getUsername());
+		Account receiver = accountQueryService.findByUsername(createPersonalAccountRequest.getUsername());
+
+		BigDecimal initialBalance = new BigDecimal("500.00");
+		sender.setBalance(initialBalance);
+		receiver.setBalance(initialBalance);
+
+		accountQueryService.save(receiver);
+		accountQueryService.save(sender);
+
+		Jwt jwt = new Jwt(
+				"test-token",
+				Instant.now(),
+				Instant.now().plusSeconds(3600),
+				Map.of("alg", "none"),
+				Map.of(
+						"account_id", sender.getId(),
+						"account_number", sender.getNumber()
+				)
+		);
+		when(jwtUtil.getJwtClaims()).thenReturn(jwt);
+
+		CreateTransactionRequest request = transactionTestCases.getCreateTransferRequest(receiver.getNumber());
+		return new TransferScenario(sender, receiver, initialBalance, request);
+	}
+
+	private record TransferScenario(
+			Account sender,
+			Account receiver,
+			BigDecimal initialBalance,
+			CreateTransactionRequest request
+	) {
+	}
+
+
+}

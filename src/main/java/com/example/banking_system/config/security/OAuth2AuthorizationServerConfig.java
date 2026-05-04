@@ -1,6 +1,8 @@
 package com.example.banking_system.config.security;
 
-import com.example.banking_system.common.OAuthProperties;
+import com.example.banking_system.common.prop.OAuthProperties;
+import com.example.banking_system.domain.account.entity.Account;
+import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
@@ -10,7 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,23 +23,24 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.InMemoryOAuth2AuthorizationService;
 import org.springframework.security.oauth2.server.authorization.OAuth2AuthorizationService;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
 import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
+import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
+import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
-import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
-import java.util.List;
 import java.util.UUID;
 
 @Configuration
@@ -46,9 +48,9 @@ import java.util.UUID;
 public class OAuth2AuthorizationServerConfig {
 
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationEntryPoint authenticationEntryPoint;
     private final OAuthProperties oAuthProperties;
     private final CorsConfigurationSource corsConfigurationSource;
+    private final AccountQueryService accountQueryService;
 
     // Security Filter Chain for OAuth2 Authorization Server, used to issue tokens
     @Bean
@@ -60,15 +62,22 @@ public class OAuth2AuthorizationServerConfig {
         http
                 .securityMatcher(authorizationServerConfigurer.getEndpointsMatcher())
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
+                        .requestMatchers(oAuthProperties.getLogoutUri()).permitAll()
                         .anyRequest().authenticated()
                 )
                 .with(authorizationServerConfigurer, (authorizationServer) ->
                         authorizationServer
                                 .registeredClientRepository(registeredClientRepository())
-                                .oidc(Customizer.withDefaults())
+                                .oidc(oidc -> oidc.logoutEndpoint(
+                                        logout -> logout.
+                                                logoutResponseHandler((request, response, authentication) -> response.sendRedirect(oAuthProperties.getClientOriginUri() + "/login?logout=success"))
+                                                .errorResponseHandler((request, response, exception) ->  response.sendRedirect(oAuthProperties.getClientOriginUri() + "/login?logout=error"))
+
+                                        )
+                                )
                 )
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(authenticationEntryPoint)
+                        .authenticationEntryPoint(authServerAuthenticationEntryPoint())
                 )
                 .csrf(AbstractHttpConfigurer::disable) //temp
                 .cors(cors -> cors.configurationSource(corsConfigurationSource));
@@ -89,15 +98,18 @@ public class OAuth2AuthorizationServerConfig {
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
-                        .loginPage(oAuthProperties.getOriginUri())
+                        .loginPage(oAuthProperties.getClientOriginUri() + "/login")
                         .loginProcessingUrl("/login")
                         .defaultSuccessUrl(oAuthProperties.getAuthorizationUri() + "?response_type=code&client_id="
                                 + oAuthProperties.getClientId() + "&scope=" + oAuthProperties.getScopeRead() + " " +
-                                oAuthProperties.getScopeWrite() + "&redirect_uri=" + oAuthProperties.getRedirectUri())
+                                oAuthProperties.getScopeWrite() + " openid"+ "&redirect_uri=" + oAuthProperties.getRedirectUri())
                         .failureHandler(customLoginFailureHandler())
                         .usernameParameter("username")
                         .passwordParameter("password")
                         .permitAll()
+                )
+                .exceptionHandling(ex -> ex
+                        .authenticationEntryPoint(authServerAuthenticationEntryPoint())
                 );
 
         return http.build();
@@ -106,15 +118,17 @@ public class OAuth2AuthorizationServerConfig {
     private AuthenticationFailureHandler customLoginFailureHandler() {
         return (request, response, exception) -> {
             if(exception instanceof BadCredentialsException){
-                response.sendRedirect(oAuthProperties.getOriginUri() +  "/login?error=invalid-credentials");
+                response.sendRedirect(oAuthProperties.getClientOriginUri() +  "/login?error=invalid-credentials");
             }
             else {
-                response.sendRedirect(oAuthProperties.getOriginUri() + "/login?error=authentication-failed");
+                response.sendRedirect(oAuthProperties.getClientOriginUri() + "/login?error=authentication-failed");
             }
         };
     }
 
-
+    AuthenticationEntryPoint authServerAuthenticationEntryPoint() {
+        return (request, response, authException) -> response.sendRedirect(oAuthProperties.getClientOriginUri() + "/login");
+    }
 
     @Bean
     public RegisteredClientRepository registeredClientRepository() {
@@ -131,11 +145,27 @@ public class OAuth2AuthorizationServerConfig {
                 .tokenSettings(TokenSettings.builder()
                         .accessTokenTimeToLive(Duration.ofMinutes(15))
                         .refreshTokenTimeToLive(Duration.ofDays(1))
-                        .reuseRefreshTokens(false)
+                        .reuseRefreshTokens(true)
                         .build())
                 .build();
 
         return new InMemoryRegisteredClientRepository(client);
+    }
+
+    @Bean
+    public OAuth2TokenCustomizer<JwtEncodingContext> jwtTokenCustomizer() {
+        return context -> {
+            if (OAuth2TokenType.ACCESS_TOKEN.equals(context.getTokenType())) {
+                context.getClaims().claims((claims) -> {
+                    String username = context.getPrincipal().getName();
+                    Account account = accountQueryService.findByUsername(username);
+
+                    claims.put("username", username);
+                    claims.put("account_number", account.getNumber());
+                    claims.put("account_id", account.getId());
+                });
+            }
+        };
     }
 
     @Bean
@@ -153,7 +183,7 @@ public class OAuth2AuthorizationServerConfig {
                 .tokenRevocationEndpoint(oAuthProperties.getTokenRevocationUri())
                 .jwkSetEndpoint(oAuthProperties.getJwkSetUri())
                 .oidcLogoutEndpoint(oAuthProperties.getLogoutUri())
-                .oidcUserInfoEndpoint(oAuthProperties.getOicdUserInfoUri())
+                .oidcUserInfoEndpoint(oAuthProperties.getOidcUserInfoUri())
                 .build();
     }
 
@@ -171,7 +201,7 @@ public class OAuth2AuthorizationServerConfig {
 
     @Bean
     public JwtDecoder jwtDecoder() {
-            return  NimbusJwtDecoder.withJwkSetUri(oAuthProperties.getJwkSetUri()).build();
+            return  NimbusJwtDecoder.withJwkSetUri(oAuthProperties.getAuthServerUri() + oAuthProperties.getJwkSetUri()).build();
     }
 
     private static RSAKey generateRsa() {

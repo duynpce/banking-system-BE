@@ -1,23 +1,25 @@
 package com.example.banking_system.card.integration;
 
 import com.example.banking_system.account.AccountTestCases;
-import com.example.banking_system.account.controller.AccountController;
-import com.example.banking_system.account.controller.BusinessAccountController;
-import com.example.banking_system.account.controller.PersonalAccountController;
-import com.example.banking_system.account.dto.CreateBusinessAccountRequest;
-import com.example.banking_system.account.dto.CreatePersonalAccountRequest;
+import com.example.banking_system.domain.account.constant.AccountType;
+import com.example.banking_system.domain.account.controller.AccountController;
+import com.example.banking_system.domain.account.controller.BusinessAccountController;
+import com.example.banking_system.domain.account.controller.PersonalAccountController;
+import com.example.banking_system.domain.account.dto.CreateBusinessAccountRequest;
+import com.example.banking_system.domain.account.dto.CreatePersonalAccountRequest;
 import com.example.banking_system.card.CardTestCases;
-import com.example.banking_system.card.controller.BusinessCardController;
-import com.example.banking_system.card.controller.CardController;
-import com.example.banking_system.card.controller.CardPrivilegeController;
-import com.example.banking_system.card.controller.PersonalCardController;
-import com.example.banking_system.card.dto.CreateBusinessCardRequest;
-import com.example.banking_system.card.dto.CreatePersonalCardRequest;
-import com.example.banking_system.card.dto.GetCardResponse;
-import com.example.banking_system.card.mapper.CardMapper;
-import com.example.banking_system.card.service.query.CardPrivilegeCodeQueryService;
-import com.example.banking_system.card.service.query.CardPrivilegeQueryService;
-import com.example.banking_system.card.service.query.CardQueryService;
+import com.example.banking_system.domain.card.controller.BusinessCardController;
+import com.example.banking_system.domain.card.controller.CardController;
+import com.example.banking_system.domain.card.controller.CardPrivilegeController;
+import com.example.banking_system.domain.card.controller.PersonalCardController;
+import com.example.banking_system.domain.card.constant.CardType;
+import com.example.banking_system.domain.card.dto.CreateCardPrivilegeRequest;
+import com.example.banking_system.domain.card.dto.CreateBusinessCardRequest;
+import com.example.banking_system.domain.card.dto.CreatePersonalCardRequest;
+import com.example.banking_system.domain.card.dto.GetCardResponse;
+import com.example.banking_system.common.dto.ResponseDto;
+import com.example.banking_system.domain.card.service.query.CardPrivilegeQueryService;
+import com.example.banking_system.domain.card.service.query.CardQueryService;
 import com.example.banking_system.common.IntegrationTest;
 import com.example.banking_system.common.exception.ForbiddenException;
 import com.example.banking_system.common.exception.NotFoundException;
@@ -69,9 +71,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
     private CardPrivilegeController cardPrivilegeController;
 
     @Autowired
-    private CardPrivilegeCodeQueryService cardPrivilegeCodeQueryService;
-
-    @Autowired
     private CardPrivilegeQueryService cardPrivilegeQueryService;
 
     @MockitoBean
@@ -82,7 +81,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         //set up
         CreateBusinessAccountRequest accountRequest = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(accountRequest);
-        cardPrivilegeCodeQueryService.save(cardTestCases.getCardPrivilegeCodeTestCase());
         cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
 
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
@@ -92,19 +90,20 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         businessCardController.create(cardRequest);
 
         // Get all cards
-        ResponseEntity<List<? extends GetCardResponse>> response = cardController.getAllFromByJwt();
+        ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> response = cardController.getAllFromByJwt();
+        ResponseDto<List<? extends GetCardResponse>> responseDto = response.getBody();
+        List<? extends GetCardResponse> cardList = responseDto != null ? responseDto.getData() : null;
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertNotNull(response.getBody(), "Response body should not be null");
-        assertFalse(response.getBody().isEmpty(), "Card list should not be empty");
+        assertNotNull(responseDto, "Response body should not be null");
+        assertTrue(responseDto.isSuccess(), "Response success flag should be true");
+        assertNotNull(cardList, "Card list should not be null");
+        assertFalse(cardList.isEmpty(), "Card list should not be empty");
 
         // Clean up
-        cardController.delete(response.getBody().getFirst().getId());
+        cardController.delete(cardList.getFirst().getId());
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
-        accountController.delete();
-
-        cardPrivilegeQueryService.deleteByPrivilegeCode(cardRequest.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCode(cardRequest.getPrivilegeCode());
+        cleanUpCardPrivilege(cardRequest.getPrivilegeCode(), cardRequest.getAccountType(), cardRequest.getType());
     }
 
     @Test
@@ -121,8 +120,9 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         //set up
         CreatePersonalAccountRequest accountRequest = accountTestCases.getCreatePersonalAccountRequestTestCase();
         personalAccountController.create(accountRequest);
-        cardPrivilegeCodeQueryService.save(cardTestCases.getCardPrivilegeCodeTestCase());
-        cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
+        CreateCardPrivilegeRequest createCardPrivilegeRequest = cardTestCases.getCreateCardPrivilegeRequestTestCase();
+        createCardPrivilegeRequest.setAccountType(AccountType.PERSONAL);
+        cardPrivilegeController.create(createCardPrivilegeRequest);
 
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
 
@@ -131,25 +131,29 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         personalCardController.create(cardRequest);
 
         // Get all cards to retrieve the card ID
-        ResponseEntity<List<? extends GetCardResponse>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseDto<List<? extends GetCardResponse>> allCardsDto = allCardsResponse.getBody();
+        List<? extends GetCardResponse> allCards = allCardsDto != null ? allCardsDto.getData() : null;
         assertNotNull(allCardsResponse, "Response should not be null");
-        assertNotNull(allCardsResponse.getBody(), "Response body should not be null");
-        long cardId = allCardsResponse.getBody().getFirst().getId();
+        assertNotNull(allCardsDto, "Response body should not be null");
+        assertTrue(allCardsDto.isSuccess(), "Response success flag should be true");
+        assertNotNull(allCards, "Card list should not be null");
+        long cardId = allCards.getFirst().getId();
 
         // Get card by ID
-        ResponseEntity<GetCardResponse> response = cardController.getById(cardId);
+        ResponseEntity<ResponseDto<GetCardResponse>> response = cardController.getById(cardId);
+        ResponseDto<GetCardResponse> responseDto = response.getBody();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertNotNull(response.getBody(), "Response body should not be null");
-        assertEquals(cardId, response.getBody().getId(), "Card ID should match");
+        assertNotNull(responseDto, "Response body should not be null");
+        assertTrue(responseDto.isSuccess(), "Response success flag should be true");
+        assertNotNull(responseDto.getData(), "Card DTO should not be null");
+        assertEquals(cardId, responseDto.getData().getId(), "Card ID should match");
 
         // Clean up
         cardController.delete(cardId);
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
-        accountController.delete();
-
-        cardPrivilegeQueryService.deleteByPrivilegeCode(cardRequest.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCode(cardRequest.getPrivilegeCode());
+        cleanUpCardPrivilege(cardRequest.getPrivilegeCode(), cardRequest.getAccountType(), cardRequest.getType());
     }
 
     @Test
@@ -157,7 +161,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         //set up
         CreateBusinessAccountRequest account1Request = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(account1Request);
-        cardPrivilegeCodeQueryService.save(cardTestCases.getCardPrivilegeCodeTestCase());
         cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
 
         when(jwtUtil.getUsername()).thenReturn(account1Request.getUsername());
@@ -165,10 +168,14 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         CreateBusinessCardRequest card1Request = cardTestCases.getCreateBusinessCardRequestTestCase();
         businessCardController.create(card1Request);
 
-        ResponseEntity<List<? extends GetCardResponse>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseDto<List<? extends GetCardResponse>> allCardsDto = allCardsResponse.getBody();
+        List<? extends GetCardResponse> allCards = allCardsDto != null ? allCardsDto.getData() : null;
         assertNotNull(allCardsResponse, "Response should not be null");
-        assertNotNull(allCardsResponse.getBody(), "Response body should not be null");
-        long cardId = allCardsResponse.getBody().getFirst().getId();
+        assertNotNull(allCardsDto, "Response body should not be null");
+        assertTrue(allCardsDto.isSuccess(), "Response success flag should be true");
+        assertNotNull(allCards, "Card list should not be null");
+        long cardId = allCards.getFirst().getId();
 
         // Create second account
         CreatePersonalAccountRequest account2Request = accountTestCases.getCreatePersonalAccountRequestTestCase();
@@ -192,10 +199,7 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         when(jwtUtil.getUsername()).thenReturn(account2Request.getUsername());
-        accountController.delete();
-
-        cardPrivilegeQueryService.deleteByPrivilegeCode(card1Request.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCode(card1Request.getPrivilegeCode());
+        cleanUpCardPrivilege(card1Request.getPrivilegeCode(), card1Request.getAccountType(), card1Request.getType());
     }
 
     @Test
@@ -203,7 +207,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         // set up
         CreateBusinessAccountRequest accountRequest = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(accountRequest);
-        cardPrivilegeCodeQueryService.save(cardTestCases.getCardPrivilegeCodeTestCase());
         cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
 
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
@@ -212,15 +215,19 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         CreateBusinessCardRequest cardRequest = cardTestCases.getCreateBusinessCardRequestTestCase();
         businessCardController.create(cardRequest);
 
-        ResponseEntity<List<? extends GetCardResponse>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseDto<List<? extends GetCardResponse>> allCardsDto = allCardsResponse.getBody();
+        List<? extends GetCardResponse> allCards = allCardsDto != null ? allCardsDto.getData() : null;
         assertNotNull(allCardsResponse, "Response should not be null");
-        assertNotNull(allCardsResponse.getBody(), "Response body should not be null");
-        long cardId = allCardsResponse.getBody().getFirst().getId();
+        assertNotNull(allCardsDto, "Response body should not be null");
+        assertTrue(allCardsDto.isSuccess(), "Response success flag should be true");
+        assertNotNull(allCards, "Card list should not be null");
+        long cardId = allCards.getFirst().getId();
 
         // Delete card
-        ResponseEntity<GetCardResponse> response = cardController.delete(cardId);
+        ResponseEntity<?> response = cardController.delete(cardId);
 
-        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode(), "Response status should be NO_CONTENT");
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode(), "Response status should be OK");
 
         Assertions.assertThrows(NotFoundException.class,
             () -> cardQueryService.findById(cardId),
@@ -228,10 +235,8 @@ public class CardControllerIntegrationTest extends IntegrationTest {
 
         // Clean up account
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
-        accountController.delete();
 
-        cardPrivilegeQueryService.deleteByPrivilegeCode(cardRequest.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCode(cardRequest.getPrivilegeCode());
+        cleanUpCardPrivilege(cardRequest.getPrivilegeCode(), cardRequest.getAccountType(), cardRequest.getType());
     }
 
     @Test
@@ -240,7 +245,6 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         CreateBusinessAccountRequest account1Request = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(account1Request);
 
-        cardPrivilegeCodeQueryService.save(cardTestCases.getCardPrivilegeCodeTestCase());
         cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
 
         when(jwtUtil.getUsername()).thenReturn(account1Request.getUsername());
@@ -248,10 +252,14 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         CreateBusinessCardRequest card1Request = cardTestCases.getCreateBusinessCardRequestTestCase();
         businessCardController.create(card1Request);
 
-        ResponseEntity<List<? extends GetCardResponse>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseEntity<ResponseDto<List<? extends GetCardResponse>>> allCardsResponse = cardController.getAllFromByJwt();
+        ResponseDto<List<? extends GetCardResponse>> allCardsDto = allCardsResponse.getBody();
+        List<? extends GetCardResponse> allCards = allCardsDto != null ? allCardsDto.getData() : null;
         assertNotNull(allCardsResponse, "Response should not be null");
-        assertNotNull(allCardsResponse.getBody(), "Response body should not be null");
-        long cardId = allCardsResponse.getBody().getFirst().getId();
+        assertNotNull(allCardsDto, "Response body should not be null");
+        assertTrue(allCardsDto.isSuccess(), "Response success flag should be true");
+        assertNotNull(allCards, "Card list should not be null");
+        long cardId = allCards.getFirst().getId();
 
 
         CreatePersonalAccountRequest account2Request = accountTestCases.getCreatePersonalAccountRequestTestCase();
@@ -275,10 +283,14 @@ public class CardControllerIntegrationTest extends IntegrationTest {
         accountController.delete();
 
         when(jwtUtil.getUsername()).thenReturn(account2Request.getUsername());
+
+
+        cleanUpCardPrivilege(card1Request.getPrivilegeCode(), card1Request.getAccountType(), card1Request.getType());
+
+    }
+
+    public void cleanUpCardPrivilege(String code, AccountType accountType, CardType cardType) {
         accountController.delete();
-
-        cardPrivilegeQueryService.deleteByPrivilegeCode(card1Request.getPrivilegeCode());
-        cardPrivilegeCodeQueryService.deleteByCode(card1Request.getPrivilegeCode());
-
+        cardPrivilegeQueryService.deleteByPrivilegeCodeAndAccountTypeAndCardType(code, accountType, cardType);
     }
 }

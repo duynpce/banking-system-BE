@@ -1,19 +1,30 @@
 package com.example.banking_system.account;
 
-import com.example.banking_system.account.constant.Gender;
-import com.example.banking_system.account.dto.*;
-import com.example.banking_system.account.entity.BusinessAccount;
-import com.example.banking_system.account.entity.GovernmentAccount;
-import com.example.banking_system.account.entity.PersonalAccount;
+import com.example.banking_system.domain.account.constant.Gender;
+import com.example.banking_system.domain.account.dto.*;
+import com.example.banking_system.domain.account.entity.Account;
+import com.example.banking_system.domain.account.entity.BusinessAccount;
+import com.example.banking_system.domain.account.entity.GovernmentAccount;
+import com.example.banking_system.domain.account.entity.PersonalAccount;
 import lombok.Getter;
 
 import java.time.LocalDate;
 
 @Getter
 public class AccountTestCases {
-    private final BusinessAccount businessAccountTestCase = new BusinessAccount("username", "password", "email", "phoneNumber", "address", "OrganizationName", "TaxIdNumber");
-    private final PersonalAccount personalAccountTestCase = new PersonalAccount("username", "password", "email", "phoneNumber", "address", Gender.FEMALE,"fullName", LocalDate.now(), "idCardNumber");
-    private final GovernmentAccount governmentAccountTestCase = new GovernmentAccount("username", "password", "email", "phoneNumber", "address", "governmentDepartment");
+    private  BusinessAccount businessAccountTestCase = new BusinessAccount("username1", "Password123@", "email1@gmail.com", "0123456789", "address", "OrganizationName", "0123456789");
+    private  PersonalAccount personalAccountTestCase = new PersonalAccount("username2", "Password123@", "email2@gmail.com", "1234567890", "address", Gender.FEMALE,"fullName", LocalDate.now().minusYears(20) , "0123456789");
+    private  GovernmentAccount governmentAccountTestCase = new GovernmentAccount("username3", "Password123@", "email3@gmail.com", "2345678901", "address", "governmentDepartment");
+
+    {
+        businessAccountTestCase.getAccount().setId(1L);
+        personalAccountTestCase.getAccount().setId(2L);
+        governmentAccountTestCase.getAccount().setId(3L);
+
+        businessAccountTestCase.getAccount().setNumber("012345678901");
+        personalAccountTestCase.getAccount().setNumber("012345678902");
+        governmentAccountTestCase.getAccount().setNumber("012345678903");
+    }
 
 
     private static AccountTestCases instance;
@@ -28,43 +39,46 @@ public class AccountTestCases {
 
     public CreateBusinessAccountRequest getCreateBusinessAccountRequestTestCase() {
         CreateBusinessAccountRequest request = new CreateBusinessAccountRequest();
-        fillCreateAccountRequest(request);
+        request.setUsername("username2");
+        request.setPassword("password");
+        request.setEmail("email2@gmail.com");
+        request.setPhoneNumber("2123456789");
+        request.setAddress("address");
         request.setOrganizationName("OrganizationName");
-        request.setTaxIdNumber("TaxIdNumber");
+        request.setTaxIdNumber("0123456789");
         return request;
     }
 
     public CreateGovernmentAccountRequest getCreateGovernmentAccountRequestTestCase() {
         CreateGovernmentAccountRequest request = new CreateGovernmentAccountRequest();
-        fillCreateAccountRequest(request);
+        request.setUsername("username3");
+        request.setPassword("password");
+        request.setEmail("email3@gmail.com");
+        request.setPhoneNumber("3123456789");
+        request.setAddress("address");
         request.setGovernmentDepartment("governmentDepartment");
         return request;
     }
 
     public CreatePersonalAccountRequest getCreatePersonalAccountRequestTestCase() {
         CreatePersonalAccountRequest request = new CreatePersonalAccountRequest();
-        fillCreateAccountRequest(request);
+        request.setUsername("username1");
+        request.setPassword("password");
+        request.setEmail("email1@gmail.com");
+        request.setPhoneNumber("1123456789");
+        request.setAddress("address");
         request.setFullName("fullName");
-        request.setDateOfBirth(LocalDate.now());
-        request.setIdCardNumber("idCardNumber");
+        request.setDateOfBirth(LocalDate.now().minusYears(20));
+        request.setIdCardNumber("0123456789");
         request.setGender(Gender.UNKNOWN);
         return request;
     }
-
-    private void fillCreateAccountRequest(CreateAccountRequest request) {
-        request.setUsername("username");
-        request.setPassword("password");
-        request.setEmail("email@gmail.com");
-        request.setPhoneNumber("phoneNumber");
-        request.setAddress("address");
-    }
-
 
     public UpdateBusinessAccountRequest getUpdateBusinessAccountRequestTestCase() {
         UpdateBusinessAccountRequest request = new UpdateBusinessAccountRequest();
         fillUpdateAccountRequest(request);
         request.setOrganizationName("newOrganizationName");
-        request.setTaxIdNumber("newTaxIdNumber");
+        request.setTaxIdNumber("01234567890");
         return request;
     }
 
@@ -79,14 +93,14 @@ public class AccountTestCases {
         UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();
         fillUpdateAccountRequest(request);
         request.setFullName("newFullName");
-        request.setIdCardNumber("newIdCardNumber");
-        request.setDateOfBirth(LocalDate.now());
+        request.setIdCardNumber("0987654321");
+        request.setDateOfBirth(LocalDate.now().minusYears(21));
         return request;
     }
 
     private void fillUpdateAccountRequest(UpdateAccountRequest request) {
         request.setEmail("newEmail@gmail.com");
-        request.setPhoneNumber("newPhoneNumber");
+        request.setPhoneNumber("0987654321");
         request.setAddress("newAddress");
     }
     

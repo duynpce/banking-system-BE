@@ -1,21 +1,24 @@
 package com.example.banking_system.account.unit;
 
 import com.example.banking_system.account.AccountTestCases;
-import com.example.banking_system.account.service.domain.GovernmentAccountService;
-import com.example.banking_system.account.service.query.GovernmentAccountQueryService;
+import com.example.banking_system.domain.account.service.domain.AccountService;
+import com.example.banking_system.domain.account.service.domain.GovernmentAccountService;
+import com.example.banking_system.domain.account.service.query.GovernmentAccountQueryService;
 import com.example.banking_system.common.UnitTest;
-import com.example.banking_system.account.dto.CreateGovernmentAccountRequest;
-import com.example.banking_system.account.dto.UpdateGovernmentAccountRequest;
-import com.example.banking_system.account.entity.GovernmentAccount;
+import com.example.banking_system.domain.account.dto.CreateGovernmentAccountRequest;
+import com.example.banking_system.domain.account.dto.UpdateGovernmentAccountRequest;
+import com.example.banking_system.domain.account.entity.GovernmentAccount;
 import com.example.banking_system.common.exception.ValidationException;
-import com.example.banking_system.account.mapper.AccountMapper;
+import com.example.banking_system.domain.account.mapper.AccountMapper;
 import com.example.banking_system.common.utility.JwtUtil;
-import com.example.banking_system.account.validator.GovernmentAccountValidator;
+import com.example.banking_system.domain.account.validator.GovernmentAccountValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -37,6 +40,9 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
     PasswordEncoder passwordEncoder;
 
     @Mock
+    AccountService accountService;
+
+    @Mock
     JwtUtil jwtUtil;
 
     @InjectMocks
@@ -46,6 +52,7 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
     public void createAccountSuccess() {
         GovernmentAccount governmentAccount = accountTestCases.getGovernmentAccountTestCase();
         final String hashedPassword = "hashedPassword";
+        final String mockAccountNumber = "mockAccountNumber";
 
         CreateGovernmentAccountRequest request = new CreateGovernmentAccountRequest();
 
@@ -53,10 +60,12 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
         doNothing().when(governmentAccountValidator).validateCreate(governmentAccount);
         when(passwordEncoder.encode(request.getPassword())).thenReturn(hashedPassword);
         when(governmentAccountQueryService.save(governmentAccount)).thenReturn(governmentAccount);
+        when(accountService.generateAccountNumber()).thenReturn(mockAccountNumber);
 
         GovernmentAccount createdAccount = governmentAccountService.create(request);
 
         assertEquals(governmentAccount.getGovernmentDepartment(), createdAccount.getGovernmentDepartment());
+        assertEquals(mockAccountNumber, governmentAccount.getAccount().getNumber());
         verify(governmentAccountQueryService, times(1)).save(governmentAccount);
     }
 
@@ -78,7 +87,7 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
     @Test
     public void updateAccountSuccess() {
         GovernmentAccount existingAccount = accountTestCases.getGovernmentAccountTestCase();
-        String username = "username";
+        String username = existingAccount.getAccount().getUsername();
         String newEmail =  "newEmail@example.com";
         String newDepartment = "NewDepartment";
 
@@ -105,7 +114,7 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
     @Test
     public void updateAccountFailure_InvalidInput() {
         GovernmentAccount existingAccount = accountTestCases.getGovernmentAccountTestCase();
-        String username = "username";
+        String username = existingAccount.getAccount().getUsername();
 
         UpdateGovernmentAccountRequest request = new UpdateGovernmentAccountRequest();
 
@@ -117,6 +126,27 @@ public class GovernmentAccountServiceUnitTest extends UnitTest {
         RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> governmentAccountService.update(request));
 
         assertEquals("At least one field must be provided for update", exception.getMessage());
+        verify(governmentAccountQueryService, never()).save(any());
+    }
+
+    @Test
+    public void updateAccountFailure_UpdatedWithin48Hours() {
+        GovernmentAccount existingAccount = accountTestCases.getGovernmentAccountTestCase();
+        existingAccount.getAccount().setUpdatedAt(Instant.now());
+        String username = existingAccount.getAccount().getUsername();
+
+
+        UpdateGovernmentAccountRequest request = new UpdateGovernmentAccountRequest();
+        request.setGovernmentDepartment("NewDepartment");
+
+        when(jwtUtil.getUsername()).thenReturn(username);
+        when(governmentAccountQueryService.findByUsername(username)).thenReturn(existingAccount);
+        doThrow(new ValidationException("account can only be updated once every 48 hours"))
+                .when(governmentAccountValidator).validateUpdate(request, existingAccount);
+
+        RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> governmentAccountService.update(request));
+
+        assertEquals("account can only be updated once every 48 hours", exception.getMessage());
         verify(governmentAccountQueryService, never()).save(any());
     }
 }

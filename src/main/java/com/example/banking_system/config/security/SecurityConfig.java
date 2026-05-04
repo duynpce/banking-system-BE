@@ -1,6 +1,6 @@
 package com.example.banking_system.config.security;
 
-import com.example.banking_system.common.OAuthProperties;
+import com.example.banking_system.common.prop.OAuthProperties;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -11,9 +11,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -41,13 +39,6 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Bean
-    AuthenticationEntryPoint authenticationEntryPoint() {
-        return (request, response, authException) -> {
-            response.sendRedirect(oAuthProperties.getOriginUri() + "/login");
-        };
-    }
-
     // Custom Access Denied Handler, called when authenticated user tries to access a resource they don't have permission for
     @Bean
     AccessDeniedHandler accessDeniedHandler() {
@@ -57,7 +48,6 @@ public class SecurityConfig {
         };
     }
 
-    //temporary
     @Bean
     WebClient webClient() {
         return WebClient.builder().build();
@@ -66,12 +56,12 @@ public class SecurityConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource (){
         CorsConfiguration config = new CorsConfiguration();
-        String origin = oAuthProperties.getOriginUri();
+        String origin = oAuthProperties.getClientOriginUri();
         config.setAllowedOrigins(List.of(origin));
         config.setAllowCredentials(true);
-        config.setAllowedHeaders(List.of("*"));;
+        config.setAllowedHeaders(List.of("*"));
         config.setAllowedMethods(List.of("*"));
-        config.setExposedHeaders(List.of("*"));;
+        config.setExposedHeaders(List.of("*"));
         config.setMaxAge(3600L * 3); // 3 hour
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

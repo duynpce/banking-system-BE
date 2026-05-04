@@ -1,21 +1,24 @@
 package com.example.banking_system.account.unit;
 
 import com.example.banking_system.account.AccountTestCases;
-import com.example.banking_system.account.service.domain.PersonalAccountService;
-import com.example.banking_system.account.service.query.PersonalAccountQueryService;
+import com.example.banking_system.domain.account.service.domain.AccountService;
+import com.example.banking_system.domain.account.service.domain.PersonalAccountService;
+import com.example.banking_system.domain.account.service.query.PersonalAccountQueryService;
 import com.example.banking_system.common.UnitTest;
-import com.example.banking_system.account.dto.CreatePersonalAccountRequest;
-import com.example.banking_system.account.dto.UpdatePersonalAccountRequest;
-import com.example.banking_system.account.entity.PersonalAccount;
+import com.example.banking_system.domain.account.dto.CreatePersonalAccountRequest;
+import com.example.banking_system.domain.account.dto.UpdatePersonalAccountRequest;
+import com.example.banking_system.domain.account.entity.PersonalAccount;
 import com.example.banking_system.common.exception.ValidationException;
-import com.example.banking_system.account.mapper.AccountMapper;
+import com.example.banking_system.domain.account.mapper.AccountMapper;
 import com.example.banking_system.common.utility.JwtUtil;
-import com.example.banking_system.account.validator.PersonalAccountValidator;
+import com.example.banking_system.domain.account.validator.PersonalAccountValidator;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.time.Instant;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
@@ -37,6 +40,9 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
     PasswordEncoder passwordEncoder;
 
     @Mock
+    AccountService accountService;
+
+    @Mock
     JwtUtil jwtUtil;
 
     @InjectMocks
@@ -46,6 +52,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
     public void createAccountSuccess() {
         PersonalAccount personalAccount = accountTestCases.getPersonalAccountTestCase();
         final String hashedPassword = "hashedPassword";
+        final String mockAccountNumber = "mockAccountNumber";
 
         CreatePersonalAccountRequest request = new CreatePersonalAccountRequest();
 
@@ -53,10 +60,12 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
         doNothing().when(personalAccountValidator).validateCreate(personalAccount);
         when(passwordEncoder.encode(request.getPassword())).thenReturn(hashedPassword);
         when(personalAccountQueryService.save(personalAccount)).thenReturn(personalAccount);
+        when(accountService.generateAccountNumber()).thenReturn(mockAccountNumber);
 
         PersonalAccount createdAccount = personalAccountService.create(request);
 
         assertEquals(personalAccount, createdAccount);
+        assertEquals(mockAccountNumber, personalAccount.getAccount().getNumber());
         verify(personalAccountQueryService, times(1)).save(personalAccount);
     }
 
@@ -78,7 +87,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
     @Test
     public void updateAccountSuccess() {
         PersonalAccount existingAccount = accountTestCases.getPersonalAccountTestCase();
-        String username = "username";
+        String username = existingAccount.getAccount().getUsername();
 
         UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();
         request.setFullName("NewFullName");
@@ -99,7 +108,7 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
     @Test
     public void updateAccountFailure_InvalidInput() {
         PersonalAccount existingAccount = accountTestCases.getPersonalAccountTestCase();
-        String username = "username";
+        String username = existingAccount.getAccount().getUsername();
 
         UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();
 
@@ -111,6 +120,26 @@ public class PersonalAccountServiceUnitTest extends UnitTest {
         RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> personalAccountService.update(request));
 
         assertEquals("At least one field must be provided for update", exception.getMessage());
+        verify(personalAccountQueryService, never()).save(any());
+    }
+
+    @Test
+    public void updateAccountFailure_UpdatedWithin48Hours() {
+        PersonalAccount existingAccount = accountTestCases.getPersonalAccountTestCase();
+        existingAccount.getAccount().setUpdatedAt(Instant.now());
+        String username = existingAccount.getAccount().getUsername();
+
+        UpdatePersonalAccountRequest request = new UpdatePersonalAccountRequest();
+        request.setFullName("NewFullName");
+
+        when(jwtUtil.getUsername()).thenReturn(username);
+        when(personalAccountQueryService.findByUsername(username)).thenReturn(existingAccount);
+        doThrow(new ValidationException("account can only be updated once every 48 hours"))
+                .when(personalAccountValidator).validateUpdate(request, existingAccount);
+
+        RuntimeException exception = Assertions.assertThrows(ValidationException.class, () -> personalAccountService.update(request));
+
+        assertEquals("account can only be updated once every 48 hours", exception.getMessage());
         verify(personalAccountQueryService, never()).save(any());
     }
 }

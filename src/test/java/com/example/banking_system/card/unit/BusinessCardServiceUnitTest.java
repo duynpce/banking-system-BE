@@ -1,17 +1,16 @@
 package com.example.banking_system.card.unit;
 
-import com.example.banking_system.account.entity.Account;
-import com.example.banking_system.account.service.query.AccountQueryService;
+import com.example.banking_system.domain.account.entity.Account;
+import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.example.banking_system.card.CardTestCases;
-import com.example.banking_system.card.dto.CreateBusinessCardRequest;
-import com.example.banking_system.card.entity.BusinessCard;
-import com.example.banking_system.card.entity.CardPrivilege;
-import com.example.banking_system.card.entity.CardPrivilegeCode;
-import com.example.banking_system.card.repository.BusinessCardRepository;
-import com.example.banking_system.card.service.domain.BusinessCardService;
-import com.example.banking_system.card.service.domain.CardService;
-import com.example.banking_system.card.service.query.CardPrivilegeQueryService;
-import com.example.banking_system.card.validator.BusinessCardValidator;
+import com.example.banking_system.domain.card.dto.CreateBusinessCardRequest;
+import com.example.banking_system.domain.card.entity.BusinessCard;
+import com.example.banking_system.domain.card.entity.CardPrivilege;
+import com.example.banking_system.domain.card.repository.BusinessCardRepository;
+import com.example.banking_system.domain.card.service.domain.BusinessCardService;
+import com.example.banking_system.domain.card.service.domain.CardService;
+import com.example.banking_system.domain.card.service.query.CardPrivilegeQueryService;
+import com.example.banking_system.domain.card.validator.BusinessCardValidator;
 import com.example.banking_system.common.UnitTest;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
@@ -55,12 +54,7 @@ public class BusinessCardServiceUnitTest extends UnitTest {
         Account account = new Account();
         account.setId(1L);
         account.setUsername(username);
-
-        CardPrivilegeCode cardPrivilegeCode = new CardPrivilegeCode();
-        cardPrivilegeCode.setCode("STANDARD");
-        CardPrivilege privilege = new CardPrivilege();
-        privilege.setCardPrivilegeCode(cardPrivilegeCode);
-
+        CardPrivilege  cardPrivilege = cardTestCases.getCardPrivilegeTestCase();
         CreateBusinessCardRequest request = cardTestCases.getCreateBusinessCardRequestTestCase();
 
         BusinessCard businessCard = new BusinessCard();
@@ -69,7 +63,7 @@ public class BusinessCardServiceUnitTest extends UnitTest {
         when(accountQueryService.findByUsername(username)).thenReturn(account);
         doNothing().when(businessCardValidator).validateCreate(account);
         when(cardService.generateCardNumber()).thenReturn(cardNumber);
-        when(cardPrivilegeQueryService.findByPrivilegeCode(request.getPrivilegeCode())).thenReturn(privilege);
+        when(cardPrivilegeQueryService.findByCodeAndAccountTypeAndCardTypeAndIsActive(request.getPrivilegeCode(), request.getAccountType(), request.getType())).thenReturn(cardPrivilege);
         doNothing().when(cardService).updateExpirationDateOnCreate(any());
         when(businessCardRepository.save(any(BusinessCard.class))).thenReturn(businessCard);
 
@@ -78,7 +72,7 @@ public class BusinessCardServiceUnitTest extends UnitTest {
         Assertions.assertEquals(businessCard, createdCard);
         verify(businessCardValidator).validateCreate(account);
         verify(cardService).generateCardNumber();
-        verify(cardPrivilegeQueryService).findByPrivilegeCode(request.getPrivilegeCode());
+        verify(cardPrivilegeQueryService).findByCodeAndAccountTypeAndCardTypeAndIsActive(request.getPrivilegeCode(), request.getAccountType(), request.getType());
         verify(businessCardRepository, times(1)).save(any(BusinessCard.class));
     }
 

@@ -1,32 +1,23 @@
 package com.example.banking_system.card.integration;
 
 import com.example.banking_system.account.AccountTestCases;
-import com.example.banking_system.account.controller.BusinessAccountController;
-import com.example.banking_system.account.dto.CreateBusinessAccountRequest;
+import com.example.banking_system.domain.account.controller.BusinessAccountController;
+import com.example.banking_system.domain.account.dto.CreateBusinessAccountRequest;
 import com.example.banking_system.card.CardTestCases;
-import com.example.banking_system.card.controller.BusinessCardController;
-import com.example.banking_system.card.controller.CardController;
-import com.example.banking_system.card.controller.CardPrivilegeController;
-import com.example.banking_system.card.dto.CreateBusinessCardRequest;
-import com.example.banking_system.card.dto.GetCardResponse;
-import com.example.banking_system.card.entity.CardPrivilege;
-import com.example.banking_system.card.service.query.CardPrivilegeCodeQueryService;
+import com.example.banking_system.domain.card.controller.BusinessCardController;
+import com.example.banking_system.domain.card.controller.CardPrivilegeController;
+import com.example.banking_system.domain.card.dto.CreateBusinessCardRequest;
 import com.example.banking_system.common.IntegrationTest;
+import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.NotFoundException;
 import com.example.banking_system.common.exception.UnauthorizedException;
-import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
@@ -45,9 +36,6 @@ public class BusinessCardControllerIntegrationTest extends IntegrationTest {
     @Autowired
     private CardPrivilegeController cardPrivilegeController;
 
-    @Autowired
-    private CardPrivilegeCodeQueryService cardPrivilegeCodeQueryService;
-
     @MockitoBean
     private JwtUtil jwtUtil;
 
@@ -56,17 +44,17 @@ public class BusinessCardControllerIntegrationTest extends IntegrationTest {
         // Create business account
         CreateBusinessAccountRequest accountRequest = accountTestCases.getCreateBusinessAccountRequestTestCase();
         businessAccountController.create(accountRequest);
-        cardPrivilegeCodeQueryService.save(cardTestCases.getCardPrivilegeCodeTestCase());
         cardPrivilegeController.create(cardTestCases.getCreateCardPrivilegeRequestTestCase());
 
         when(jwtUtil.getUsername()).thenReturn(accountRequest.getUsername());
 
         CreateBusinessCardRequest cardRequest = cardTestCases.getCreateBusinessCardRequestTestCase();
-        ResponseEntity<String> response = businessCardController.create(cardRequest);
+        ResponseEntity<ResponseDto<String>> response = businessCardController.create(cardRequest);
+        ResponseDto<String> responseDto = response.getBody();
 
         assertEquals(HttpStatus.OK, response.getStatusCode(), "Response status should be OK");
-        assertNotNull(response.getBody(), "Response body should not be null");
-        assertEquals("Business card created successfully", response.getBody());
+        assertNotNull(responseDto, "Response body should not be null");
+        assertTrue(responseDto.isSuccess(), "Response success flag should be true");
 
 
     }
