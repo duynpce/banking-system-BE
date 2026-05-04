@@ -33,6 +33,18 @@ spring:
         jwt:
           jwk-set-uri: ${APP_ORIGIN_URL}/${OAUTH2_JWK_SET_URI}
 
+server:
+  servlet:
+    context-path: ${APP_CONTEXT_PATH}
+    session:
+      cookie:
+        same-site: none
+        secure: true
+        name: JSESSIONID
+
+  port: ${PORT:8080}
+
+
 
 value :
   oauth2:
