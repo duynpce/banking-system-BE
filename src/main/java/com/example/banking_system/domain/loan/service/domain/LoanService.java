@@ -1,6 +1,8 @@
 package com.example.banking_system.domain.loan.service.domain;
 
+import com.example.banking_system.common.dto.MetaDto;
 import com.example.banking_system.common.dto.PaginationDto;
+import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.utility.JwtUtil;
 import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.account.service.query.AccountQueryService;
@@ -26,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -52,45 +55,24 @@ public class LoanService {
         loan.setDueDate(LocalDate.now().plusMonths(loanPolicy.getDurationMonths()));
         loan.setAccount(account);
         loan.setPolicy(loanPolicy);
+        BigDecimal interestAmount = loan.getBaseAmount().multiply(loanPolicy.getInterestRate().divide(new BigDecimal("100"), 4,RoundingMode.HALF_EVEN)).multiply(BigDecimal.valueOf(loanPolicy.getDurationMonths()));
+        loan.setTotalAmount(loan.getBaseAmount().add(interestAmount));
         account.setBalance(account.getBalance().add(request.getAmount()));
+
+        //save to get id
+        Loan savedLoan  = loanQueryService.save(loan);
 
         //create a transaction to record the loan lending
         Transaction transaction  = new Transaction();
         transaction.setStatus(TransactionStatus.COMPLETED);
         transaction.setReceiver(account);
         transaction.setTransferredAmount(request.getAmount());
-        transaction.setDescription("Loan lending for loan id: " + loan.getId());
+        transaction.setDescription("Loan lending for loan id: " + savedLoan.getId());
         transaction.setReceiverPostedBalance(account.getBalance());
         transaction.setType(TransactionType.DEPOSIT);
+        transactionQueryService.save(transaction);
 
-        return loanQueryService.save(loan);
-    }
-
-    @Transactional(readOnly = true)
-    public GetLoanResponse getById(long id) {
-        Loan loan = loanQueryService.findById(id);
-        return loanMapper.toDto(loan);
-    }
-
-    @Transactional(readOnly = true)
-    public List<GetLoanResponse> getByPage(PaginationDto paginationDto) {
-        long AccountId = jwtUtil.getJwtClaims().getClaim("account_id");
-
-        Page<Loan> loanPage = loanQueryService.findByAccountIdWithPagination(AccountId, paginationDto);
-        return loanMapper.toDtoList(loanPage.getContent());
-    }
-
-    @Transactional(readOnly = true)
-    public List<GetLoanResponse> getByFilter(LoanFilter loanFilter) {
-        long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
-        Page<Loan> loanPage = loanQueryService.findByFilter(accountId, loanFilter);
-        return loanMapper.toDtoList(loanPage.getContent());
-    }
-
-    @Transactional(readOnly = true)
-    public GetLoanReportResponse getByReports(LoanStatus loanStatus) {
-        long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
-        return loanQueryService.findReportByAccountIdAndStatus(accountId, loanStatus);
+        return loan;
     }
 
     @Transactional
@@ -120,5 +102,40 @@ public class LoanService {
         accountQueryService.save(account);
         loanQueryService.save(loan);
         transactionQueryService.save(transaction);
+    }
+
+    @Transactional(readOnly = true)
+    public GetLoanResponse getById(long id) {
+        Loan loan = loanQueryService.findById(id);
+        return loanMapper.toDto(loan);
+    }
+
+    @Transactional(readOnly = true)
+    public List<GetLoanResponse> getByPage(PaginationDto paginationDto) {
+        long AccountId = jwtUtil.getJwtClaims().getClaim("account_id");
+
+        Page<Loan> loanPage = loanQueryService.findByAccountIdWithPagination(AccountId, paginationDto);
+        return loanMapper.toDtoList(loanPage.getContent());
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseDto<List<GetLoanResponse>> getByFilter(LoanFilter loanFilter) {
+        long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
+        Page<Loan> loanPage = loanQueryService.findByFilter(accountId, loanFilter);
+        ResponseDto<List<GetLoanResponse>> response = ResponseDto.success(loanMapper.toDtoList(loanPage.getContent()), "get loan by filter success");
+        MetaDto metaDto = MetaDto.builder().totalPages(loanPage.getTotalPages()).
+                totalItems(loanPage.getTotalElements()).
+                currentPage(loanPage.getNumber())
+                .paginationDto((loanFilter.getPaginationDto())).build();
+
+
+        response.setMetaData(metaDto);
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public GetLoanReportResponse getByReports(LoanStatus loanStatus) {
+        long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
+        return loanQueryService.findReportByAccountIdAndStatus(accountId, loanStatus);
     }
 }

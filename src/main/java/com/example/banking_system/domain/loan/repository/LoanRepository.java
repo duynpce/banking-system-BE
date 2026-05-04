@@ -14,7 +14,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificationExecutor<Loan> {
-    @EntityGraph(attributePaths = {"account", "loan_policy"})
+    @EntityGraph(attributePaths = {"account", "policy"})
     Optional<Loan> findByIdAndAccountId(long loanId, long accountId);
 
     Page<Loan> findByAccountId(long accountId, Pageable pageable);
@@ -23,8 +23,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long>, JpaSpecificat
             SELECT
                 COALESCE(SUM(l.total_amount), 0)                          AS totalAmount,
                 COALESCE(SUM(l.left_amount), 0)                           AS leftAmount,
-                COALESCE(SUM((l.total_amount / p.duration_months) +
-                                         (l.total_amount / p.duration_months * p.interest_rate)), 0)      AS monthlyInstallment
+                COALESCE(SUM((l.total_amount / p.duration_months) + (l.total_amount * p.interest_rate / 100)), 0)      AS monthlyInstallment
             FROM loan l
             JOIN loan_policy p ON l.loan_policy_id = p.id
             WHERE l.account_id = :accountId
