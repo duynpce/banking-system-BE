@@ -2,6 +2,7 @@ package com.example.banking_system.domain.transaction.service;
 
 import com.example.banking_system.common.dto.MetaDto;
 import com.example.banking_system.common.dto.ResponseDto;
+import com.example.banking_system.common.exception.ForbiddenException;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
 import com.example.banking_system.common.utility.TimeUtil;
@@ -44,66 +45,65 @@ public class TransactionService {
     public Transaction create(CreateTransactionRequest request) {
 
         Transaction transaction = transactionMapper.toEntity(request);
-        transactionValidator.validateCreate(request);
+        Account loggedInAccount = accountQueryService.findById(jwtUtil.getJwtClaims().getClaim("account_id"));
+        transactionValidator.validateCreate(request, loggedInAccount);
 
         switch(transaction.getType()) {
-            case TRANSFER -> handleCreateTransferTransaction(transaction);
-            case DEPOSIT, CASHBACK -> handleCreateDepositAndCashBackTransaction(transaction);
-            case WITHDRAWAL -> handleCreateWithdrawalTransaction(transaction);
-            case PAYMENT -> handleCreatePaymentTransaction(transaction);
+            case TRANSFER -> handleCreateTransferTransaction(transaction,  loggedInAccount);
+            case DEPOSIT, CASHBACK -> handleCreateDepositAndCashBackTransaction(transaction,   loggedInAccount);
+            case WITHDRAWAL -> handleCreateWithdrawalTransaction(transaction,   loggedInAccount);
+            case PAYMENT -> handleCreatePaymentTransaction(transaction,   loggedInAccount);
         }
 
         return transactionRepository.save(transaction);
     }
 
     //admin only
-    private void handleCreateDepositAndCashBackTransaction(Transaction transaction) {
-        String accountNumber = jwtUtil.getJwtClaims().getClaimAsString("account_number");
-
-        Account account = accountQueryService.findByAccountNumber(transaction.getReceiver().getNumber());
+    private void handleCreateDepositAndCashBackTransaction(Transaction transaction, Account loggedInAccount) {
         Account internalDepositAccount = accountQueryService.getInternalDePositAccount();
+        Account receiver = accountQueryService.findByAccountNumber(transaction.getReceiver().getNumber());
 
         // if logged in account not internal deposit account --> failed , can convert to role == admin or internal
-        if(!accountNumber.equals(accountQueryService.getINTERNAL_DEPOSIT_ACCOUNT_NUMBER())) {
+        if(!loggedInAccount.getNumber().equals(accountQueryService.getINTERNAL_DEPOSIT_ACCOUNT_NUMBER())) {
             throw new ValidationException("Only admin can perform this transaction");
         }
 
         internalDepositAccount.setBalance(internalDepositAccount.getBalance().subtract(transaction.getTransferredAmount()));
-        account.setBalance(account.getBalance().add(transaction.getTransferredAmount()));
-        accountQueryService.save(account);
+        receiver.setBalance(receiver.getBalance().add(transaction.getTransferredAmount()));
+        accountQueryService.save(receiver);
         accountQueryService.save(internalDepositAccount);
 
         transaction.setSender(null);
-        transaction.setReceiver(account);
+        transaction.setReceiver(receiver);
         transaction.setStatus(TransactionStatus.COMPLETED);
-        transaction.setReceiverPostedBalance(account.getBalance());
+        transaction.setReceiverPostedBalance(receiver.getBalance());
     }
 
 
-    private void handleCreateWithdrawalTransaction(Transaction transaction) {
-        long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
-        Account account = accountQueryService.findById(accountId);
+    private void handleCreateWithdrawalTransaction(Transaction transaction,  Account loggedInAccount) {
         Account internalWithdrawalAccount = accountQueryService.getInternalWithdrawalAccount();
 
-        BigDecimal remainingBalance = account.getBalance().subtract(transaction.getTransferredAmount());
+        BigDecimal remainingBalance = loggedInAccount.getBalance().subtract(transaction.getTransferredAmount());
         if(remainingBalance.compareTo(BigDecimal.ZERO) < 0) {
             throw new ValidationException("Insufficient balance for withdrawal");
         }
 
+        if(!loggedInAccount.getStatus().canWithdraw()){
+            throw new ForbiddenException("account with status " +  loggedInAccount.getStatus() + " cannot perform withdrawal transactions");
+        }
+
         internalWithdrawalAccount.setBalance(internalWithdrawalAccount.getBalance().add(transaction.getTransferredAmount()));
-        account.setBalance(remainingBalance);
-        accountQueryService.save(account);
+        loggedInAccount.setBalance(remainingBalance);
+        accountQueryService.save(loggedInAccount);
         accountQueryService.save(internalWithdrawalAccount);
 
-        transaction.setSender(account);
+        transaction.setSender(loggedInAccount);
         transaction.setReceiver(null);
         transaction.setStatus(TransactionStatus.COMPLETED);
-        transaction.setSenderPostedBalance(account.getBalance());
+        transaction.setSenderPostedBalance(loggedInAccount.getBalance());
     }
 
-    private void handleCreateTransferTransaction(Transaction transaction) {
-        long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
-        Account sender = accountQueryService.findById(accountId);
+    private void handleCreateTransferTransaction(Transaction transaction, Account sender) {
         Account receiver = accountQueryService.findByAccountNumber(transaction.getReceiver().getNumber());
 
         BigDecimal senderRemainingBalance = sender.getBalance().subtract(transaction.getTransferredAmount());
@@ -127,9 +127,7 @@ public class TransactionService {
         transaction.setReceiverPostedBalance(receiver.getBalance());
     }
 
-    private void handleCreatePaymentTransaction(Transaction transaction) {
-        long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
-        Account sender = accountQueryService.findById(accountId);
+    private void handleCreatePaymentTransaction(Transaction transaction , Account sender) {
         Account receiver = accountQueryService.findByAccountNumber(transaction.getReceiver().getNumber());
 
         transaction.setSender(sender);

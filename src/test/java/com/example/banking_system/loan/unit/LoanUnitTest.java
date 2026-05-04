@@ -3,15 +3,17 @@ package com.example.banking_system.loan.unit;
 import com.example.banking_system.account.AccountTestCases;
 import com.example.banking_system.common.UnitTest;
 import com.example.banking_system.common.dto.PaginationDto;
+import com.example.banking_system.common.dto.ResponseDto;
 import com.example.banking_system.common.exception.NotFoundException;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
 import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.account.service.query.AccountQueryService;
 import com.example.banking_system.domain.loan.constant.LoanStatus;
-import com.example.banking_system.domain.loan.constant.LoanType;
 import com.example.banking_system.domain.loan.dto.CreateLoanRequest;
+import com.example.banking_system.domain.loan.dto.GetLoanReportResponse;
 import com.example.banking_system.domain.loan.dto.GetLoanResponse;
+import com.example.banking_system.domain.loan.dto.LoanFilter;
 import com.example.banking_system.domain.loan.dto.RepayLoanRequest;
 import com.example.banking_system.domain.loan.entity.Loan;
 import com.example.banking_system.domain.loan.entity.LoanPolicy;
@@ -75,7 +77,8 @@ public class LoanUnitTest extends UnitTest {
         LoanPolicy loanPolicy = loanTestCases.getLoanPolicyTestCase();
         CreateLoanRequest request = loanTestCases.getCreateLoanRequestTestCase(loanPolicy.getId(), loanPolicy.getLoanType());
         Loan loan = new Loan();
-        loan.setTotalAmount(request.getAmount());
+        loan.setBaseAmount(request.getAmount());
+        loan.setTotalAmount(request.getAmount().add(request.getAmount().multiply(loanPolicy.getInterestRate())));
         BigDecimal initialBalance = new BigDecimal("500.00");
         account.setBalance(initialBalance);
 
@@ -83,7 +86,7 @@ public class LoanUnitTest extends UnitTest {
         when(loanMapper.toEntity(request)).thenReturn(loan);
         when(accountQueryService.findById(account.getId())).thenReturn(account);
         when(loanPolicyQueryService.findById(request.getPolicyId())).thenReturn(loanPolicy);
-        doNothing().when(loanValidator).validateCreate(loan, loanPolicy);
+        doNothing().when(loanValidator).validateCreate(loan, loanPolicy, account);
         when(loanQueryService.save(loan)).thenReturn(loan);
 
         Loan result = loanService.create(request);
@@ -93,7 +96,7 @@ public class LoanUnitTest extends UnitTest {
         assertEquals(LocalDate.now().plusMonths(loanPolicy.getDurationMonths()), loan.getDueDate());
         assertEquals(loanPolicy, loan.getPolicy());
         assertEquals(account, loan.getAccount());
-        verify(loanValidator).validateCreate(loan, loanPolicy);
+        verify(loanValidator).validateCreate(loan, loanPolicy, account);
         verify(loanQueryService).save(loan);
     }
 
@@ -109,7 +112,7 @@ public class LoanUnitTest extends UnitTest {
         when(accountQueryService.findById(account.getId())).thenReturn(account);
         when(loanPolicyQueryService.findById(request.getPolicyId())).thenReturn(loanPolicy);
         doThrow(new ValidationException("loan amount cannot be greater than maximum allowed by policy"))
-                .when(loanValidator).validateCreate(loan, loanPolicy);
+                .when(loanValidator).validateCreate(loan, loanPolicy, account);
 
         RuntimeException exception = Assertions.assertThrows(
                 ValidationException.class,
@@ -117,7 +120,7 @@ public class LoanUnitTest extends UnitTest {
         );
 
         assertEquals("loan amount cannot be greater than maximum allowed by policy", exception.getMessage());
-        verify(loanValidator).validateCreate(loan, loanPolicy);
+        verify(loanValidator).validateCreate(loan, loanPolicy, account);
         verify(loanQueryService, never()).save(any());
     }
 
@@ -170,6 +173,74 @@ public class LoanUnitTest extends UnitTest {
         assertEquals(response, result.getFirst());
         verify(loanQueryService).findByAccountIdWithPagination(anyLong(), eq(paginationDto));
         verify(loanMapper).toDtoList(List.of(loan));
+    }
+
+    @Test
+    public void getByFilterSuccess() {
+        Loan loan = loanTestCases.getLoanTestCase();
+        GetLoanResponse response = loanTestCases.getLoanResponseTestCase();
+        LoanFilter loanFilter = loanTestCases.getLoanFilterTestCase();
+        Page<Loan> page = new PageImpl<>(List.of(loan));
+
+        setupJwt();
+        when(loanQueryService.findByFilter(anyLong(), eq(loanFilter))).thenReturn(page);
+        when(loanMapper.toDtoList(List.of(loan))).thenReturn(List.of(response));
+
+        ResponseDto<List<GetLoanResponse>> result = loanService.getByFilter(loanFilter);
+
+        assertEquals(1, result.getData().size());
+        assertEquals(response, result.getData().getFirst());
+        verify(loanQueryService).findByFilter(anyLong(), eq(loanFilter));
+        verify(loanMapper).toDtoList(List.of(loan));
+    }
+
+    @Test
+    public void getByFilterEmptyResult() {
+        LoanFilter loanFilter = loanTestCases.getLoanFilterTestCase();
+        loanFilter.setStatus(LoanStatus.DONE_PAYMENT);
+        Page<Loan> emptyPage = new PageImpl<>(List.of());
+
+        setupJwt();
+        when(loanQueryService.findByFilter(anyLong(), eq(loanFilter))).thenReturn(emptyPage);
+        when(loanMapper.toDtoList(List.of())).thenReturn(List.of());
+
+        ResponseDto<List<GetLoanResponse>> result = loanService.getByFilter(loanFilter);
+
+        assertTrue(result.getData().isEmpty());
+        verify(loanQueryService).findByFilter(anyLong(), eq(loanFilter));
+    }
+
+    @Test
+    public void getByReportsSuccess() {
+        GetLoanReportResponse  response = loanTestCases.getLoanReportTestCase();
+        LoanStatus loanStatus = LoanStatus.CURRENT_PAYMENT;
+
+        setupJwt();
+        when(loanQueryService.findReportByAccountIdAndStatus(anyLong(), eq(loanStatus))).thenReturn(response);
+
+        GetLoanReportResponse result = loanService.getByReports(loanStatus);
+
+        assertEquals(loanStatus, result.getLoanStatus());
+        assertEquals(response.getTotalAmount(), result.getTotalAmount());
+        assertEquals(response.getLeftAmount(), result.getLeftAmount());
+        assertEquals(response.getMonthlyInstallment(), result.getMonthlyInstallment());
+        verify(loanQueryService).findReportByAccountIdAndStatus(anyLong(), eq(loanStatus));
+    }
+
+    @Test
+    public void getByReportsNoLoansReturnsZeroAmounts() {
+        LoanStatus loanStatus = LoanStatus.DONE_PAYMENT;
+        GetLoanReportResponse zeroResponse = new GetLoanReportResponse(loanStatus, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO);
+
+        setupJwt();
+        when(loanQueryService.findReportByAccountIdAndStatus(anyLong(), eq(loanStatus))).thenReturn(zeroResponse);
+
+        GetLoanReportResponse result = loanService.getByReports(loanStatus);
+
+        assertEquals(loanStatus, result.getLoanStatus());
+        assertEquals(0, result.getTotalAmount().compareTo(java.math.BigDecimal.ZERO));
+        assertEquals(0, result.getLeftAmount().compareTo(java.math.BigDecimal.ZERO));
+        assertEquals(0, result.getMonthlyInstallment().compareTo(java.math.BigDecimal.ZERO));
     }
 
     @Test

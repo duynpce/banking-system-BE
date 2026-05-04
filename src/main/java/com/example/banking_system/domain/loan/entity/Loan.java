@@ -23,7 +23,10 @@ public class Loan {
     private long id;
 
     @Column(name = "total_amount", nullable = false, updatable = false)
-    private BigDecimal totalAmount;;
+    private BigDecimal totalAmount;
+
+    @Column(name = "base_amount", nullable = false, updatable = false)
+    private BigDecimal baseAmount;
 
     @Column(name ="left_amount", nullable = false)
     private BigDecimal leftAmount;

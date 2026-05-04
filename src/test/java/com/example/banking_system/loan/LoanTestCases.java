@@ -5,7 +5,10 @@ import com.example.banking_system.domain.account.entity.Account;
 import com.example.banking_system.domain.loan.constant.LoanFineType;
 import com.example.banking_system.domain.loan.constant.LoanStatus;
 import com.example.banking_system.domain.loan.constant.LoanType;
+import com.example.banking_system.domain.loan.dto.GetLoanReportResponse;
+import com.example.banking_system.domain.loan.dto.LoanFilter;
 import com.example.banking_system.domain.loan.dto.*;
+import com.example.banking_system.common.dto.PaginationDto;
 import com.example.banking_system.domain.loan.entity.Loan;
 import com.example.banking_system.domain.loan.entity.LoanFine;
 import com.example.banking_system.domain.loan.entity.LoanFinePolicy;
@@ -13,6 +16,7 @@ import com.example.banking_system.domain.loan.entity.LoanPolicy;
 import lombok.Getter;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDate;
 
@@ -33,8 +37,8 @@ public class LoanTestCases {
     public CreateLoanPolicyRequest getCreateLoanPolicyRequestTestCase() {
         CreateLoanPolicyRequest request = new CreateLoanPolicyRequest();
         request.setDurationMonths(12);
-        request.setInterestRate(1.5);
-        request.setMaxAmount(10000.00);
+        request.setInterestRate(new BigDecimal("1.5"));
+        request.setMaxAmount(new BigDecimal("10000.00"));
         request.setLoanType(LoanType.CREDIT);
         request.setEffectiveFrom(LocalDate.now());
         request.setEffectiveTo(LocalDate.now().plusMonths(12));
@@ -45,7 +49,7 @@ public class LoanTestCases {
         UpdateLoanPolicyRequest request = new UpdateLoanPolicyRequest();
         request.setId(1L);
         request.setDurationMonths(24);
-        request.setInterestRate(2.0);
+        request.setInterestRate(new BigDecimal("2.0"));
         request.setLoanType(LoanType.CREDIT);
         request.setEffectiveFrom(LocalDate.now().plusDays(1));
         request.setEffectiveTo(LocalDate.now().plusMonths(18));
@@ -61,9 +65,9 @@ public class LoanTestCases {
         loanPolicy.setLoanType(request.getLoanType());
         loanPolicy.setEffectiveFrom(request.getEffectiveFrom());
         loanPolicy.setEffectiveTo(request.getEffectiveTo());
-        loanPolicy.setMaxAmount(BigDecimal.valueOf(request.getMaxAmount()));
+        loanPolicy.setMaxAmount(request.getMaxAmount());
         loanPolicy.setCreatedAt(Instant.now());
-        loanPolicy.setMaxAmount(BigDecimal.valueOf(request.getMaxAmount()));
+        loanPolicy.setMaxAmount(request.getMaxAmount());
         return loanPolicy;
     }
 
@@ -168,11 +172,13 @@ public class LoanTestCases {
         GetLoanResponse response = new GetLoanResponse();
         response.setId(loan.getId());
         response.setTotalAmount(loan.getTotalAmount());
+        response.setBaseAmount(loan.getBaseAmount());
         response.setLeftAmount(loan.getLeftAmount());
         response.setDueDate(loan.getDueDate());
         response.setStatus(loan.getStatus());
         response.setType(loan.getType());
         response.setCreatedAt(loan.getCreatedAt());
+        response.setDurationMonths(loan.getPolicy().getDurationMonths());
         return response;
     }
 
@@ -213,6 +219,34 @@ public class LoanTestCases {
         response.setAmount(loanFine.getAmount());
         response.setCreatedAt(loanFine.getCreatedAt());
         response.setType(loanFine.getType());
+        return response;
+    }
+
+    public LoanFilter getLoanFilterTestCase() {
+        LoanFilter filter = new LoanFilter();
+        filter.setPaginationDto(new PaginationDto(0, 10));
+        filter.setStatus(LoanStatus.CURRENT_PAYMENT);
+        return filter;
+    }
+
+    public LoanFilter getLoanFilterWithDateRangeTestCase() {
+        LoanFilter filter = new LoanFilter();
+        filter.setPaginationDto(new PaginationDto(0, 10));
+        filter.setStartDate(LocalDate.now().minusMonths(1));
+        filter.setEndDate(LocalDate.now());
+        return filter;
+    }
+
+    public GetLoanReportResponse getLoanReportTestCase() {
+        GetLoanReportResponse response = new GetLoanReportResponse();
+        Loan loan = getLoanTestCase();
+        response.setLoanStatus(loan.getStatus());
+        response.setTotalAmount(loan.getTotalAmount());
+        response.setLeftAmount(loan.getLeftAmount());
+
+        BigDecimal monthlyInstallment = loan.getTotalAmount().divide(new BigDecimal(loan.getPolicy().getDurationMonths()),4, RoundingMode.HALF_EVEN);
+
+        response.setMonthlyInstallment(monthlyInstallment);
         return response;
     }
 }

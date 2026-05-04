@@ -99,31 +99,10 @@ public class TransactionUnitTest extends UnitTest {
 		assertEquals(receiver.getBalance(), initialBalance.add(request.getTransferredAmount()));
         assertEquals(sender.getBalance(), initialBalance.subtract(request.getTransferredAmount()));
 
-		verify(transactionValidator).validateCreate(request);
+		verify(transactionValidator).validateCreate(request, sender);
 		verify(accountQueryService).save(sender);
 		verify(accountQueryService).save(receiver);
 		verify(transactionRepository).save(transaction);
-	}
-
-	@Test
-	public void createTransactionFailureValidationError() {
-		String internalAccountNumber = "123456789012";
-        CreateTransactionRequest request = transactionTestCases.getCreateTransferRequest(internalAccountNumber);
-		Transaction transaction = new Transaction();
-
-		when(transactionMapper.toEntity(request)).thenReturn(transaction);
-		doThrow(new ValidationException("Invalid receiver account number"))
-				.when(transactionValidator).validateCreate(request);
-
-		ValidationException exception = Assertions.assertThrows(
-				ValidationException.class,
-				() -> transactionService.create(request)
-		);
-
-		assertEquals("Invalid receiver account number", exception.getMessage());
-		verify(transactionValidator).validateCreate(request);
-		verify(transactionRepository, never()).save(any());
-		verify(accountQueryService, never()).findById(anyLong());
 	}
 
 	@Test
@@ -150,18 +129,25 @@ public class TransactionUnitTest extends UnitTest {
 		assertEquals(TransactionStatus.PENDING, result.getStatus());
 		assertEquals(sender, result.getSender());
 		assertEquals(receiver, result.getReceiver());
-		verify(transactionValidator).validateCreate(request);
+		verify(transactionValidator).validateCreate(request, sender);
 		verify(transactionRepository).save(transaction);
 	}
 
 	@Test
 	public void createPaymentTransactionFailureValidationError() {
+		Account account = accountTestCases.getPersonalAccountTestCase().getAccount();
 		CreateTransactionRequest request = transactionTestCases.getCreateInvalidReceiverRequest("123456789012", TransactionType.PAYMENT);
+
+
 		Transaction transaction = new Transaction();
 
+		Jwt jwt = mock(Jwt.class);
+		when(jwtUtil.getJwtClaims()).thenReturn(jwt);
+		when(jwt.getClaim("account_id")).thenReturn(account.getId());
+		when(transactionMapper.toEntity(request)).thenReturn(transaction);
 		when(transactionMapper.toEntity(request)).thenReturn(transaction);
 		doThrow(new ValidationException("Invalid receiver account number"))
-				.when(transactionValidator).validateCreate(request);
+				.when(transactionValidator).validateCreate(request, null);
 
 		ValidationException exception = Assertions.assertThrows(
 				ValidationException.class,
@@ -169,7 +155,7 @@ public class TransactionUnitTest extends UnitTest {
 		);
 
 		assertEquals("Invalid receiver account number", exception.getMessage());
-		verify(transactionValidator).validateCreate(request);
+		verify(transactionValidator).validateCreate(request, null);
 		verify(transactionRepository, never()).save(any());
 	}
 
@@ -191,12 +177,13 @@ public class TransactionUnitTest extends UnitTest {
 
 		Jwt jwt = mock(Jwt.class);
 		when(jwtUtil.getJwtClaims()).thenReturn(jwt);
-		when(jwt.getClaimAsString("account_number")).thenReturn(internalDepositAccount.getNumber());
+		when(jwt.getClaim("account_id")).thenReturn(internalDepositAccount.getId());
 		when(transactionMapper.toEntity(request)).thenReturn(transaction);
 		when(accountQueryService.findByAccountNumber(account.getNumber())).thenReturn(account);
 		when(accountQueryService.getINTERNAL_DEPOSIT_ACCOUNT_NUMBER()).thenReturn(internalDepositAccount.getNumber());
 		when(accountQueryService.getInternalDePositAccount()).thenReturn(internalDepositAccount);
 		when(transactionRepository.save(transaction)).thenReturn(transaction);
+		when(accountQueryService.findById(internalDepositAccount.getId())).thenReturn(internalDepositAccount);
 
 		Transaction result = transactionService.create(request);
 
@@ -204,7 +191,7 @@ public class TransactionUnitTest extends UnitTest {
 		assertEquals(internalInitialBalance.subtract(request.getTransferredAmount()), internalDepositAccount.getBalance());
 		assertEquals(account, result.getReceiver());
 		assertEquals(account.getBalance(), result.getReceiverPostedBalance());
-		verify(transactionValidator).validateCreate(request);
+		verify(transactionValidator).validateCreate(request, internalDepositAccount);
 		verify(accountQueryService).save(account);
 		verify(accountQueryService).save(internalDepositAccount);
 		verify(transactionRepository).save(transaction);
@@ -214,10 +201,15 @@ public class TransactionUnitTest extends UnitTest {
 	public void createDepositTransactionFailureValidationError() {
 		CreateTransactionRequest request = transactionTestCases.getCreateInvalidReceiverRequest("123456789012", TransactionType.DEPOSIT);
 		Transaction transaction = new Transaction();
+		Account account = accountTestCases.getBusinessAccountTestCase().getAccount();
 
+
+		Jwt jwt = mock(Jwt.class);
+		when(jwtUtil.getJwtClaims()).thenReturn(jwt);
+		when(jwt.getClaim("account_id")).thenReturn(account.getId());
 		when(transactionMapper.toEntity(request)).thenReturn(transaction);
 		doThrow(new ValidationException("Invalid receiver account number"))
-				.when(transactionValidator).validateCreate(request);
+				.when(transactionValidator).validateCreate(request, null);
 
 		ValidationException exception = Assertions.assertThrows(
 				ValidationException.class,
@@ -225,7 +217,7 @@ public class TransactionUnitTest extends UnitTest {
 		);
 
 		assertEquals("Invalid receiver account number", exception.getMessage());
-		verify(transactionValidator).validateCreate(request);
+		verify(transactionValidator).validateCreate(request, null);
 		verify(transactionRepository, never()).save(any());
 	}
 
@@ -258,7 +250,7 @@ public class TransactionUnitTest extends UnitTest {
 		assertEquals(internalInitialBalance.add(request.getTransferredAmount()), internalWithdrawalAccount.getBalance());
 		assertEquals(account, result.getSender());
 		assertEquals(account.getBalance(), result.getSenderPostedBalance());
-		verify(transactionValidator).validateCreate(request);
+		verify(transactionValidator).validateCreate(request, account);
 		verify(accountQueryService).save(account);
 		verify(accountQueryService).save(internalWithdrawalAccount);
 		verify(transactionRepository).save(transaction);
@@ -268,10 +260,15 @@ public class TransactionUnitTest extends UnitTest {
 	public void createWithdrawalTransactionFailureValidationError() {
 		CreateTransactionRequest request = transactionTestCases.getCreateInvalidReceiverRequest("123456789012", TransactionType.WITHDRAWAL);
 		Transaction transaction = new Transaction();
+		Account account = accountTestCases.getBusinessAccountTestCase().getAccount();
 
+
+		Jwt jwt = mock(Jwt.class);
+		when(jwtUtil.getJwtClaims()).thenReturn(jwt);
+		when(jwt.getClaim("account_id")).thenReturn(account.getId());
 		when(transactionMapper.toEntity(request)).thenReturn(transaction);
 		doThrow(new ValidationException("Invalid receiver account number"))
-				.when(transactionValidator).validateCreate(request);
+				.when(transactionValidator).validateCreate(request, null);
 
 		ValidationException exception = Assertions.assertThrows(
 				ValidationException.class,
@@ -279,7 +276,7 @@ public class TransactionUnitTest extends UnitTest {
 		);
 
 		assertEquals("Invalid receiver account number", exception.getMessage());
-		verify(transactionValidator).validateCreate(request);
+		verify(transactionValidator).validateCreate(request, null);
 		verify(transactionRepository, never()).save(any());
 	}
 

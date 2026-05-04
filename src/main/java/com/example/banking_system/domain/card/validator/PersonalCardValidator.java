@@ -18,6 +18,10 @@ public class PersonalCardValidator {
         if(!account.getCreditRank().canOpenCard()) {
             throw new ForbiddenException("Account's credit rank does not permit opening a personal card");
         }
+
+        if(!account.getCreditRank().canOpenCard()){
+            throw new ForbiddenException("Account's credit rank does not permit opening a personal card");
+        }
     }
 }
 

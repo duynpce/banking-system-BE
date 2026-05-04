@@ -16,9 +16,11 @@ public interface LoanMapper {
     @Mapping(target = "status", expression = "java(LoanStatus.CURRENT_PAYMENT)")
     @Mapping(target = "account", ignore = true)
     @Mapping(target = "policy", ignore = true)
-    @Mapping(target = "totalAmount" , source = "request.amount")
+    @Mapping(target = "baseAmount" , source = "request.amount")
     Loan toEntity(CreateLoanRequest request);
 
+    @Mapping(target = "durationMonths" , source = "loan.policy.durationMonths")
+    @Mapping(target = "interestRate" , source = "loan.policy.interestRate")
     GetLoanResponse toDto(Loan loan);
 
     List<GetLoanResponse> toDtoList(List<Loan> loanList);

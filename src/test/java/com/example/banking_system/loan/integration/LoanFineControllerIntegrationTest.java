@@ -17,6 +17,7 @@ import com.example.banking_system.domain.loan.controller.LoanFineController;
 import com.example.banking_system.domain.loan.controller.LoanFinePolicyController;
 import com.example.banking_system.domain.loan.controller.LoanPolicyController;
 import com.example.banking_system.domain.loan.dto.*;
+import com.example.banking_system.domain.loan.dto.LoanFilter;
 import com.example.banking_system.domain.loan.entity.LoanPolicy;
 import com.example.banking_system.domain.loan.service.query.LoanPolicyQueryService;
 import com.example.banking_system.loan.LoanTestCases;
@@ -70,7 +71,7 @@ public class LoanFineControllerIntegrationTest extends IntegrationTest {
     public void testCreateLoanFineSuccess() {
         setupLoan();
         long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
-        GetLoanResponse loanResponse = Objects.requireNonNull(loanController.getByPage(new PaginationDto(0, 5)).getBody()).getData().getFirst();
+        GetLoanResponse loanResponse = Objects.requireNonNull(loanController.getByFilter(loanTestCases.getLoanFilterTestCase()).getBody()).getData().getFirst();
         GetLoanFinePolicyResponse loanFinePolicyResponse = Objects.requireNonNull(loanFinePolicyController.getByLoanFineType(LoanFineType.OVERDUE_PAYMENT).getBody()).getData().getFirst();
         CreateLoanFineRequest request = loanTestCases.getCreateLoanFineRequestTestCase(loanResponse.getId(), accountId, loanFinePolicyResponse.getId());
 
@@ -91,7 +92,7 @@ public class LoanFineControllerIntegrationTest extends IntegrationTest {
     public void testCreateLoanFineFailureValidationError() {
         setupLoan();
         long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
-        GetLoanResponse loanResponse = Objects.requireNonNull(loanController.getByPage(new PaginationDto(0, 5)).getBody()).getData().getFirst();
+        GetLoanResponse loanResponse = Objects.requireNonNull(loanController.getByFilter(loanTestCases.getLoanFilterTestCase()).getBody()).getData().getFirst();
         GetLoanFinePolicyResponse loanFinePolicyResponse = Objects.requireNonNull(loanFinePolicyController.getByLoanFineType(LoanFineType.OVERDUE_PAYMENT).getBody()).getData().getFirst();
         CreateLoanFineRequest request = loanTestCases.getCreateLoanFineRequestTestCase(loanResponse.getId(), accountId, loanFinePolicyResponse.getId());
         request.setAmount(BigDecimal.ZERO);
@@ -105,7 +106,7 @@ public class LoanFineControllerIntegrationTest extends IntegrationTest {
     public void testUpdateLoanFineSuccess() {
         setupLoan();
         long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
-        GetLoanResponse loanResponse = Objects.requireNonNull(loanController.getByPage(new PaginationDto(0, 5)).getBody()).getData().getFirst();
+        GetLoanResponse loanResponse = Objects.requireNonNull(loanController.getByFilter(loanTestCases.getLoanFilterTestCase()).getBody()).getData().getFirst();
         GetLoanFinePolicyResponse loanFinePolicyResponse = Objects.requireNonNull(loanFinePolicyController.getByLoanFineType(LoanFineType.OVERDUE_PAYMENT).getBody()).getData().getFirst();
         CreateLoanFineRequest request = loanTestCases.getCreateLoanFineRequestTestCase(loanResponse.getId(), accountId, loanFinePolicyResponse.getId());
         loanFineController.create(request);
@@ -133,7 +134,7 @@ public class LoanFineControllerIntegrationTest extends IntegrationTest {
     public void testGetLoanFineByIdSuccess() {
         setupLoan();
         long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
-        GetLoanResponse loanResponse = Objects.requireNonNull(loanController.getByPage(new PaginationDto(0, 5)).getBody()).getData().getFirst();
+        GetLoanResponse loanResponse = Objects.requireNonNull(loanController.getByFilter(loanTestCases.getLoanFilterTestCase()).getBody()).getData().getFirst();
         GetLoanFinePolicyResponse loanFinePolicyResponse = Objects.requireNonNull(loanFinePolicyController.getByLoanFineType(LoanFineType.OVERDUE_PAYMENT).getBody()).getData().getFirst();
         CreateLoanFineRequest request = loanTestCases.getCreateLoanFineRequestTestCase(loanResponse.getId(), accountId, loanFinePolicyResponse.getId());
         loanFineController.create(request);
@@ -160,7 +161,7 @@ public class LoanFineControllerIntegrationTest extends IntegrationTest {
     public void testGetLoanFineByPageSuccess() {
         setupLoan();
         long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
-        GetLoanResponse loanResponse = Objects.requireNonNull(loanController.getByPage(new PaginationDto(0, 5)).getBody()).getData().getFirst();
+        GetLoanResponse loanResponse = Objects.requireNonNull(loanController.getByFilter(loanTestCases.getLoanFilterTestCase()).getBody()).getData().getFirst();
         GetLoanFinePolicyResponse loanFinePolicyResponse = Objects.requireNonNull(loanFinePolicyController.getByLoanFineType(LoanFineType.OVERDUE_PAYMENT).getBody()).getData().getFirst();
         CreateLoanFineRequest request = loanTestCases.getCreateLoanFineRequestTestCase(loanResponse.getId(), accountId, loanFinePolicyResponse.getId());
         loanFineController.create(request);

@@ -13,6 +13,9 @@ public enum CreditRank {
         public boolean canBorrowLoan() {
             return true;
         }
+
+        @Override
+        public boolean canOpenDeposit() {return true;}
     },
     GOOD{
         @Override
@@ -24,6 +27,9 @@ public enum CreditRank {
         public boolean canBorrowLoan() {
             return true;
         }
+
+        @Override
+        public boolean canOpenDeposit() {return true;}
     },
     FAIR{
         @Override
@@ -35,6 +41,9 @@ public enum CreditRank {
         public boolean canBorrowLoan() {
             return true;
         }
+
+        @Override
+        public boolean canOpenDeposit() {return true;}
     },
     POOR{
         @Override
@@ -46,9 +55,13 @@ public enum CreditRank {
         public boolean canBorrowLoan() {
             return false;
         }
+
+        @Override
+        public boolean canOpenDeposit() {return false;}
     };
 
 //    public abstract BigDecimal getCreditLimit();
     public abstract boolean canBorrowLoan();
     public abstract boolean canOpenCard();
+    public abstract boolean canOpenDeposit();
 }

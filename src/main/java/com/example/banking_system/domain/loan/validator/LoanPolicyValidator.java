@@ -8,6 +8,7 @@ import com.example.banking_system.domain.loan.service.query.LoanPolicyQueryServi
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Component
