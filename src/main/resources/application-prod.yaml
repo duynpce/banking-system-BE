@@ -1,0 +1,62 @@
+spring:
+  application:
+    name: banking-system
+
+  datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        globally_quoted_identifiers: true
+        jdbc:
+          time_zone: UTC
+
+# caching not implemented yet, but we can use redis in the future if needed
+#  cache:
+#    type: redis
+
+#  data:
+#    redis:
+#      host: localhost
+#      port: 6379
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          jwk-set-uri: ${APP_ORIGIN_URL}/${OAUTH2_JWK_SET_URI}
+
+
+value :
+  oauth2:
+    redirect-uri: ${OAUTH2_ORIGIN_URI}/${OAUTH2_REDIRECT_URI}
+    client-id: ${OAUTH2_CLIENT_ID}
+    client-secret: ${OAUTH2_CLIENT_SECRET}
+    scope-read: ${OAUTH2_SCOPE_READ}
+    scope-write: ${OAUTH2_SCOPE_WRITE}
+    authorization-uri: ${OAUTH2_AUTHORIZATION_URI}
+    token-uri: ${OAUTH2_TOKEN_URI}
+    token-introspection-uri: ${OAUTH2_TOKEN_INTROSPECTION_URI}
+    token-revocation-uri: ${OAUTH2_TOKEN_REVOCATION_URI}
+    oidc-user-info-uri: ${OAUTH2_OIDC_USER_INFO_URI}
+    jwk-set-uri: ${OAUTH2_JWK_SET_URI}
+    logout-uri: ${OAUTH2_LOGOUT_URI}
+    client-origin-uri: ${OAUTH2_CLIENT_ORIGIN_URI}
+    post-basic-secret: ${OAUTH2_POST_BASIC_SECRET}
+    auth-server-uri: ${OAUTH2_AUTH_SERVER_URI}
+
+  card:
+    bin: ${CARD_BIN}
+
+  transaction:
+    deposit-account-number: ${TRANSACTION_DEPOSIT_ACCOUNT_NUMBER}
+    withdrawal-account-number: ${TRANSACTION_WITHDRAWAL_ACCOUNT_NUMBER}
+
+  environment: "prod"
