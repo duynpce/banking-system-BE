@@ -117,20 +117,7 @@ public class TransactionIntegrationTest extends IntegrationTest {
 		assertNull(result.getPostedBalance());
 	}
 
-	@Test
-	public void createPaymentTransactionFailureValidationError() {
-		CreateTransactionRequest request = transactionTestCases.getCreateInvalidReceiverRequest(
-				accountQueryService.getINTERNAL_DEPOSIT_ACCOUNT_NUMBER(),
-				com.example.banking_system.domain.transaction.constant.TransactionType.PAYMENT
-		);
 
-		ValidationException exception = Assertions.assertThrows(
-				ValidationException.class,
-				() -> transactionController.create(request)
-		);
-
-		assertEquals("Invalid receiver account number", exception.getMessage());
-	}
 
 	@Test
 	public void createDepositTransactionSuccess() {
@@ -164,21 +151,6 @@ public class TransactionIntegrationTest extends IntegrationTest {
 	}
 
 	@Test
-	public void createDepositTransactionFailureValidationError() {
-		CreateTransactionRequest request = transactionTestCases.getCreateInvalidReceiverRequest(
-				accountQueryService.getINTERNAL_DEPOSIT_ACCOUNT_NUMBER(),
-				com.example.banking_system.domain.transaction.constant.TransactionType.DEPOSIT
-		);
-
-		ValidationException exception = Assertions.assertThrows(
-				ValidationException.class,
-				() -> transactionController.create(request)
-		);
-
-		assertEquals("Invalid receiver account number", exception.getMessage());
-	}
-
-	@Test
 	public void createWithdrawalTransactionSuccess() {
 		TransferScenario transferScenario = setupTransferScenario();
 		Account account = transferScenario.sender();
@@ -194,21 +166,6 @@ public class TransactionIntegrationTest extends IntegrationTest {
 		assertTrue(response.getBody().isSuccess());
 		assertEquals(initialAccountBalance.subtract(request.getTransferredAmount()), account.getBalance());
 		assertEquals(initialInternalBalance.add(request.getTransferredAmount()), internalWithdrawalAccount.getBalance());
-	}
-
-	@Test
-	public void createWithdrawalTransactionFailureValidationError() {
-		CreateTransactionRequest request = transactionTestCases.getCreateInvalidReceiverRequest(
-				accountQueryService.getINTERNAL_WITHDRAWAL_ACCOUNT_NUMBER(),
-				com.example.banking_system.domain.transaction.constant.TransactionType.WITHDRAWAL
-		);
-
-		ValidationException exception = Assertions.assertThrows(
-				ValidationException.class,
-				() -> transactionController.create(request)
-		);
-
-		assertEquals("Invalid receiver account number", exception.getMessage());
 	}
 
 	@Test

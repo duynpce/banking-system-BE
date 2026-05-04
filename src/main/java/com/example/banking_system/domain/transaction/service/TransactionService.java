@@ -2,6 +2,7 @@ package com.example.banking_system.domain.transaction.service;
 
 import com.example.banking_system.common.dto.MetaDto;
 import com.example.banking_system.common.dto.ResponseDto;
+import com.example.banking_system.common.exception.ForbiddenException;
 import com.example.banking_system.common.exception.ValidationException;
 import com.example.banking_system.common.utility.JwtUtil;
 import com.example.banking_system.common.utility.TimeUtil;
@@ -60,6 +61,7 @@ public class TransactionService {
     //admin only
     private void handleCreateDepositAndCashBackTransaction(Transaction transaction, Account loggedInAccount) {
         Account internalDepositAccount = accountQueryService.getInternalDePositAccount();
+        Account receiver = accountQueryService.findByAccountNumber(transaction.getReceiver().getNumber());
 
         // if logged in account not internal deposit account --> failed , can convert to role == admin or internal
         if(!loggedInAccount.getNumber().equals(accountQueryService.getINTERNAL_DEPOSIT_ACCOUNT_NUMBER())) {
@@ -67,14 +69,14 @@ public class TransactionService {
         }
 
         internalDepositAccount.setBalance(internalDepositAccount.getBalance().subtract(transaction.getTransferredAmount()));
-        loggedInAccount.setBalance(loggedInAccount.getBalance().add(transaction.getTransferredAmount()));
-        accountQueryService.save(loggedInAccount);
+        receiver.setBalance(receiver.getBalance().add(transaction.getTransferredAmount()));
+        accountQueryService.save(receiver);
         accountQueryService.save(internalDepositAccount);
 
         transaction.setSender(null);
-        transaction.setReceiver(loggedInAccount);
+        transaction.setReceiver(receiver);
         transaction.setStatus(TransactionStatus.COMPLETED);
-        transaction.setReceiverPostedBalance(loggedInAccount.getBalance());
+        transaction.setReceiverPostedBalance(receiver.getBalance());
     }
 
 
@@ -84,6 +86,10 @@ public class TransactionService {
         BigDecimal remainingBalance = loggedInAccount.getBalance().subtract(transaction.getTransferredAmount());
         if(remainingBalance.compareTo(BigDecimal.ZERO) < 0) {
             throw new ValidationException("Insufficient balance for withdrawal");
+        }
+
+        if(!loggedInAccount.getStatus().canWithdraw()){
+            throw new ForbiddenException("account with status " +  loggedInAccount.getStatus() + " cannot perform withdrawal transactions");
         }
 
         internalWithdrawalAccount.setBalance(internalWithdrawalAccount.getBalance().add(transaction.getTransferredAmount()));
