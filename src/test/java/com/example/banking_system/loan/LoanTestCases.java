@@ -38,7 +38,7 @@ public class LoanTestCases {
         CreateLoanPolicyRequest request = new CreateLoanPolicyRequest();
         request.setDurationMonths(12);
         request.setInterestRate(new BigDecimal("1.5"));
-        request.setMaxAmount(new BigDecimal("10000.00"));
+        request.setMaxAmount(new BigDecimal("10000.0000"));
         request.setLoanType(LoanType.CREDIT);
         request.setEffectiveFrom(LocalDate.now());
         request.setEffectiveTo(LocalDate.now().plusMonths(12));
@@ -88,7 +88,7 @@ public class LoanTestCases {
     public CreateLoanFinePolicyRequest getCreateLoanFinePolicyRequestTestCase() {
         CreateLoanFinePolicyRequest request = new CreateLoanFinePolicyRequest();
         request.setLoanFineType(LoanFineType.OVERDUE_PAYMENT);
-        request.setAmount(new BigDecimal("25.00"));
+        request.setAmount(new BigDecimal("25.0000"));
         request.setEffectiveFrom(LocalDate.now());
         request.setEffectiveTo(LocalDate.now().plusMonths(6));
         return request;
@@ -98,7 +98,7 @@ public class LoanTestCases {
         UpdateLoanFinePolicyRequest request = new UpdateLoanFinePolicyRequest();
         request.setId(1L);
         request.setLoanFineType(LoanFineType.OVERDUE_PAYMENT);
-        request.setAmount(new BigDecimal("50.00"));
+        request.setAmount(new BigDecimal("50.0000"));
         request.setEffectiveFrom(LocalDate.now().plusDays(1));
         request.setEffectiveTo(LocalDate.now().plusMonths(9));
         return request;
@@ -130,7 +130,7 @@ public class LoanTestCases {
 
     public CreateLoanRequest getCreateLoanRequestTestCase(long policyId, LoanType type) {
         CreateLoanRequest request = new CreateLoanRequest();
-        request.setAmount(new BigDecimal("1000.00"));
+        request.setAmount(new BigDecimal("1000.0000"));
         request.setType(type);
         request.setPolicyId(policyId);
         return request;
@@ -150,8 +150,8 @@ public class LoanTestCases {
     public Loan getLoanTestCase(Account account, LoanPolicy loanPolicy) {
         Loan loan = new Loan();
         loan.setId(1L);
-        loan.setTotalAmount(new BigDecimal("1000.00"));
-        loan.setLeftAmount(new BigDecimal("1000.00"));
+        loan.setTotalAmount(new BigDecimal("1000.0000"));
+        loan.setLeftAmount(new BigDecimal("1000.0000"));
         loan.setDueDate(LocalDate.now().plusMonths(loanPolicy.getDurationMonths()));
         loan.setStatus(LoanStatus.CURRENT_PAYMENT);
         loan.setType(loanPolicy.getLoanType());
@@ -185,7 +185,7 @@ public class LoanTestCases {
     public CreateLoanFineRequest getCreateLoanFineRequestTestCase(long loanId, long accountId, long loanFinePolicyId) {
         CreateLoanFineRequest request = new CreateLoanFineRequest();
         request.setLoanId(loanId);
-        request.setAmount(new BigDecimal("50.00"));
+        request.setAmount(new BigDecimal("50.0000"));
         request.setAccountId(accountId);
         request.setLoanFinePolicyId(loanFinePolicyId);
         request.setType(LoanFineType.OVERDUE_PAYMENT);
@@ -195,7 +195,7 @@ public class LoanTestCases {
     public UpdateLoanFineRequest getUpdateLoanFineRequestTestCase(long id) {
         UpdateLoanFineRequest request = new UpdateLoanFineRequest();
         request.setId(id);
-        request.setAmount(new BigDecimal("75.00"));
+        request.setAmount(new BigDecimal("75.0000"));
         request.setType(LoanFineType.EARLY_PAYMENT);
         return request;
     }
@@ -204,7 +204,7 @@ public class LoanTestCases {
         LoanFine loanFine = new LoanFine();
         loanFine.setId(1L);
         loanFine.setLoan(loan);
-        loanFine.setAmount(new BigDecimal("50.00"));
+        loanFine.setAmount(new BigDecimal("50.0000"));
         loanFine.setType(LoanFineType.OVERDUE_PAYMENT);
         loanFine.setCreatedAt(LocalDate.now());
         return loanFine;

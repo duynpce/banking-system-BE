@@ -22,7 +22,7 @@ public class LoanPolicy {
     @Column(name = "duration_months", nullable = false)
     private Integer durationMonths;
 
-    @Column(name = "interest_rate", nullable = false)
+    @Column(name = "interest_rate", nullable = false, precision = 12, scale = 2)
     private BigDecimal interestRate;
 
     @Column(name = "loan_type" , nullable = false)

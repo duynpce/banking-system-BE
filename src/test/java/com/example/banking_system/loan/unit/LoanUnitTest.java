@@ -257,7 +257,7 @@ public class LoanUnitTest extends UnitTest {
 
         loanService.repayLoan(request);
 
-        assertEquals(new BigDecimal("750.00"), account.getBalance());
+        assertEquals(new BigDecimal("750.0000"), account.getBalance());
         assertEquals(0, loan.getLeftAmount().compareTo(BigDecimal.ZERO));
         assertEquals(LoanStatus.DONE_PAYMENT, loan.getStatus());
         verify(accountQueryService).save(account);
