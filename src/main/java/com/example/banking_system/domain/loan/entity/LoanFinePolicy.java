@@ -21,7 +21,7 @@ public class LoanFinePolicy {
     @Column(name = "type", nullable = false)
     private LoanFineType loanFineType;
 
-    @Column(name = "amount")
+    @Column(name = "amount", precision = 19, scale = 4, nullable = false)
     private BigDecimal amount;
 
     @Column(name = "effective_from",  nullable = false)

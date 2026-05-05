@@ -22,13 +22,13 @@ public class Loan {
     @SequenceGenerator(name = "loan_seq_id", sequenceName = "loan_seq_id", allocationSize = 1)
     private long id;
 
-    @Column(name = "total_amount", nullable = false, updatable = false)
+    @Column(name = "total_amount", nullable = false, updatable = false, precision = 19, scale = 4)
     private BigDecimal totalAmount;
 
-    @Column(name = "base_amount", nullable = false, updatable = false)
+    @Column(name = "base_amount", nullable = false, updatable = false, precision = 19, scale = 4)
     private BigDecimal baseAmount;
 
-    @Column(name ="left_amount", nullable = false)
+    @Column(name ="left_amount", nullable = false , precision = 19, scale = 4)
     private BigDecimal leftAmount;
 
     @Column(name = "due_date", nullable = false)

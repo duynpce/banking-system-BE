@@ -80,6 +80,7 @@ public class LoanService {
         long accountId = jwtUtil.getJwtClaims().getClaim("account_id");
         Loan loan = loanQueryService.findByIdAndAccountId(request.getLoanId(), accountId);
         Account account = loan.getAccount();
+        request.setAmount(request.getAmount().setScale(4, RoundingMode.DOWN));
 
         loanValidator.validateRepay(loan, request, account);
 

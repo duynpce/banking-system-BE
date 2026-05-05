@@ -244,7 +244,7 @@ public class LoanTestCases {
         response.setTotalAmount(loan.getTotalAmount());
         response.setLeftAmount(loan.getLeftAmount());
 
-        BigDecimal monthlyInstallment = loan.getTotalAmount().divide(new BigDecimal(loan.getPolicy().getDurationMonths()),4, RoundingMode.HALF_EVEN);
+        BigDecimal monthlyInstallment = loan.getTotalAmount().divide(new BigDecimal(loan.getPolicy().getDurationMonths()),4, RoundingMode.DOWN);
 
         response.setMonthlyInstallment(monthlyInstallment);
         return response;

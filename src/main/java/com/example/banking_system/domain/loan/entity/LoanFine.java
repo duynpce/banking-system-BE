@@ -21,7 +21,7 @@ public class LoanFine {
     @Column(name = "id")
     private long id;
 
-    @Column(name = "amount", nullable = false)
+    @Column(name = "amount", nullable = false, precision = 19, scale = 4)
     private BigDecimal amount;
 
     @Column(name = "created_at", nullable = false, updatable = false)

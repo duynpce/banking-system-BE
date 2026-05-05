@@ -35,7 +35,7 @@ public class LoanPolicy {
     @Column(name = "effective_to",   nullable = false)
     private LocalDate effectiveTo;
 
-    @Column(name = "max_amount")
+    @Column(name = "max_amount", precision = 19, scale = 4, nullable = false)
     private BigDecimal maxAmount;
 
     @Column(name ="created_at", nullable = false, updatable = false)
